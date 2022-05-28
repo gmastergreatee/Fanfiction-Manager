@@ -9,6 +9,8 @@ Windows only (Dotnet 4.6.1)
 In development __(PRE-ALPHA)__
 
 ### Features
+- [x] Web Renderer
+- [ ] Site Rules Manager
 - [ ] Downloader
 - [ ] Library
 - [ ] Updater
