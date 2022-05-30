@@ -62,11 +62,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Logs.cs">
+    <Compile Include="FormInterfaces\IForm.cs" />
+    <Compile Include="FormInterfaces\ILogForm.cs" />
+    <Compile Include="LogsForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Logs.Designer.cs">
-      <DependentUpon>Logs.cs</DependentUpon>
+    <Compile Include="LogsForm.Designer.cs">
+      <DependentUpon>LogsForm.cs</DependentUpon>
     </Compile>
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
@@ -74,25 +76,27 @@
     <Compile Include="MainForm.Designer.cs">
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Manager.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RendererRelated\REventArgs\URLLoadEventArgs.cs" />
     <Compile Include="RendererRelated\IRendererJavascriptExecutor.cs" />
     <Compile Include="RendererRelated\IRendererLocalStorage.cs" />
     <Compile Include="RendererRelated\IRendererMethods.cs" />
     <Compile Include="RendererRelated\IRendererURLBlocker.cs" />
-    <Compile Include="RendererRelated\Renderer.cs">
+    <Compile Include="RendererRelated\RendererForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="RendererRelated\Renderer.Designer.cs">
-      <DependentUpon>Renderer.cs</DependentUpon>
+    <Compile Include="RendererRelated\RendererForm.Designer.cs">
+      <DependentUpon>RendererForm.cs</DependentUpon>
     </Compile>
     <Compile Include="RendererRelated\RendererJavascriptExecutor.cs" />
     <Compile Include="RendererRelated\RendererLocalStorage.cs" />
     <Compile Include="RendererRelated\RendererMethods.cs" />
     <Compile Include="RendererRelated\RendererRequestHandler.cs" />
     <Compile Include="RendererRelated\RendererURLBlocker.cs" />
-    <EmbeddedResource Include="Logs.resx">
-      <DependentUpon>Logs.cs</DependentUpon>
+    <EmbeddedResource Include="LogsForm.resx">
+      <DependentUpon>LogsForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
@@ -106,8 +110,8 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <EmbeddedResource Include="RendererRelated\Renderer.resx">
-      <DependentUpon>Renderer.cs</DependentUpon>
+    <EmbeddedResource Include="RendererRelated\RendererForm.resx">
+      <DependentUpon>RendererForm.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="app.manifest" />
     <None Include="packages.config" />

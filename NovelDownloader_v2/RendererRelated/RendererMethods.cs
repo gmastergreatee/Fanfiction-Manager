@@ -10,8 +10,8 @@ namespace NovelDownloader_v2.RendererRelated
 {
     public class RendererMethods : IRendererMethods
     {
-        const string initCss = "html,body{height:100%;width:100%}table{margin:auto}th{font-size:26;font-weight:bold}";
-        public string InitHtml { get; protected set; } = "<html><body><style>" + initCss + "</style><table><tr><th>Hi Renderer!!<br>!~~Please wait while we load ur stuff~~!</th></tr></table></body></html>";
+        const string initCss = "html,body{height:100%;width:100%;margin:0}div{height:100%;display:flex;flex-flow:column;justify-content:center;align-items:center;font-size:26}";
+        public string InitHtml { get; protected set; } = "<html><body><style>" + initCss + "</style><div><span>Hi Renderer!!</span><span>!~~Please wait while we load ur stuff~~!</span></div></body></html>";
 
         public ChromiumWebBrowser Browser
         {
