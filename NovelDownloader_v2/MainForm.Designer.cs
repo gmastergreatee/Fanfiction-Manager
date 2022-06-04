@@ -33,16 +33,17 @@
             this.lblStatus = new System.Windows.Forms.ToolStripStatusLabel();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.addNovelToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.libraryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.loadNovelToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveLibraryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.rulesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.listToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.addToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.listToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
-            this.addNovelToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.reloadToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.statusStrip1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -93,15 +94,23 @@
             this.fileToolStripMenuItem.Size = new System.Drawing.Size(44, 24);
             this.fileToolStripMenuItem.Text = "File";
             // 
+            // addNovelToolStripMenuItem
+            // 
+            this.addNovelToolStripMenuItem.Name = "addNovelToolStripMenuItem";
+            this.addNovelToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
+            this.addNovelToolStripMenuItem.Text = "Add Novel";
+            // 
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
             this.exitToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
             this.exitToolStripMenuItem.Text = "Exit";
+            this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
             // libraryToolStripMenuItem
             // 
             this.libraryToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.reloadToolStripMenuItem,
             this.loadNovelToolStripMenuItem,
             this.saveLibraryToolStripMenuItem});
             this.libraryToolStripMenuItem.Name = "libraryToolStripMenuItem";
@@ -130,22 +139,22 @@
             this.rulesToolStripMenuItem.Size = new System.Drawing.Size(56, 24);
             this.rulesToolStripMenuItem.Text = "Rules";
             // 
-            // listToolStripMenuItem
-            // 
-            this.listToolStripMenuItem.Name = "listToolStripMenuItem";
-            this.listToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
-            this.listToolStripMenuItem.Text = "List";
-            // 
             // addToolStripMenuItem
             // 
             this.addToolStripMenuItem.Name = "addToolStripMenuItem";
-            this.addToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
+            this.addToolStripMenuItem.Size = new System.Drawing.Size(137, 26);
             this.addToolStripMenuItem.Text = "Add";
+            // 
+            // listToolStripMenuItem
+            // 
+            this.listToolStripMenuItem.Name = "listToolStripMenuItem";
+            this.listToolStripMenuItem.Size = new System.Drawing.Size(137, 26);
+            this.listToolStripMenuItem.Text = "List";
             // 
             // saveAllToolStripMenuItem
             // 
             this.saveAllToolStripMenuItem.Name = "saveAllToolStripMenuItem";
-            this.saveAllToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
+            this.saveAllToolStripMenuItem.Size = new System.Drawing.Size(137, 26);
             this.saveAllToolStripMenuItem.Text = "Save All";
             // 
             // tableLayoutPanel1
@@ -162,11 +171,11 @@
             this.tableLayoutPanel1.Size = new System.Drawing.Size(1045, 557);
             this.tableLayoutPanel1.TabIndex = 3;
             // 
-            // addNovelToolStripMenuItem
+            // reloadToolStripMenuItem
             // 
-            this.addNovelToolStripMenuItem.Name = "addNovelToolStripMenuItem";
-            this.addNovelToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
-            this.addNovelToolStripMenuItem.Text = "Add Novel";
+            this.reloadToolStripMenuItem.Name = "reloadToolStripMenuItem";
+            this.reloadToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
+            this.reloadToolStripMenuItem.Text = "Reload";
             // 
             // MainForm
             // 
@@ -208,6 +217,7 @@
         private System.Windows.Forms.ToolStripMenuItem listToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem saveAllToolStripMenuItem;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
+        private System.Windows.Forms.ToolStripMenuItem reloadToolStripMenuItem;
     }
 }
 
