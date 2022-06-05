@@ -46,7 +46,10 @@ namespace NovelDownloader_v2
 
         public void AppendText(string text)
         {
-            txtConsole.AppendText(text + Environment.NewLine);
+            Invoke(new Action(() =>
+            {
+                txtConsole.AppendText(text + Environment.NewLine);
+            }));
         }
     }
 }

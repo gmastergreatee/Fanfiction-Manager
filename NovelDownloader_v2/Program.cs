@@ -29,7 +29,8 @@ namespace NovelDownloader_v2
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             SetProcessDpiAwareness((int)DpiAwareness.PerMonitorAware);
-            Application.Run(new MainForm());
+            var manager = new Manager();
+            Application.Run();
         }
     }
 }
