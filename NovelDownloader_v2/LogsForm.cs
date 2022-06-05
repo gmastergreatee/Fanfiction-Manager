@@ -7,14 +7,12 @@ using System.Windows.Forms;
 using System.ComponentModel;
 using System.Threading.Tasks;
 using System.Collections.Generic;
-using NovelDownloader_v2.FormInterfaces;
 
 namespace NovelDownloader_v2
 {
-    public partial class LogsForm : Form, ILogForm
+    public partial class LogsForm : FormWrapper
     {
         #region EventHandlers
-        public event EventHandler OnCloseClick;
         #endregion
 
         public LogsForm()
@@ -39,17 +37,22 @@ namespace NovelDownloader_v2
 
         private void Logs_FormClosing(object sender, FormClosingEventArgs e)
         {
-            OnCloseClick?.Invoke(sender, e);
             e.Cancel = true;
-            Hide();
+            CloseMe(sender, e);
         }
 
         public void AppendText(string text)
         {
-            Invoke(new Action(() =>
+            var now = DateTime.Now.ToString("[yyyy-MM-dd HH:mm:ss] ");
+            if (IsHandleCreated)
             {
-                txtConsole.AppendText(text + Environment.NewLine);
-            }));
+                Invoke(new Action(() =>
+                {
+                    txtConsole.AppendText(now + text + Environment.NewLine);
+                }));
+            }
+            else
+                txtConsole.AppendText(now + text + Environment.NewLine);
         }
     }
 }

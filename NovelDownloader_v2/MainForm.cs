@@ -12,7 +12,7 @@ using System.Collections.Generic;
 
 namespace NovelDownloader_v2
 {
-    public partial class MainForm : Form
+    public partial class MainForm : FormWrapper
     {
         public MainForm()
         {
@@ -29,10 +29,13 @@ namespace NovelDownloader_v2
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
+            e.Cancel = true;
+            CloseMe(sender, e);
         }
 
-        private void exitToolStripMenuItem_Click(object sender, EventArgs e)
+        private void closeToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            CloseMe(sender, e);
         }
     }
 }

@@ -6,10 +6,9 @@ using NovelDownloader_v2.RendererRelated.REventArgs;
 
 namespace NovelDownloader_v2.RendererRelated
 {
-    public partial class RendererForm : Form
+    public partial class RendererForm : FormWrapper
     {
         #region EventHandlers
-        public event EventHandler OnCloseClick;
         public event EventHandler OnBrowserDevToolsToggled;
         public event EventHandler<LoadErrorEventArgs> OnBrowserLoadError;
         public event EventHandler<URLLoadEventArgs> OnBrowserLoadingStateChanged;
@@ -58,9 +57,8 @@ namespace NovelDownloader_v2.RendererRelated
 
         private void Renderer_FormClosing(object sender, FormClosingEventArgs e)
         {
-            OnCloseClick?.Invoke(sender, e);
             e.Cancel = true;
-            Hide();
+            CloseMe(sender, e);
         }
 
         private void btnToggleDevTools_Click(object sender, EventArgs e)
