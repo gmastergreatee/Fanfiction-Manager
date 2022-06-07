@@ -7,7 +7,7 @@ using System.Windows.Forms;
 
 namespace NovelDownloader_v2
 {
-    public abstract class FormWrapper : Form
+    public class FormWrapper : Form
     {
         public event EventHandler OnCloseClick;
 
