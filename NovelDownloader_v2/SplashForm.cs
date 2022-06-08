@@ -8,6 +8,7 @@ namespace NovelDownloader_v2
         public SplashForm()
         {
             InitializeComponent();
+            Icon = Properties.Resources.AppIcon;
         }
 
         public new void Hide()
