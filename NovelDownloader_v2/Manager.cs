@@ -17,6 +17,7 @@ namespace NovelDownloader_v2
         LogsForm LogsForm { get; set; }
         RulesForm RulesForm { get; set; }
         RendererRelated.RendererForm Renderer { get; set; }
+        RendererRelated.RendererForm TestRenderer { get; set; }
 
         public Manager()
         {
@@ -64,6 +65,14 @@ namespace NovelDownloader_v2
             {
                 ShowLog();
             };
+            Globals.OnOpenRenderer += (s, e) =>
+            {
+                ShowRenderer();
+            };
+            Globals.OnOpenTestRenderer += (s, e) =>
+            {
+                ShowTestRenderer();
+            };
             Globals.OnShutDown += (s, e) =>
             {
                 Shutdown();
@@ -74,6 +83,7 @@ namespace NovelDownloader_v2
         {
             MainForm = new MainForm();
             Renderer = new RendererRelated.RendererForm();
+            TestRenderer = new RendererRelated.RendererForm(true);
             RulesForm = new RulesForm();
         }
 
@@ -105,6 +115,12 @@ namespace NovelDownloader_v2
         {
             Renderer.Show();
             Renderer.Activate();
+        }
+
+        private void ShowTestRenderer()
+        {
+            TestRenderer.Show();
+            TestRenderer.Activate();
         }
 
         private void ShowSplash()
@@ -154,16 +170,20 @@ namespace NovelDownloader_v2
 
         private void Shutdown()
         {
+            bool preventShutdown = false;
             if (!PerformPendingTasks())
             {
                 MainForm.Invoke(new Action(() =>
                 {
                     if (MessageBox.Show("Renderer still busy. Wanna force close?", "Really wanna quit?", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No)
                     {
-                        return;
+                        preventShutdown = true;
                     }
                 }));
             }
+
+            if (preventShutdown)
+                return;
 
             TrayIcon.Dispose();
             Cef.Shutdown();
@@ -177,9 +197,9 @@ namespace NovelDownloader_v2
         }
 
         /// <summary>
-        /// Performs Pending Tasks
+        /// Returns false if renderer is busy
         /// </summary>
-        /// <returns>Returns false if renderer is busy</returns>
+        /// <returns></returns>
         private bool PerformPendingTasks()
         {
             if (Renderer.IsWorking)
@@ -187,6 +207,7 @@ namespace NovelDownloader_v2
 
             MainForm.Close();
             Renderer.Close();
+            TestRenderer.Close();
             LogsForm.Close();
             RulesForm.Close();
 

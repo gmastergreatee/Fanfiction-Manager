@@ -15,6 +15,8 @@ namespace NovelDownloader_v2
         public static EventHandler<string> OnLogVerbose;
         public static EventHandler OnOpenRules;
         public static EventHandler OnOpenLogs;
+        public static EventHandler OnOpenRenderer;
+        public static EventHandler OnOpenTestRenderer;
 
         public static EventHandler OnShutDown;
 

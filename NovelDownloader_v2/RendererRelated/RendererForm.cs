@@ -21,7 +21,7 @@ namespace NovelDownloader_v2.RendererRelated
         public bool IsWorking { get; set; } = false;
         public IRendererMethods Operations { get; private set; }
 
-        public RendererForm()
+        public RendererForm(bool isTestMode = false)
         {
             Operations = new RendererMethods();
             browser = Operations.Browser;
@@ -35,6 +35,11 @@ namespace NovelDownloader_v2.RendererRelated
 
             tableLayoutPanel1.Controls.Add(browser, 0, 1);
             tableLayoutPanel1.SetColumnSpan(browser, 2);
+
+            if (isTestMode)
+            {
+                Text = "Renderer Test";
+            }
         }
 
         #region Browser Events
