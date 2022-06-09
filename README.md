@@ -10,7 +10,7 @@ In development __(PRE-ALPHA)__
 
 ### Features
 - [x] Web Renderer
-- [ ] Site Rules Manager
+- [x] Site Rules Manager
 - [ ] Downloader
 - [ ] Library
 - [ ] Updater
