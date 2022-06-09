@@ -41,6 +41,7 @@ namespace NovelDownloader_v2
 
         private void BtnHelp_Click(object sender, EventArgs e)
         {
+            new HelpForm(new HelpUserControls.AddEditRuleHelpUserControl()).Show();
         }
     }
 }
