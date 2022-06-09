@@ -66,6 +66,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AddEditRule.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AddEditRule.Designer.cs">
+      <DependentUpon>AddEditRule.cs</DependentUpon>
+    </Compile>
+    <Compile Include="AddEditRuleUserControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="AddEditRuleUserControl.Designer.cs">
+      <DependentUpon>AddEditRuleUserControl.cs</DependentUpon>
+    </Compile>
     <Compile Include="FormWrapper.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -122,6 +134,12 @@
     <Compile Include="SplashForm.Designer.cs">
       <DependentUpon>SplashForm.cs</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="AddEditRule.resx">
+      <DependentUpon>AddEditRule.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="AddEditRuleUserControl.resx">
+      <DependentUpon>AddEditRuleUserControl.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="LogsForm.resx">
       <DependentUpon>LogsForm.cs</DependentUpon>
     </EmbeddedResource>

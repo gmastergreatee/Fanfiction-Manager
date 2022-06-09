@@ -38,11 +38,18 @@ namespace NovelDownloader_v2
                     TextAlign = HorizontalAlignment.Left,
                 },
             });
+
+            listRules.ContextMenu = new ContextMenu(new MenuItem[]
+            {
+                new MenuItem("Add", AddRule),
+                new MenuItem("Edit", EditRule),
+                new MenuItem("Delete", DeleteRule),
+            });
         }
 
         private void RulesForm_Load(object sender, EventArgs e)
         {
-
+            RefreshRules();
         }
 
         private void ResetColumnWidths()
@@ -54,8 +61,61 @@ namespace NovelDownloader_v2
 
         private void RefreshRules()
         {
-            // ... get rules here and set them in the list
+            var counter = 1;
+            foreach (var itm in Globals.Rules)
+            {
+                listRules.Items.Add(new ListViewItem(new string[]
+                {
+                    itm.RuleName,
+                    itm.URLRegex,
+                })
+                {
+                    Name = itm.Id.ToString(),
+                    Text = counter + ".",
+                });
+                counter++;
+            }
             ResetColumnWidths();
+        }
+
+        private Models.SiteRule SelectedRule
+        {
+            get
+            {
+                var rules = listRules.SelectedItems;
+                if (rules.Count < 0)
+                {
+                    var id = rules[0].Name;
+                    return Globals.Rules.FirstOrDefault(i => i.Id.ToString() == id);
+                }
+                return null;
+            }
+        }
+
+        private void AddRule(object sender, EventArgs e)
+        {
+            new AddEditRule().ShowDialog();
+        }
+
+        private void EditRule(object sender, EventArgs e)
+        {
+            var curRule = SelectedRule;
+            if (curRule != null)
+                new AddEditRule(curRule).ShowDialog();
+        }
+
+        private void DeleteRule(object sender, EventArgs e)
+        {
+            var curRule = SelectedRule;
+            if (curRule != null)
+            {
+                if (MessageBox.Show("Do you really want to delete the rule \"" + curRule.RuleName + "\" ?", "Delete Rule", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                {
+                    listRules.Items.RemoveByKey(curRule.Id.ToString());
+                    Globals.Rules.Remove(curRule);
+                    ResetColumnWidths();
+                }
+            }
         }
     }
 }

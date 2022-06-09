@@ -8,6 +8,8 @@ namespace NovelDownloader_v2.Models
 {
     public class SiteRule
     {
+        public Guid Id { get; set; }
+        public string RuleName { get; set; } = "";
         public string URLRegex { get; set; } = "";
         public bool EnableJavascript { get; set; } = true;
 
