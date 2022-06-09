@@ -205,12 +205,6 @@ namespace NovelDownloader_v2
             if (Renderer.IsWorking)
                 return false;
 
-            MainForm.Close();
-            Renderer.Close();
-            TestRenderer.Close();
-            LogsForm.Close();
-            RulesForm.Close();
-
             return true;
         }
     }

@@ -94,7 +94,7 @@ namespace NovelDownloader_v2
 
         private void AddRule(object sender, EventArgs e)
         {
-            new AddEditRuleForm().ShowDialog();
+            new AddEditRuleForm().Show();
         }
 
         private void EditRule(object sender, EventArgs e)

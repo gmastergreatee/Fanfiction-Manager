@@ -19,6 +19,7 @@ namespace NovelDownloader_v2
         {
             InitializeComponent();
             Size = new Size(880, 625);
+            Icon = Properties.Resources.AppIcon;
 
             if (rule == null)
             {
@@ -30,12 +31,16 @@ namespace NovelDownloader_v2
                 Text = "Edit Rule";
             }
 
-            var addEditRuleUserControl = new AddEditRuleUserControl(rule)
+            var addEditRuleUserControl = new AddEditRuleUserControl(Rule)
             {
                 Dock = DockStyle.Top
             };
 
             tabPage1.Controls.Add(addEditRuleUserControl);
+        }
+
+        private void BtnHelp_Click(object sender, EventArgs e)
+        {
         }
     }
 }

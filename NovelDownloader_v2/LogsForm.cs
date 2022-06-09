@@ -12,9 +12,6 @@ namespace NovelDownloader_v2
 {
     public partial class LogsForm : FormWrapper
     {
-        #region EventHandlers
-        #endregion
-
         public LogsForm()
         {
             InitializeComponent();
@@ -48,8 +45,10 @@ namespace NovelDownloader_v2
                     txtConsole.AppendText(now + text + Environment.NewLine);
                 }));
             }
-            else
+            else if (!txtConsole.IsDisposed)
+            {
                 txtConsole.AppendText(now + text + Environment.NewLine);
+            }
         }
     }
 }
