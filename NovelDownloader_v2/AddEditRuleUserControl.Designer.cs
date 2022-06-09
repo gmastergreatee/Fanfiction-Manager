@@ -110,6 +110,7 @@
             // txtChapterScript
             // 
             this.txtChapterScript.Dock = System.Windows.Forms.DockStyle.Top;
+            this.txtChapterScript.Font = new System.Drawing.Font("Consolas", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.txtChapterScript.Location = new System.Drawing.Point(131, 1058);
             this.txtChapterScript.Multiline = true;
             this.txtChapterScript.Name = "txtChapterScript";
@@ -131,6 +132,7 @@
             // txtSinglePageURLScript
             // 
             this.txtSinglePageURLScript.Dock = System.Windows.Forms.DockStyle.Top;
+            this.txtSinglePageURLScript.Font = new System.Drawing.Font("Consolas", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.txtSinglePageURLScript.Location = new System.Drawing.Point(131, 725);
             this.txtSinglePageURLScript.Multiline = true;
             this.txtSinglePageURLScript.Name = "txtSinglePageURLScript";
@@ -154,6 +156,7 @@
             // txtTOCPageScript
             // 
             this.txtTOCPageScript.Dock = System.Windows.Forms.DockStyle.Top;
+            this.txtTOCPageScript.Font = new System.Drawing.Font("Consolas", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.txtTOCPageScript.Location = new System.Drawing.Point(131, 392);
             this.txtTOCPageScript.Multiline = true;
             this.txtTOCPageScript.Name = "txtTOCPageScript";
@@ -175,6 +178,7 @@
             // txtPageTypeScript
             // 
             this.txtPageTypeScript.Dock = System.Windows.Forms.DockStyle.Top;
+            this.txtPageTypeScript.Font = new System.Drawing.Font("Consolas", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.txtPageTypeScript.Location = new System.Drawing.Point(131, 86);
             this.txtPageTypeScript.Multiline = true;
             this.txtPageTypeScript.Name = "txtPageTypeScript";
