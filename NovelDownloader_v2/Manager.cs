@@ -48,6 +48,11 @@ namespace NovelDownloader_v2
             {
                 LogText("Novel-Manager window closed", true);
             };
+            MainForm.OnOpenRulesClick += (s, e) =>
+            {
+                RulesForm.Show();
+                LogText("Rules window opened", true);
+            };
 
             LogsForm = new LogsForm();
             LogsForm.OnCloseClick += (s, e) =>
