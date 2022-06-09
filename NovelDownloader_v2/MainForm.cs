@@ -42,6 +42,7 @@ namespace NovelDownloader_v2
 
         private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
         {
+
         }
 
         #endregion
@@ -50,8 +51,7 @@ namespace NovelDownloader_v2
 
         private void closeToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            Hide();
-            Globals.OnLogVerbose(sender, Text + " window closed");
+            Close();
         }
 
         private void rulesToolStripMenuItem_Click(object sender, EventArgs e)

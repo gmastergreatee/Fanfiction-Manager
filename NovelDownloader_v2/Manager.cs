@@ -59,12 +59,10 @@ namespace NovelDownloader_v2
             Globals.OnOpenRules += (s, e) =>
             {
                 ShowRules();
-                LogText("Rules window opened", true);
             };
             Globals.OnOpenLogs += (s, e) =>
             {
                 ShowLog();
-                LogText("Log window opened", true);
             };
         }
 

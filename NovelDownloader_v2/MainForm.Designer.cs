@@ -153,7 +153,7 @@
             // showLogsToolStripMenuItem
             // 
             this.showLogsToolStripMenuItem.Name = "showLogsToolStripMenuItem";
-            this.showLogsToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
+            this.showLogsToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.L)));
             this.showLogsToolStripMenuItem.Size = new System.Drawing.Size(210, 26);
             this.showLogsToolStripMenuItem.Text = "&Show Logs";
             this.showLogsToolStripMenuItem.Click += new System.EventHandler(this.showLogsToolStripMenuItem_Click);

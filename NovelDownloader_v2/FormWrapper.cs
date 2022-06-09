@@ -9,6 +9,11 @@ namespace NovelDownloader_v2
 {
     public class FormWrapper : Form
     {
+        public FormWrapper()
+        {
+            FormClosing += FormWrapper_FormClosing;
+        }
+
         public new void Show()
         {
             if (IsHandleCreated)
@@ -21,7 +26,7 @@ namespace NovelDownloader_v2
             else
                 base.Show();
 
-            FormClosing += FormWrapper_FormClosing;
+            Globals.OnLogVerbose?.Invoke(this, Text + " window activated");
         }
 
         private void FormWrapper_FormClosing(object sender, FormClosingEventArgs e)
@@ -31,7 +36,7 @@ namespace NovelDownloader_v2
                 e.Cancel = true;
                 Hide();
             }));
-            Globals.OnLogVerbose?.Invoke(sender, ((Form)sender).Text + " window closed");
+            Globals.OnLogVerbose?.Invoke(sender, ((Form)sender).Text + " window de-activated");
         }
     }
 }

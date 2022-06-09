@@ -26,7 +26,10 @@ namespace NovelDownloader_v2
                 }),
                 new MenuItem("Copy", (sender, e) =>
                 {
-                    Clipboard.SetText(txtConsole.SelectedText);
+                    if (!string.IsNullOrWhiteSpace(txtConsole.SelectedText))
+                    {
+                        Clipboard.SetText(txtConsole.SelectedText);
+                    }
                 }),
                 new MenuItem("Clear", (sender, e) =>
                 {
