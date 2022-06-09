@@ -30,6 +30,7 @@ namespace NovelDownloader_v2.RendererRelated
             browser.LoadingStateChanged += browser_LoadingStateChanged;
 
             InitializeComponent();
+            Icon = Properties.Resources.AppIcon;
 
             tableLayoutPanel1.Controls.Add(browser, 0, 1);
             tableLayoutPanel1.SetColumnSpan(browser, 2);

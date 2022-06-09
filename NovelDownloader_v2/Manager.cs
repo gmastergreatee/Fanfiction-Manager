@@ -16,6 +16,7 @@ namespace NovelDownloader_v2
         SplashForm SplashForm { get; set; }
         MainForm MainForm { get; set; }
         LogsForm LogsForm { get; set; }
+        RulesForm RulesForm { get; set; }
         RendererRelated.RendererForm Renderer { get; set; }
 
         public Manager()
@@ -58,6 +59,12 @@ namespace NovelDownloader_v2
             Renderer.OnCloseClick += (s, e) =>
             {
                 LogText("Browser window closed", true);
+            };
+
+            RulesForm = new RulesForm();
+            RulesForm.OnCloseClick += (s, e) =>
+            {
+                LogText("Rules window closed", true);
             };
         }
 

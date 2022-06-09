@@ -14,28 +14,60 @@ namespace NovelDownloader_v2
 {
     public partial class MainForm : FormWrapper
     {
+        #region Events
+        public event EventHandler OnOpenRulesClick;
+        #endregion
+
         public MainForm()
         {
             InitializeComponent();
+            Icon = Properties.Resources.AppIcon;
         }
 
-        private void Form1_Load(object sender, EventArgs e)
+        protected override void WndProc(ref Message m)
+        {
+            if (m.Msg == NativeMethods.WM_SHOWME)
+            {
+                Show();
+                if (WindowState == FormWindowState.Minimized)
+                {
+                    WindowState = FormWindowState.Normal;
+                }
+                Activate();
+            }
+            base.WndProc(ref m);
+        }
+
+        #region MainForm Events
+
+        private void MainForm_Load(object sender, EventArgs e)
         {
         }
 
-        private void Form1_FormClosed(object sender, FormClosedEventArgs e)
+        private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
         {
         }
 
-        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             e.Cancel = true;
             CloseMe(sender, e);
         }
 
+        #endregion
+
+        #region ToolStripClick Events
+
         private void closeToolStripMenuItem_Click(object sender, EventArgs e)
         {
             CloseMe(sender, e);
         }
+
+        private void rulesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OnOpenRulesClick?.Invoke(sender, e);
+        }
+
+        #endregion
     }
 }

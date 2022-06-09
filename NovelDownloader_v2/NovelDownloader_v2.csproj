@@ -82,6 +82,7 @@
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Manager.cs" />
+    <Compile Include="NativeMethods.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RendererRelated\REventArgs\URLLoadEventArgs.cs" />
@@ -100,6 +101,12 @@
     <Compile Include="RendererRelated\RendererMethods.cs" />
     <Compile Include="RendererRelated\RendererRequestHandler.cs" />
     <Compile Include="RendererRelated\RendererURLBlocker.cs" />
+    <Compile Include="RulesForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="RulesForm.Designer.cs">
+      <DependentUpon>RulesForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="SplashForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -124,6 +131,9 @@
     </Compile>
     <EmbeddedResource Include="RendererRelated\RendererForm.resx">
       <DependentUpon>RendererForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RulesForm.resx">
+      <DependentUpon>RulesForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="SplashForm.resx">
       <DependentUpon>SplashForm.cs</DependentUpon>
