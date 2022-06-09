@@ -49,18 +49,18 @@ namespace NovelDownloader_v2.RendererRelated
         }
         private IRendererURLBlocker _URLBlocker { get; set; }
 
-        public RendererMethods()
+        public RendererMethods(bool isTestMode = false)
         {
             _JavascriptExecutor = new RendererJavascriptExecutor(_Browser);
             _LocalStorage = new RendererLocalStorage(_Browser, _JavascriptExecutor);
-            _URLBlocker = new RendererURLBlocker(_Browser);
+            _URLBlocker = new RendererURLBlocker(_Browser, isTestMode);
         }
 
         public void ResetPage()
         {
             _Browser.LoadHtml(InitHtml);
         }
-        
+
         public void ResetCookies(string resetCookiesUrl = "")
         {
             if (!string.IsNullOrWhiteSpace(resetCookiesUrl))
@@ -71,11 +71,6 @@ namespace NovelDownloader_v2.RendererRelated
             {
                 Cef.GetGlobalCookieManager().DeleteCookies(_Browser.Address);
             }
-        }
-
-        public void ShutDown()
-        {
-            Cef.Shutdown();
         }
     }
 }

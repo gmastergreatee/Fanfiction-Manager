@@ -10,6 +10,5 @@ namespace NovelDownloader_v2.RendererRelated
         IRendererURLBlocker URLBlocker { get; }
         void ResetPage();
         void ResetCookies(string resetCookiesUrl = "");
-        void ShutDown();
     }
 }

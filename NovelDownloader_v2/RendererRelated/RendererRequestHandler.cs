@@ -10,13 +10,15 @@ namespace NovelDownloader_v2.RendererRelated
     {
         private List<string> blockStringRules { get; set; } = new List<string>();
         private bool regexMode { get; set; } = false;
+        private bool IsTestMode { get; set; }
 
-        public RendererRequestHandler(List<string> blockStringRules, bool regexMode = false)
+        public RendererRequestHandler(List<string> blockStringRules, bool regexMode = false, bool isTestMode = false)
             : base()
         {
             if (blockStringRules.Count > 0)
                 this.blockStringRules = blockStringRules;
             this.regexMode = regexMode;
+            IsTestMode = isTestMode;
         }
 
         protected override bool OnBeforeBrowse(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, IRequest request, bool userGesture, bool isRedirect)
@@ -46,12 +48,14 @@ namespace NovelDownloader_v2.RendererRelated
             if (block)
                 return true;
 
-            if (isRedirect)
-                Globals.OnRendererEvent?.Invoke(chromiumWebBrowser, new Models.RendererEvent
+            if (isRedirect && frame.IsMain)
+            {
+                (IsTestMode ? Globals.OnTestRendererEvent : Globals.OnRendererEvent)?.Invoke(chromiumWebBrowser, new Models.RendererEvent
                 {
                     Event = Models.RendererEventEnum.BrowserRedirect,
-                    Details = request.Url
+                    Url = request.Url,
                 });
+            }
 
             return base.OnBeforeBrowse(chromiumWebBrowser, browser, frame, request, userGesture, isRedirect);
         }

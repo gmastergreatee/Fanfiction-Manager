@@ -5,5 +5,6 @@
         BrowserRedirect,
         PageLoading,
         PageLoaded,
+        PageLoadingStopped,
     }
 }

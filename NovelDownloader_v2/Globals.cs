@@ -10,17 +10,21 @@ namespace NovelDownloader_v2
 {
     public static class Globals
     {
-        public static EventHandler<RendererEvent> OnRendererEvent;
-        public static EventHandler<string> OnLog;
-        public static EventHandler<string> OnLogVerbose;
-        public static EventHandler OnOpenRules;
-        public static EventHandler OnOpenLogs;
-        public static EventHandler OnOpenRenderer;
-        public static EventHandler OnOpenTestRenderer;
+        public static EventHandler<RendererEvent> OnRendererEvent { get; set; }
+        public static EventHandler<RendererEvent> OnTestRendererEvent { get; set; }
 
-        public static EventHandler OnShutDown;
+        public static EventHandler<string> OnLog { get; set; }
+        public static EventHandler<string> OnLogVerbose { get; set; }
+        public static EventHandler OnOpenRules { get; set; }
+        public static EventHandler OnOpenLogs { get; set; }
+        public static EventHandler OnOpenRenderer { get; set; }
+        public static EventHandler OnOpenTestRenderer { get; set; }
+
+        public static EventHandler OnShutDown { get; set; }
 
         public static bool VerboseMode { get; set; } = true;
         public static List<SiteRule> Rules { get; set; } = new List<SiteRule>();
+        public static SiteRule Rule { get; set; } = null;
+        public static SiteRule TestRule { get; set; } = null;
     }
 }

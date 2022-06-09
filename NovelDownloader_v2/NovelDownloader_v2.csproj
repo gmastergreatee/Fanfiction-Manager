@@ -134,6 +134,12 @@
     <Compile Include="RendererRelated\RendererMethods.cs" />
     <Compile Include="RendererRelated\RendererRequestHandler.cs" />
     <Compile Include="RendererRelated\RendererURLBlocker.cs" />
+    <Compile Include="RendererRelated\TestRendererControlsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="RendererRelated\TestRendererControlsForm.Designer.cs">
+      <DependentUpon>TestRendererControlsForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="RulesForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -146,6 +152,7 @@
     <Compile Include="SplashForm.Designer.cs">
       <DependentUpon>SplashForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Utils\RegexUtil.cs" />
     <EmbeddedResource Include="AddEditRuleForm.resx">
       <DependentUpon>AddEditRuleForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -176,6 +183,9 @@
     </Compile>
     <EmbeddedResource Include="RendererRelated\RendererForm.resx">
       <DependentUpon>RendererForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RendererRelated\TestRendererControlsForm.resx">
+      <DependentUpon>TestRendererControlsForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="RulesForm.resx">
       <DependentUpon>RulesForm.cs</DependentUpon>

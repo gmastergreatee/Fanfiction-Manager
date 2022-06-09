@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using NovelDownloader_v2.RendererRelated.Models;
 
 namespace NovelDownloader_v2
 {
@@ -49,6 +50,7 @@ namespace NovelDownloader_v2
 
         public void InitializeGlobalEvents()
         {
+            #region Log Stuff
             Globals.OnLog += (s, e) =>
             {
                 LogText(e);
@@ -57,6 +59,17 @@ namespace NovelDownloader_v2
             {
                 LogText(e, true);
             };
+            Globals.OnRendererEvent += (s, e) =>
+            {
+                LogText(RendererEvent.RendererEventLog(e), true);
+            };
+            Globals.OnTestRendererEvent += (s, e) =>
+            {
+                LogText(RendererEvent.RendererEventLog(e, true), true);
+            };
+            #endregion
+
+            #region Show Stuff
             Globals.OnOpenRules += (s, e) =>
             {
                 ShowRules();
@@ -73,6 +86,8 @@ namespace NovelDownloader_v2
             {
                 ShowTestRenderer();
             };
+            #endregion
+
             Globals.OnShutDown += (s, e) =>
             {
                 Shutdown();
