@@ -143,6 +143,14 @@ namespace NovelDownloader_v2
                 {
                     ShowMainForm();
                 }),
+                new MenuItem("Rules", (s, e) =>
+                {
+                    ShowRules();
+                }),
+                new MenuItem("Show Logs", (s, e) =>
+                {
+                    ShowLog();
+                }),
                 new MenuItem("Exit", (s, e) =>
                 {
                     Shutdown();
