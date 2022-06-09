@@ -64,6 +64,10 @@ namespace NovelDownloader_v2
             {
                 ShowLog();
             };
+            Globals.OnShutDown += (s, e) =>
+            {
+                Shutdown();
+            };
         }
 
         private void InitializeForms()
@@ -150,7 +154,17 @@ namespace NovelDownloader_v2
 
         private void Shutdown()
         {
-            PerformPendingTasks();
+            if (!PerformPendingTasks())
+            {
+                MainForm.Invoke(new Action(() =>
+                {
+                    if (MessageBox.Show("Renderer still busy. Wanna force close?", "Really wanna quit?", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No)
+                    {
+                        return;
+                    }
+                }));
+            }
+
             TrayIcon.Dispose();
             Cef.Shutdown();
             Environment.Exit(0);
@@ -162,11 +176,21 @@ namespace NovelDownloader_v2
                 LogsForm.AppendText(text);
         }
 
-        private void PerformPendingTasks()
+        /// <summary>
+        /// Performs Pending Tasks
+        /// </summary>
+        /// <returns>Returns false if renderer is busy</returns>
+        private bool PerformPendingTasks()
         {
-            MainForm.Hide();
-            Renderer.Hide();
-            LogsForm.Hide();
+            if (Renderer.IsWorking)
+                return false;
+
+            MainForm.Close();
+            Renderer.Close();
+            LogsForm.Close();
+            RulesForm.Close();
+
+            return true;
         }
     }
 }

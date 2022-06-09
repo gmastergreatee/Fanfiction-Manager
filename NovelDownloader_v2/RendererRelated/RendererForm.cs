@@ -18,6 +18,7 @@ namespace NovelDownloader_v2.RendererRelated
         private ChromiumWebBrowser browser { get; set; } = null;
         #endregion
 
+        public bool IsWorking { get; set; } = false;
         public IRendererMethods Operations { get; private set; }
 
         public RendererForm()
@@ -55,7 +56,7 @@ namespace NovelDownloader_v2.RendererRelated
         }
 
         #endregion
-        
+
         private void btnToggleDevTools_Click(object sender, EventArgs e)
         {
             browser.ShowDevTools();

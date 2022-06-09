@@ -65,5 +65,10 @@ namespace NovelDownloader_v2
         {
             Globals.OnOpenLogs?.Invoke(sender, e);
         }
+
+        private void exitToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Globals.OnShutDown?.Invoke(sender, e);
+        }
     }
 }

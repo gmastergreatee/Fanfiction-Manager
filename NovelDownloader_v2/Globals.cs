@@ -16,6 +16,8 @@ namespace NovelDownloader_v2
         public static EventHandler OnOpenRules;
         public static EventHandler OnOpenLogs;
 
+        public static EventHandler OnShutDown;
+
         public static bool VerboseMode { get; set; } = true;
         public static List<SiteRule> Rules { get; set; } = new List<SiteRule>();
     }
