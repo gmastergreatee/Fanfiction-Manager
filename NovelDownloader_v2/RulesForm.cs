@@ -94,14 +94,14 @@ namespace NovelDownloader_v2
 
         private void AddRule(object sender, EventArgs e)
         {
-            new AddEditRule().ShowDialog();
+            new AddEditRuleForm().ShowDialog();
         }
 
         private void EditRule(object sender, EventArgs e)
         {
             var curRule = SelectedRule;
             if (curRule != null)
-                new AddEditRule(curRule).ShowDialog();
+                new AddEditRuleForm(curRule).ShowDialog();
         }
 
         private void DeleteRule(object sender, EventArgs e)

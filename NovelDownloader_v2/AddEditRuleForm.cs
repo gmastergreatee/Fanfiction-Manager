@@ -11,11 +11,11 @@ using System.Windows.Forms;
 
 namespace NovelDownloader_v2
 {
-    public partial class AddEditRule : Form
+    public partial class AddEditRuleForm : Form
     {
-        public Models.SiteRule Rule { get; private set; }
+        public SiteRule Rule { get; private set; }
 
-        public AddEditRule(SiteRule rule = null)
+        public AddEditRuleForm(SiteRule rule = null)
         {
             InitializeComponent();
             Size = new Size(880, 625);
@@ -29,6 +29,13 @@ namespace NovelDownloader_v2
             {
                 Text = "Edit Rule";
             }
+
+            var addEditRuleUserControl = new AddEditRuleUserControl(rule)
+            {
+                Dock = DockStyle.Top
+            };
+
+            tabPage1.Controls.Add(addEditRuleUserControl);
         }
     }
 }
