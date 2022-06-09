@@ -74,16 +74,15 @@
             this.btnToggleDevTools.UseVisualStyleBackColor = true;
             this.btnToggleDevTools.Click += new System.EventHandler(this.btnToggleDevTools_Click);
             // 
-            // Renderer
+            // RendererForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(795, 473);
             this.Controls.Add(this.tableLayoutPanel1);
             this.MinimizeBox = false;
-            this.Name = "Renderer";
+            this.Name = "RendererForm";
             this.Text = "Renderer";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Renderer_FormClosing);
             this.tableLayoutPanel1.ResumeLayout(false);
             this.tableLayoutPanel1.PerformLayout();
             this.flowLayoutPanel1.ResumeLayout(false);

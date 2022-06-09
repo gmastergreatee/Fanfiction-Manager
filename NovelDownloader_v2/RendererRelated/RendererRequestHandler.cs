@@ -1,4 +1,6 @@
 ﻿using CefSharp;
+using CefSharp.WinForms;
+using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
@@ -43,6 +45,13 @@ namespace NovelDownloader_v2.RendererRelated
 
             if (block)
                 return true;
+
+            if (isRedirect)
+                Globals.OnRendererEvent?.Invoke(chromiumWebBrowser, new Models.RendererEvent
+                {
+                    Event = Models.RendererEventEnum.BrowserRedirect,
+                    Details = request.Url
+                });
 
             return base.OnBeforeBrowse(chromiumWebBrowser, browser, frame, request, userGesture, isRedirect);
         }

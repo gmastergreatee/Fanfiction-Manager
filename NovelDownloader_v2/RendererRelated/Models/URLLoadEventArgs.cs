@@ -1,7 +1,7 @@
 ﻿using CefSharp;
 using CefSharp.WinForms;
 
-namespace NovelDownloader_v2.RendererRelated.REventArgs
+namespace NovelDownloader_v2.RendererRelated.Models
 {
     public class URLLoadEventArgs
     {

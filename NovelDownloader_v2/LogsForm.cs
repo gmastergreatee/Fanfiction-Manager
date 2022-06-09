@@ -35,12 +35,6 @@ namespace NovelDownloader_v2
             });
         }
 
-        private void Logs_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            e.Cancel = true;
-            CloseMe(sender, e);
-        }
-
         public void AppendText(string text)
         {
             var now = DateTime.Now.ToString("[yyyy-MM-dd HH:mm:ss] ");

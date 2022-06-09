@@ -10,7 +10,6 @@ namespace NovelDownloader_v2
 {
     public class Manager
     {
-        bool VerboseMode { get; set; } = true;
         NotifyIcon TrayIcon { get; set; }
 
         SplashForm SplashForm { get; set; }
@@ -21,6 +20,15 @@ namespace NovelDownloader_v2
 
         public Manager()
         {
+            LogsForm = new LogsForm();
+
+            InitializeGlobalEvents();
+
+            SplashForm = new SplashForm();
+
+            ShowSplash();
+            Application.DoEvents();
+
             InitializeForms();
             InitializeTrayIcon();
 
@@ -31,46 +39,40 @@ namespace NovelDownloader_v2
             });
 
             dataLoader.Wait();
+            SplashForm.Close();
+            Application.DoEvents();
+
             ShowMainForm();
             ShowTrayContextMenu();
         }
 
-        private void InitializeForms()
+        public void InitializeGlobalEvents()
         {
-            SplashForm = new SplashForm();
-            SplashForm.OnCloseClick += (s, e) =>
+            Globals.OnLog += (s, e) =>
             {
-                LogText("Splash window closed", true);
+                LogText(e);
             };
-
-            MainForm = new MainForm();
-            MainForm.OnCloseClick += (s, e) =>
+            Globals.OnLogVerbose += (s, e) =>
             {
-                LogText("Novel-Manager window closed", true);
+                LogText(e, true);
             };
-            MainForm.OnOpenRulesClick += (s, e) =>
+            Globals.OnOpenRules += (s, e) =>
             {
-                RulesForm.Show();
+                ShowRules();
                 LogText("Rules window opened", true);
             };
-
-            LogsForm = new LogsForm();
-            LogsForm.OnCloseClick += (s, e) =>
+            Globals.OnOpenLogs += (s, e) =>
             {
-                LogText("Logs window closed", true);
+                ShowLog();
+                LogText("Log window opened", true);
             };
+        }
 
+        private void InitializeForms()
+        {
+            MainForm = new MainForm();
             Renderer = new RendererRelated.RendererForm();
-            Renderer.OnCloseClick += (s, e) =>
-            {
-                LogText("Browser window closed", true);
-            };
-
             RulesForm = new RulesForm();
-            RulesForm.OnCloseClick += (s, e) =>
-            {
-                LogText("Rules window closed", true);
-            };
         }
 
         private void InitializeTrayIcon()
@@ -109,6 +111,12 @@ namespace NovelDownloader_v2
             SplashForm.Activate();
         }
 
+        private void ShowRules()
+        {
+            RulesForm.Show();
+            RulesForm.Activate();
+        }
+
         private void ShowTrayContextMenu()
         {
             TrayIcon.ContextMenu = new ContextMenu(new MenuItem[]
@@ -145,13 +153,14 @@ namespace NovelDownloader_v2
         private void Shutdown()
         {
             PerformPendingTasks();
+            TrayIcon.Dispose();
             Cef.Shutdown();
             Environment.Exit(0);
         }
 
         private void LogText(string text, bool verboseCheck = false)
         {
-            if (!verboseCheck || VerboseMode)
+            if (!verboseCheck || Globals.VerboseMode)
                 LogsForm.AppendText(text);
         }
 

@@ -9,11 +9,15 @@ namespace NovelDownloader_v2
         {
             InitializeComponent();
             Icon = Properties.Resources.AppIcon;
+
+            FormClosing += SplashForm_FormClosing;
         }
 
-        public new void Hide()
+        private void SplashForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-            CloseMe(this, null);
+            e.Cancel = true;
+            Hide();
+            Globals.OnLogVerbose?.Invoke(sender, "Splash window closed");
         }
     }
 }

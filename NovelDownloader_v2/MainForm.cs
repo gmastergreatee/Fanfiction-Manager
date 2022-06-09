@@ -14,10 +14,6 @@ namespace NovelDownloader_v2
 {
     public partial class MainForm : FormWrapper
     {
-        #region Events
-        public event EventHandler OnOpenRulesClick;
-        #endregion
-
         public MainForm()
         {
             InitializeComponent();
@@ -48,26 +44,26 @@ namespace NovelDownloader_v2
         {
         }
 
-        private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            e.Cancel = true;
-            CloseMe(sender, e);
-        }
-
         #endregion
 
         #region ToolStripClick Events
 
         private void closeToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            CloseMe(sender, e);
+            Hide();
+            Globals.OnLogVerbose(sender, Text + " window closed");
         }
 
         private void rulesToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            OnOpenRulesClick?.Invoke(sender, e);
+            Globals.OnOpenRules?.Invoke(sender, e);
         }
 
         #endregion
+
+        private void showLogsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Globals.OnOpenLogs?.Invoke(sender, e);
+        }
     }
 }

@@ -2,7 +2,7 @@
 using CefSharp;
 using CefSharp.WinForms;
 using System.Windows.Forms;
-using NovelDownloader_v2.RendererRelated.REventArgs;
+using NovelDownloader_v2.RendererRelated.Models;
 
 namespace NovelDownloader_v2.RendererRelated
 {
@@ -55,13 +55,7 @@ namespace NovelDownloader_v2.RendererRelated
         }
 
         #endregion
-
-        private void Renderer_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            e.Cancel = true;
-            CloseMe(sender, e);
-        }
-
+        
         private void btnToggleDevTools_Click(object sender, EventArgs e)
         {
             browser.ShowDevTools();

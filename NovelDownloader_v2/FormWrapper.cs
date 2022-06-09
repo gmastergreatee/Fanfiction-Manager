@@ -9,8 +9,6 @@ namespace NovelDownloader_v2
 {
     public class FormWrapper : Form
     {
-        public event EventHandler OnCloseClick;
-
         public new void Show()
         {
             if (IsHandleCreated)
@@ -22,15 +20,18 @@ namespace NovelDownloader_v2
             }
             else
                 base.Show();
+
+            FormClosing += FormWrapper_FormClosing;
         }
 
-        public void CloseMe(object sender, EventArgs e)
+        private void FormWrapper_FormClosing(object sender, FormClosingEventArgs e)
         {
             Invoke(new Action(() =>
             {
+                e.Cancel = true;
                 Hide();
             }));
-            OnCloseClick?.Invoke(sender, e);
+            Globals.OnLogVerbose?.Invoke(sender, ((Form)sender).Text + " window closed");
         }
     }
 }
