@@ -136,6 +136,7 @@
             // txtURLsToBlock
             // 
             this.txtURLsToBlock.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.txtURLsToBlock.Font = new System.Drawing.Font("Consolas", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.txtURLsToBlock.Location = new System.Drawing.Point(3, 20);
             this.txtURLsToBlock.Multiline = true;
             this.txtURLsToBlock.Name = "txtURLsToBlock";
@@ -200,6 +201,11 @@
             // 
             this.numericUpDown2.DecimalPlaces = 2;
             this.numericUpDown2.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.numericUpDown2.Increment = new decimal(new int[] {
+            1,
+            0,
+            0,
+            131072});
             this.numericUpDown2.Location = new System.Drawing.Point(375, 31);
             this.numericUpDown2.Name = "numericUpDown2";
             this.numericUpDown2.Size = new System.Drawing.Size(180, 22);
@@ -272,7 +278,7 @@
             this.btnTest.TabIndex = 1;
             this.btnTest.Text = "Test";
             this.btnTest.UseVisualStyleBackColor = true;
-            this.btnTest.Click += new System.EventHandler(this.btnTest_Click);
+            this.btnTest.Click += new System.EventHandler(this.BtnTest_Click);
             // 
             // btnHelp
             // 

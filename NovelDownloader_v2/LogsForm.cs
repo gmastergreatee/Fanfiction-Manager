@@ -38,17 +38,15 @@ namespace NovelDownloader_v2
         public void AppendText(string text)
         {
             var now = DateTime.Now.ToString("[yyyy-MM-dd HH:mm:ss] ");
-            if (IsHandleCreated)
+            if (!IsHandleCreated)
             {
-                Invoke(new Action(() =>
-                {
-                    txtConsole.AppendText(now + text + Environment.NewLine);
-                }));
+                CreateHandle();
             }
-            else if (!txtConsole.IsDisposed)
+
+            Invoke(new Action(() =>
             {
                 txtConsole.AppendText(now + text + Environment.NewLine);
-            }
+            }));
         }
     }
 }

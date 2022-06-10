@@ -209,6 +209,8 @@ namespace NovelDownloader_v2
                 return;
 
             TrayIcon.Dispose();
+            Renderer.Operations.Browser.Dispose();
+            TestRenderer.Operations.Browser.Dispose();
             Cef.Shutdown();
             Environment.Exit(0);
         }

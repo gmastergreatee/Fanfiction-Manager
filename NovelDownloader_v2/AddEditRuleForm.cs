@@ -44,7 +44,7 @@ namespace NovelDownloader_v2
             new HelpForm(new HelpUserControls.AddEditRuleHelpUserControl()).Show();
         }
 
-        private void btnTest_Click(object sender, EventArgs e)
+        private void BtnTest_Click(object sender, EventArgs e)
         {
             Globals.OnOpenTestRenderer?.Invoke(sender, e);
         }
