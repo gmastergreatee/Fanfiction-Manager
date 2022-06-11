@@ -4,6 +4,7 @@
     {
         public RendererEventEnum Event { get; set; }
         public string Url { get; set; }
+        public string Remarks { get; set; } = "";
 
         public static string RendererEventLog(RendererEvent _event, bool isTestMode = false)
         {
@@ -25,10 +26,10 @@
                 default:
                     return "";
             }
-            return log;
+            return log + (!string.IsNullOrWhiteSpace(_event.Remarks) ? " -> " + _event.Remarks : "");
         }
 
-        public static string RendererEventStatus(RendererEvent _event, bool ignoreRedirects = true)
+        public static string RendererEventStatus(RendererEvent _event, bool ignoreRedirects = false)
         {
             var status = "";
             if (ignoreRedirects && _event.Event == RendererEventEnum.BrowserRedirect)
@@ -47,10 +48,13 @@
                 case RendererEventEnum.PageLoadingStopped:
                     status = "Stopped";
                     break;
+                case RendererEventEnum.BrowserRedirect:
+                    status = "Redirecting";
+                    break;
                 default:
                     break;
             }
-            return status;
+            return status + (!string.IsNullOrWhiteSpace(_event.Remarks) ? " -> " + _event.Remarks : "");
         }
     }
 }

@@ -10,7 +10,6 @@ namespace NovelDownloader_v2.RendererRelated
     {
         #region EventHandlers
         public event EventHandler OnBrowserDevToolsToggled;
-        public event EventHandler<URLLoadEventArgs> OnBrowserLoadingStateChanged;
         #endregion
 
         #region privates vars
@@ -31,7 +30,8 @@ namespace NovelDownloader_v2.RendererRelated
 
             browser.Dock = DockStyle.Fill;
             browser.LoadError += browser_LoadError;
-            browser.LoadingStateChanged += browser_LoadingStateChanged;
+            browser.FrameLoadStart += Browser_FrameLoadStart;
+            browser.FrameLoadEnd += Browser_FrameLoadEnd;
 
             InitializeComponent();
             Icon = Properties.Resources.AppIcon;
@@ -52,26 +52,60 @@ namespace NovelDownloader_v2.RendererRelated
             }
         }
 
+        private void Browser_FrameLoadEnd(object sender, FrameLoadEndEventArgs e)
+        {
+            if (e.Frame.IsMain)
+            {
+                Invoke(new Action(() =>
+                {
+                    (IsTestMode ? Globals.OnTestRendererEvent : Globals.OnRendererEvent)?.Invoke(sender, new RendererEvent()
+                    {
+                        Event = RendererEventEnum.PageLoaded,
+                        Url = e.Url,
+                        Remarks = e.Url,
+                    });
+                }));
+            }
+        }
+
+        private void Browser_FrameLoadStart(object sender, FrameLoadStartEventArgs e)
+        {
+            if (e.Frame.IsMain)
+            {
+                e.Browser.StopLoad();
+                Invoke(new Action(() =>
+                {
+                    (IsTestMode ? Globals.OnTestRendererEvent : Globals.OnRendererEvent)?.Invoke(sender, new RendererEvent()
+                    {
+                        Event = (e.TransitionType == TransitionType.IsRedirect || e.TransitionType == TransitionType.ClientRedirect || e.TransitionType == TransitionType.ServerRedirect) ? RendererEventEnum.BrowserRedirect : RendererEventEnum.PageLoading,
+                        Url = e.Url,
+                        Remarks = e.Url,
+                    });
+                }));
+            }
+        }
+
         #region Browser Events
 
         private void browser_LoadError(object sender, LoadErrorEventArgs e)
         {
-            Invoke(new Action(() =>
+            if (e.Frame.IsMain)
             {
-                (IsTestMode ? Globals.OnTestRendererEvent : Globals.OnRendererEvent)?.Invoke(sender, new RendererEvent()
+                Invoke(new Action(() =>
                 {
-                    Event = RendererEventEnum.PageLoadingStopped,
-                    Url = Operations.Browser.Address,
-                });
-            }));
+                    (IsTestMode ? Globals.OnTestRendererEvent : Globals.OnRendererEvent)?.Invoke(sender, new RendererEvent()
+                    {
+                        Event = RendererEventEnum.PageLoadingStopped,
+                        Url = Operations.Browser.Address,
+                        Remarks = e.ErrorText,
+                    });
+                }));
+            }
         }
 
         private void browser_LoadingStateChanged(object sender, LoadingStateChangedEventArgs e)
         {
-            Invoke(new Action(() =>
-            {
-                OnBrowserLoadingStateChanged?.Invoke(sender, new URLLoadEventArgs(e, Operations.Browser));
-            }));
+
         }
 
         #endregion

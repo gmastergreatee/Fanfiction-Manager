@@ -118,7 +118,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RendererRelated\Models\RendererEvent.cs" />
     <Compile Include="RendererRelated\Models\RendererEventEnum.cs" />
-    <Compile Include="RendererRelated\Models\URLLoadEventArgs.cs" />
     <Compile Include="RendererRelated\IRendererJavascriptExecutor.cs" />
     <Compile Include="RendererRelated\IRendererLocalStorage.cs" />
     <Compile Include="RendererRelated\IRendererMethods.cs" />
