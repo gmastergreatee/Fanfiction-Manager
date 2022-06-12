@@ -69,7 +69,7 @@ namespace NovelDownloader_v2.RendererRelated
             }
             else
             {
-                Cef.GetGlobalCookieManager().DeleteCookies(_Browser.Address);
+                Cef.GetGlobalCookieManager().DeleteCookies();
             }
         }
     }

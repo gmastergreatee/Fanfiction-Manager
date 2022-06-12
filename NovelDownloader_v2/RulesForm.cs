@@ -41,9 +41,9 @@ namespace NovelDownloader_v2
 
             listRules.ContextMenu = new ContextMenu(new MenuItem[]
             {
-                new MenuItem("Add", AddRule),
-                new MenuItem("Edit", EditRule),
-                new MenuItem("Delete", DeleteRule),
+                new MenuItem("Add Rule", AddRule),
+                new MenuItem("Edit Rule", EditRule),
+                new MenuItem("Delete Rule", DeleteRule),
             });
         }
 

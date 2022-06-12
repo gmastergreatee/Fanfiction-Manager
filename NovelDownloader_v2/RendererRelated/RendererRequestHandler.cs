@@ -37,7 +37,7 @@ namespace NovelDownloader_v2.RendererRelated
                 }
                 else
                 {
-                    if (url.StartsWith(itm))
+                    if (url.Contains(itm))
                     {
                         block = true;
                         break;

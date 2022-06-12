@@ -1,13 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
-using System.Drawing;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+using System.Drawing;
 using System.Windows.Forms;
+using System.ComponentModel;
+using System.Threading.Tasks;
+using System.Collections.Generic;
 using NovelDownloader_v2.RendererRelated.Models;
+using CefSharp;
 
 namespace NovelDownloader_v2.RendererRelated
 {
@@ -31,7 +32,7 @@ namespace NovelDownloader_v2.RendererRelated
             {
                 btnBack.Enabled = Operations.Browser.CanGoBack;
                 btnForward.Enabled = Operations.Browser.CanGoForward;
-                btnStop.Enabled = Operations.Browser.IsLoading;
+                btnStop.Enabled = e.Event == RendererEventEnum.PageLoading;
 
                 lblStatus.Text = string.IsNullOrWhiteSpace(status) ? "NA" : status;
             }));
@@ -52,12 +53,28 @@ namespace NovelDownloader_v2.RendererRelated
         private void btnGo_Click(object sender, EventArgs e)
         {
             Operations.Browser.Load(txtUrl.Text.Trim());
+            Operations.URLBlocker.BlockURLs(new List<string>()
+            {
+                "googleads",
+                "googlesyndication.com",
+                ".js",
+            });
         }
 
         private void btnStop_Click(object sender, EventArgs e)
         {
             if (Operations.Browser.IsLoading)
                 Operations.Browser.BrowserCore.StopLoad();
+        }
+
+        private void btnClearCookies_Click(object sender, EventArgs e)
+        {
+            Operations.ResetCookies();
+        }
+
+        private void btnClearLocalStorage_Click(object sender, EventArgs e)
+        {
+            Operations.LocalStorage.ClearLocalStorage();
         }
     }
 }
