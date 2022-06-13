@@ -83,6 +83,12 @@
     </Compile>
     <Compile Include="DataStore\Models\AppDataModel.cs" />
     <Compile Include="DataStore\Store.cs" />
+    <Compile Include="AddNovelForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AddNovelForm.Designer.cs">
+      <DependentUpon>AddNovelForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="FormWrapper.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -176,6 +182,9 @@
     <EmbeddedResource Include="AddEditRuleUserControl.resx">
       <DependentUpon>AddEditRuleUserControl.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="AddNovelForm.resx">
+      <DependentUpon>AddNovelForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="HelpForm.resx">
       <DependentUpon>HelpForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -238,6 +247,7 @@
     <None Include="Icon.ico" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Library\" />
     <Folder Include="Models\Library\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

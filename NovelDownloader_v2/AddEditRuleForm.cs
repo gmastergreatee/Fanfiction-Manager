@@ -52,6 +52,7 @@ namespace NovelDownloader_v2
         private void AddEditRuleForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             Globals.TestRule = null;
+            Globals.OnCloseTestRenderer?.Invoke(sender, e);
         }
 
         private void BtnHelp_Click(object sender, EventArgs e)

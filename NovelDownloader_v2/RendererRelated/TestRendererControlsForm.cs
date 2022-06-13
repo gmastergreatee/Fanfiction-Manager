@@ -22,6 +22,7 @@ namespace NovelDownloader_v2.RendererRelated
         public TestRendererControlsForm(IRendererMethods operations)
         {
             InitializeComponent();
+            Icon = Properties.Resources.AppIcon;
             Operations = operations;
 
             Globals.OnTestRendererEvent += OnTestRendererEvent;

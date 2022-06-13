@@ -16,15 +16,16 @@ namespace NovelDownloader_v2
 
         public new void Show()
         {
-            if (IsHandleCreated)
+            if (base.InvokeRequired)
             {
                 Invoke(new Action(() =>
                 {
-                    base.Show();
+                    Show();
                 }));
+                return;
             }
-            else
-                base.Show();
+
+            base.Show();
 
             Globals.OnLogVerbose?.Invoke(this, "\"" + Text + "\" window activated");
         }

@@ -21,36 +21,32 @@ return 0;
 googleads
 
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
+let _dat = $('#profile_top>span.xgray.xcontrast_txt').get(0).innerText.split(' - ').filter(i => i.includes(': ')).map((a) => {
+    let _r = a.split(': ');
+    return { 'Key': _r[0], 'Value': _r[1].replace(',', '') };
+});
 
 let retMe = {
     'NovelURL': window.location.href,
-    'Title': '',
-    'SubTitle': '',
-    'Summary': '',
-    'Author': '',
-    'PublishedOn': '',
+    'CoverURL': $('#profile_top img')[0].src,
+    'Title': $('#profile_top>b.xcontrast_txt').html(),
+    'SubTitle': $('#pre_story_links a').last().text(),
+    'Summary': $('#profile_top>div.xcontrast_txt').html(),
+    'Author': $('#profile_top>a.xcontrast_txt').html(),
+    'PublishedOn': _dat.find(i => i.Key == 'Published').Value,
     'UpdatedOn': '',
-    'Words': '',
+    'Words': _dat.find(i => i.Key == 'Words').Value,
     'Chapters': [],
     'ChapterCount': 0,
     'TOC_Extras': [],
 };
+let up_dat = _dat.find(i => i.Key == 'Updated');
+if (up_dat)
+    retMe.UpdatedOn = up_dat.Value;
 let match = (new RegExp('(?:https://)*(?:www|m)\.fanfiction\.net/([a-z]+)/([0-9]+)/([0-9]+)/([a-zA-Z0-9\-]+)').exec(window.location.href));
 if (match) {
-    retMe.Title = $('#profile_top>b.xcontrast_txt').html();
-    retMe.Author = $('#profile_top>a.xcontrast_txt').html();
-    retMe.SubTitle = $('#pre_story_links a').last().text();
-    retMe.Summary = $('#profile_top>div.xcontrast_txt').html();
-    let _dat = $('#profile_top>span.xgray.xcontrast_txt').get(0).innerText.split(' - ').filter(i => i.includes(': ')).map((a) => {
-        let _r = a.split(': ');
-        return { 'Key': _r[0], 'Value': _r[1].replace(',', '') };
-    });
-    retMe.PublishedOn = _dat.find(i => i.Key == 'Published').Value;
-    let up_dat = _dat.find(i => i.Key == 'Updated');
-    if (up_dat)
-        retMe.UpdatedOn = up_dat.Value;
-    retMe.Words = _dat.find(i => i.Key == 'Words').Value;
-    Array.from($(document.querySelector('#chap_select')).find('option')).forEach((el, i) => {
+    let chaps = $(document.querySelector('#chap_select')).find('option');
+    Array.from(chaps).forEach((el, i) => {
         retMe.Chapters.push({
             'Serial': (i + 1),
             'Name': el.innerText,

@@ -328,6 +328,7 @@
             this.MinimizeBox = false;
             this.Name = "TestRendererControlsForm";
             this.Text = "Test Renderer Controls";
+            this.TopMost = true;
             this.statusStrip1.ResumeLayout(false);
             this.statusStrip1.PerformLayout();
             this.flowLayoutPanel2.ResumeLayout(false);

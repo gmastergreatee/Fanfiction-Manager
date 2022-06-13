@@ -17,6 +17,7 @@ namespace NovelDownloader_v2
         MainForm MainForm { get; set; }
         LogsForm LogsForm { get; set; }
         RulesForm RulesForm { get; set; }
+        AddNovelForm AddNovelForm { get; set; }
         RendererRelated.RendererForm Renderer { get; set; }
         RendererRelated.RendererForm TestRenderer { get; set; }
 
@@ -33,10 +34,6 @@ namespace NovelDownloader_v2
             SplashForm = new SplashForm();
 
             ShowSplash();
-            Application.DoEvents();
-
-            InitializeForms();
-            InitializeTrayIcon();
 
             var dataLoader = Task.Run(() =>
             {
@@ -44,7 +41,11 @@ namespace NovelDownloader_v2
                 LoadNovels();
             });
 
+            Application.DoEvents();
             dataLoader.Wait();
+
+            InitializeForms();
+            InitializeTrayIcon();
             SplashForm.Close();
             Application.DoEvents();
 
@@ -222,6 +223,7 @@ return JSON.stringify({
             Renderer = new RendererRelated.RendererForm();
             TestRenderer = new RendererRelated.RendererForm(true);
             RulesForm = new RulesForm();
+            AddNovelForm = new AddNovelForm();
         }
 
         private void InitializeTrayIcon()

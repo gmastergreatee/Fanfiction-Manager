@@ -129,7 +129,7 @@ namespace NovelDownloader_v2
                 {
                     listRules.Items.RemoveByKey(curRule.Id.ToString());
                     Globals.OnDeleteRule?.Invoke(sender, curRule);
-                    ResetColumnWidths();
+                    RefreshRules();
                 }
             }
         }
