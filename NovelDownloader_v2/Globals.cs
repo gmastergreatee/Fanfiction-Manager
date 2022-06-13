@@ -23,6 +23,7 @@ namespace NovelDownloader_v2
         public static EventHandler OnOpenRules { get; set; }
         public static EventHandler<SiteRule> OnAddRule { get; set; }
         public static EventHandler<SiteRule> OnUpdateRule { get; set; }
+        public static EventHandler<SiteRule> OnDeleteRule { get; set; }
         public static EventHandler<SiteRule> OnUpdateTestRule { get; set; }
 
         public static EventHandler OnShutDown { get; set; }

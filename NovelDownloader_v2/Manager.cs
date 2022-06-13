@@ -183,6 +183,8 @@ return JSON.stringify({
             {
                 e.Id = Guid.NewGuid();
                 Globals.Rules.Add(e);
+                LogText("Rule \"" + e.RuleName + "\" added");
+                SaveAppData();
             };
             Globals.OnUpdateRule += (s, e) =>
             {
@@ -190,12 +192,21 @@ return JSON.stringify({
                 if (rule != null)
                 {
                     Models.SiteRule.Copy(e, rule);
+                    LogText("Rule \"" + e.RuleName + "\" edited");
                 }
                 else
                 {
                     LogText("Error. Maybe deleted existing rule by mistake ? No worries, added a new rule.");
                     Globals.Rules.Add(e);
+                    LogText("Rule \"" + e.RuleName + "\" added");
                 }
+                SaveAppData();
+            };
+            Globals.OnDeleteRule += (s, e) =>
+            {
+                Globals.Rules.Remove(e);
+                LogText("Rule \"" + e.RuleName + "\" deleted");
+                SaveAppData();
             };
             #endregion
 
@@ -342,6 +353,11 @@ return JSON.stringify({
                 return false;
 
             return true;
+        }
+
+        private void SaveAppData()
+        {
+            Task.Run(new Action(() => DataStore.Store.SaveAppData()));
         }
     }
 }

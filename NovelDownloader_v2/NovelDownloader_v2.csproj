@@ -81,6 +81,7 @@
     <Compile Include="AddEditRuleUserControl.Designer.cs">
       <DependentUpon>AddEditRuleUserControl.cs</DependentUpon>
     </Compile>
+    <Compile Include="DataStore\Models\AppDataModel.cs" />
     <Compile Include="DataStore\Store.cs" />
     <Compile Include="FormWrapper.cs">
       <SubType>Form</SubType>
@@ -168,7 +169,7 @@
       <DependentUpon>SplashForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Utils\JSBeautify.cs" />
-    <Compile Include="Utils\RegexUtil.cs" />
+    <Compile Include="Utils\ZipUnzip.cs" />
     <EmbeddedResource Include="AddEditRuleForm.resx">
       <DependentUpon>AddEditRuleForm.cs</DependentUpon>
     </EmbeddedResource>

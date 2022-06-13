@@ -128,7 +128,7 @@ namespace NovelDownloader_v2
                 if (MessageBox.Show("Do you really want to delete the rule \"" + curRule.RuleName + "\" ?", "Delete Rule", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
                 {
                     listRules.Items.RemoveByKey(curRule.Id.ToString());
-                    Globals.Rules.Remove(curRule);
+                    Globals.OnDeleteRule?.Invoke(sender, curRule);
                     ResetColumnWidths();
                 }
             }
