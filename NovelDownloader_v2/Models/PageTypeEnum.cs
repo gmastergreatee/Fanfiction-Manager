@@ -8,8 +8,10 @@ namespace NovelDownloader_v2.Models
 {
     public enum PageTypeEnum
     {
-        UNKNOWN,
-        TOC,
-        CHAPTER,
+        UNKNOWN = -3,
+        MANUAL_CAPTCHA = -2,
+        AUTO_CAPTCHA = -1,
+        TOC = 0,
+        CHAPTER = 1,
     }
 }

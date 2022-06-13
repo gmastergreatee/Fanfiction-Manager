@@ -3,6 +3,7 @@ using CefSharp;
 using CefSharp.WinForms;
 using System.Windows.Forms;
 using NovelDownloader_v2.RendererRelated.Models;
+using NovelDownloader_v2.Models;
 
 namespace NovelDownloader_v2.RendererRelated
 {
@@ -44,12 +45,19 @@ namespace NovelDownloader_v2.RendererRelated
                 Text = "Renderer - Rule Test";
                 TestRendererControlsForm = new TestRendererControlsForm(Operations);
                 Globals.OnTestRendererEvent += (s, e) => SetURL(e.Url);
+                Globals.OnUpdateTestRule += OnUpdateTestRule;
             }
             else
             {
                 // ... load RendererControlsForm
                 Globals.OnRendererEvent += (s, e) => SetURL(e.Url);
             }
+        }
+
+        private void OnUpdateTestRule(object sender, SiteRule e)
+        {
+            TestRendererControlsForm.Show();
+            TestRendererControlsForm.Activate();
         }
 
         private void Browser_FrameLoadEnd(object sender, FrameLoadEndEventArgs e)
@@ -62,7 +70,6 @@ namespace NovelDownloader_v2.RendererRelated
                     {
                         Event = RendererEventEnum.PageLoaded,
                         Url = e.Url,
-                        Remarks = e.Url,
                     });
                 }));
             }
@@ -72,14 +79,12 @@ namespace NovelDownloader_v2.RendererRelated
         {
             if (e.Frame.IsMain)
             {
-                e.Browser.StopLoad();
                 Invoke(new Action(() =>
                 {
                     (IsTestMode ? Globals.OnTestRendererEvent : Globals.OnRendererEvent)?.Invoke(sender, new RendererEvent()
                     {
                         Event = (e.TransitionType == TransitionType.IsRedirect || e.TransitionType == TransitionType.ClientRedirect || e.TransitionType == TransitionType.ServerRedirect) ? RendererEventEnum.BrowserRedirect : RendererEventEnum.PageLoading,
                         Url = e.Url,
-                        Remarks = e.Url,
                     });
                 }));
             }
@@ -96,16 +101,10 @@ namespace NovelDownloader_v2.RendererRelated
                     (IsTestMode ? Globals.OnTestRendererEvent : Globals.OnRendererEvent)?.Invoke(sender, new RendererEvent()
                     {
                         Event = RendererEventEnum.PageLoadingStopped,
-                        Url = Operations.Browser.Address,
-                        Remarks = e.ErrorText,
+                        Url = Operations.Browser.Address + " -> " + e.ErrorText,
                     });
                 }));
             }
-        }
-
-        private void browser_LoadingStateChanged(object sender, LoadingStateChangedEventArgs e)
-        {
-
         }
 
         #endregion
@@ -129,6 +128,7 @@ namespace NovelDownloader_v2.RendererRelated
             if (IsTestMode)
             {
                 TestRendererControlsForm.Show();
+                TestRendererControlsForm.Activate();
             }
             else
             {

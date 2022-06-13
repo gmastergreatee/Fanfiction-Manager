@@ -132,26 +132,39 @@ Single-Page-Novel URL Generator Script
     - NovelURL
     - TOC_Extras</value>
   </data>
+  <data name="label11.Text" xml:space="preserve">
+    <value>Script in JavaScript
+
+Required to determine the type of page that has been rendered
+    - will be executed after each page load
+
+Must return a number as described below -
+-3 - Unknown Page
+-2 - Manual Captcha Page
+-1 - Auto Captcha Page
+0  - TOC (Table of Contents) Page
+1  - Chapter Page</value>
+  </data>
   <data name="lblTOCResponse.Text" xml:space="preserve">
     <value>{
-    "NovelURL": "",
-    "Title": "",
-    "SubTitle": "",
-    "Summary": "",
-    "Author": "",
-    "PublishedOn": "",
-    "UpdatedOn": "",
-    "Words": "",
-    "Chapters": [
+    'NovelURL': '',
+    'Title': '',
+    'SubTitle': '',
+    'Summary': '',
+    'Author': '',
+    'PublishedOn': '',
+    'UpdatedOn': '',
+    'Words': '',
+    'Chapters': [
         {
-            "Serial": 1,
-            "Name": "",
-            "URL": "",
+            'Serial': 1,
+            'Name': '',
+            'URL': '',
         },
     ],
-    "ChapterCount": 4,
-    "TOC_Extras": [
-        "",
+    'ChapterCount': 4,
+    'TOC_Extras': [
+        '',
     ],
 }</value>
   </data>

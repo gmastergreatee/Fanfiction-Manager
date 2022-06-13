@@ -20,9 +20,7 @@ namespace NovelDownloader_v2.RendererRelated
 
         public dynamic RunEvaluateJavascript(string script)
         {
-            string scriptTemplate = @"(function () {
-                                return " + script + ";" +
-                                    "})();";
+            string scriptTemplate = @"(function () {" + script + "})();";
 
             Task<JavascriptResponse> t = browser.GetMainFrame().EvaluateScriptAsync(scriptTemplate);
             t.Wait();

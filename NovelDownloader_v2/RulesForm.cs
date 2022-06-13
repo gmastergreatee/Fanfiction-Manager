@@ -83,7 +83,7 @@ namespace NovelDownloader_v2
             get
             {
                 var rules = listRules.SelectedItems;
-                if (rules.Count < 0)
+                if (rules.Count > 0)
                 {
                     var id = rules[0].Name;
                     return Globals.Rules.FirstOrDefault(i => i.Id.ToString() == id);
@@ -94,14 +94,14 @@ namespace NovelDownloader_v2
 
         private void AddRule(object sender, EventArgs e)
         {
-            new AddEditRuleForm().Show();
+            ShowAddEditRule();
         }
 
         private void EditRule(object sender, EventArgs e)
         {
             var curRule = SelectedRule;
             if (curRule != null)
-                new AddEditRuleForm(curRule).ShowDialog();
+                ShowAddEditRule(curRule);
         }
 
         private void DeleteRule(object sender, EventArgs e)
@@ -116,6 +116,16 @@ namespace NovelDownloader_v2
                     ResetColumnWidths();
                 }
             }
+        }
+
+        private void ShowAddEditRule(Models.SiteRule siteRule = null)
+        {
+            if (Globals.TestRule != null)
+            {
+                MessageBox.Show("Please add/edit rules one by one only :(", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+            new AddEditRuleForm(siteRule).Show();
         }
     }
 }

@@ -9,10 +9,11 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using NovelDownloader_v2.RendererRelated.Models;
 using CefSharp;
+using NovelDownloader_v2.Models;
 
 namespace NovelDownloader_v2.RendererRelated
 {
-    public partial class TestRendererControlsForm : Form
+    public partial class TestRendererControlsForm : FormWrapper
     {
         IRendererMethods Operations { get; set; }
 
@@ -22,11 +23,29 @@ namespace NovelDownloader_v2.RendererRelated
             Operations = operations;
 
             Globals.OnTestRendererEvent += OnTestRendererEvent;
+            Globals.OnUpdateTestRule += UpdateTestRule;
+        }
+
+        private void UpdateTestRule(object sender, SiteRule e)
+        {
+            Globals.TestRule = e;
+            Operations.URLBlocker.BlockURLs(e.BlockedURLs);
         }
 
         private void OnTestRendererEvent(object sender, RendererEvent e)
         {
             var status = RendererEvent.RendererEventStatus(e);
+            if (e.Event == RendererEventEnum.PageLoaded)
+            {
+                Task.Run(new Action(() =>
+                {
+                    var pageType = SiteRule.GetPageType(Operations.JavascriptExecutor.RunEvaluateJavascriptToString(Globals.TestRule.GetPageType_Javascript));
+                    Invoke(new Action(() =>
+                    {
+                        lblPageType.Text = pageType.ToString();
+                    }));
+                }));
+            }
 
             Invoke(new Action(() =>
             {
@@ -53,12 +72,6 @@ namespace NovelDownloader_v2.RendererRelated
         private void btnGo_Click(object sender, EventArgs e)
         {
             Operations.Browser.Load(txtUrl.Text.Trim());
-            Operations.URLBlocker.BlockURLs(new List<string>()
-            {
-                "googleads",
-                "googlesyndication.com",
-                ".js",
-            });
         }
 
         private void btnStop_Click(object sender, EventArgs e)

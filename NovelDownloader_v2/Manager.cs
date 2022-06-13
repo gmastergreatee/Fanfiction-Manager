@@ -22,6 +22,10 @@ namespace NovelDownloader_v2
 
         public Manager()
         {
+#if DEBUG
+            SetDummyRules();
+#endif
+
             LogsForm = new LogsForm();
 
             InitializeGlobalEvents();
@@ -47,6 +51,90 @@ namespace NovelDownloader_v2
             ShowMainForm();
             ShowTrayContextMenu();
         }
+
+        #region Debug Stuff
+
+        private void SetDummyRules()
+        {
+            Globals.Rules = new List<Models.SiteRule>()
+            {
+                new Models.SiteRule
+                {
+                    Id = Guid.NewGuid(),
+                    RuleName = "Fanfiction.net",
+                    URLRegex = @"(?:https://)*(?:www|m)\.fanfiction\.net/([a-z]+)/([0-9]+)/([0-9]+)/([a-zA-Z0-9\-]+)",
+                    GetPageType_Javascript = @"
+if (document.querySelector('#cf-wrapper #cookie-alert'))
+    return -2;
+if (document.querySelector('.cf-browser-verification.cf-im-under-attack'))
+    return -1;
+return 0;
+",
+                    GetTOC_Javascript = @"
+let retMe = {
+    'NovelURL': window.location.href,
+    'Title': '',
+    'SubTitle': '',
+    'Summary': '',
+    'Author': '',
+    'PublishedOn': '',
+    'UpdatedOn': '',
+    'Words': '',
+    'Chapters': [
+        {
+            'Serial': 1,
+            'Name': '',
+            'URL': '',
+        },
+    ],
+    'ChapterCount': 0,
+    'TOC_Extras': [],
+};
+let match = (new RegExp('(?:https://)*(?:www|m)\.fanfiction\.net/([a-z]+)/([0-9]+)/([0-9]+)/([a-zA-Z0-9\-]+)').exec(window.location.href));
+if (match) {
+    retMe.Title = $('#profile_top>b.xcontrast_txt').html();
+    retMe.Author = $('#profile_top>a.xcontrast_txt').html();
+    retMe.SubTitle = $('#pre_story_links a').last().text();
+    retMe.Summary = $('#profile_top>div.xcontrast_txt').html();
+    let _dat = $('#profile_top>span.xgray.xcontrast_txt').get(0).innerText.split(' - ').filter(i => i.includes(': ')).map((a) => {
+        let _r = a.split(': ');
+        return { 'Key': _r[0], 'Value': _r[1].replace(',', '') };
+    });
+    retMe.PublishedOn = _dat.find(i => i.Key == 'Published').Value;
+    let up_dat = _dat.find(i => i.Key == 'Updated');
+    if (up_dat)
+        retMe.PublishedOn = up_dat.Value;
+    retMe.Words = _dat.find(i => i.Key == 'Words').Value;
+    Array.from($(document.querySelector('#chap_select')).find('option')).forEach((el, i) => {
+        retMe.Chapters.push({
+            'Serial': (i + 1),
+            'Name': el.innerText,
+            'URL': window.location.origin + match[1] + '/' + match[2] + '/' + el.value + '/' + match[4],
+        });
+    });
+} else {
+    return null;
+}
+return retMe;
+",
+                    IsTOCPageAChapter = true,
+                    IsSinglePageNovel = false,
+                    GetSinglePageURL_Javascript = "",
+                    GetChapter_Javascript = @"",
+                    RapidDownloadTillChapter = 15,
+                    RapidDownloadBufferSeconds = 2,
+                    BlockedURLs = new List<string>
+                    {
+                        "googleads",
+                        ".css",
+                        ".js"
+                    },
+                    BlockedURLMatchingType = Models.BlockedURLMatchingTypeEnum.Contains,
+                }
+            };
+        }
+
+        #endregion
 
         public void InitializeGlobalEvents()
         {

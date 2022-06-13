@@ -38,10 +38,10 @@
             this.tabPage3 = new System.Windows.Forms.TabPage();
             this.tableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
             this.label4 = new System.Windows.Forms.Label();
-            this.numericUpDown2 = new System.Windows.Forms.NumericUpDown();
+            this.numRDBuffer = new System.Windows.Forms.NumericUpDown();
             this.label3 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
-            this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
+            this.numRDTC = new System.Windows.Forms.NumericUpDown();
             this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
             this.btnSaveRule = new System.Windows.Forms.Button();
             this.btnTest = new System.Windows.Forms.Button();
@@ -52,8 +52,8 @@
             this.tableLayoutPanel2.SuspendLayout();
             this.tabPage3.SuspendLayout();
             this.tableLayoutPanel3.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown2)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numRDBuffer)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numRDTC)).BeginInit();
             this.flowLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -82,7 +82,7 @@
             this.tabControl1.Margin = new System.Windows.Forms.Padding(3, 3, 3, 0);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(758, 585);
+            this.tabControl1.Size = new System.Drawing.Size(758, 586);
             this.tabControl1.TabIndex = 0;
             // 
             // tabPage1
@@ -91,7 +91,7 @@
             this.tabPage1.Location = new System.Drawing.Point(4, 25);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(750, 556);
+            this.tabPage1.Size = new System.Drawing.Size(750, 557);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "Rule Details";
             this.tabPage1.UseVisualStyleBackColor = true;
@@ -102,7 +102,7 @@
             this.tabPage2.Location = new System.Drawing.Point(4, 25);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(750, 556);
+            this.tabPage2.Size = new System.Drawing.Size(750, 557);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "URL Blocks";
             this.tabPage2.UseVisualStyleBackColor = true;
@@ -120,7 +120,7 @@
             this.tableLayoutPanel2.RowCount = 2;
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel2.Size = new System.Drawing.Size(744, 550);
+            this.tableLayoutPanel2.Size = new System.Drawing.Size(744, 551);
             this.tableLayoutPanel2.TabIndex = 0;
             // 
             // label1
@@ -129,7 +129,7 @@
             this.label1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.label1.Location = new System.Drawing.Point(3, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(738, 17);
+            this.label1.Size = new System.Drawing.Size(738, 16);
             this.label1.TabIndex = 0;
             this.label1.Text = "URLs to Block";
             // 
@@ -137,11 +137,11 @@
             // 
             this.txtURLsToBlock.Dock = System.Windows.Forms.DockStyle.Fill;
             this.txtURLsToBlock.Font = new System.Drawing.Font("Consolas", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtURLsToBlock.Location = new System.Drawing.Point(3, 20);
+            this.txtURLsToBlock.Location = new System.Drawing.Point(3, 19);
             this.txtURLsToBlock.Multiline = true;
             this.txtURLsToBlock.Name = "txtURLsToBlock";
             this.txtURLsToBlock.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.txtURLsToBlock.Size = new System.Drawing.Size(738, 527);
+            this.txtURLsToBlock.Size = new System.Drawing.Size(738, 529);
             this.txtURLsToBlock.TabIndex = 1;
             // 
             // tabPage3
@@ -150,7 +150,7 @@
             this.tabPage3.Location = new System.Drawing.Point(4, 25);
             this.tabPage3.Name = "tabPage3";
             this.tabPage3.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage3.Size = new System.Drawing.Size(750, 556);
+            this.tabPage3.Size = new System.Drawing.Size(750, 557);
             this.tabPage3.TabIndex = 2;
             this.tabPage3.Text = "Extras";
             this.tabPage3.UseVisualStyleBackColor = true;
@@ -163,10 +163,10 @@
             this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
             this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
             this.tableLayoutPanel3.Controls.Add(this.label4, 3, 1);
-            this.tableLayoutPanel3.Controls.Add(this.numericUpDown2, 2, 1);
+            this.tableLayoutPanel3.Controls.Add(this.numRDBuffer, 2, 1);
             this.tableLayoutPanel3.Controls.Add(this.label3, 0, 1);
             this.tableLayoutPanel3.Controls.Add(this.label2, 0, 0);
-            this.tableLayoutPanel3.Controls.Add(this.numericUpDown1, 2, 0);
+            this.tableLayoutPanel3.Controls.Add(this.numRDTC, 2, 0);
             this.tableLayoutPanel3.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel3.Location = new System.Drawing.Point(3, 3);
             this.tableLayoutPanel3.Name = "tableLayoutPanel3";
@@ -183,7 +183,7 @@
             this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 40F));
             this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 40F));
             this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel3.Size = new System.Drawing.Size(744, 550);
+            this.tableLayoutPanel3.Size = new System.Drawing.Size(744, 551);
             this.tableLayoutPanel3.TabIndex = 0;
             // 
             // label4
@@ -197,19 +197,19 @@
             this.label4.Text = "seconds";
             this.label4.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
-            // numericUpDown2
+            // numRDBuffer
             // 
-            this.numericUpDown2.DecimalPlaces = 2;
-            this.numericUpDown2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.numericUpDown2.Increment = new decimal(new int[] {
+            this.numRDBuffer.DecimalPlaces = 2;
+            this.numRDBuffer.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.numRDBuffer.Increment = new decimal(new int[] {
             1,
             0,
             0,
             131072});
-            this.numericUpDown2.Location = new System.Drawing.Point(375, 31);
-            this.numericUpDown2.Name = "numericUpDown2";
-            this.numericUpDown2.Size = new System.Drawing.Size(180, 22);
-            this.numericUpDown2.TabIndex = 3;
+            this.numRDBuffer.Location = new System.Drawing.Point(375, 31);
+            this.numRDBuffer.Name = "numRDBuffer";
+            this.numRDBuffer.Size = new System.Drawing.Size(180, 22);
+            this.numRDBuffer.TabIndex = 3;
             // 
             // label3
             // 
@@ -235,13 +235,13 @@
             this.label2.Text = "Rapid Download Till Chapter :";
             this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
-            // numericUpDown1
+            // numRDTC
             // 
-            this.numericUpDown1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.numericUpDown1.Location = new System.Drawing.Point(375, 3);
-            this.numericUpDown1.Name = "numericUpDown1";
-            this.numericUpDown1.Size = new System.Drawing.Size(180, 22);
-            this.numericUpDown1.TabIndex = 1;
+            this.numRDTC.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.numRDTC.Location = new System.Drawing.Point(375, 3);
+            this.numRDTC.Name = "numRDTC";
+            this.numRDTC.Size = new System.Drawing.Size(180, 22);
+            this.numRDTC.TabIndex = 1;
             // 
             // flowLayoutPanel1
             // 
@@ -252,18 +252,18 @@
             this.flowLayoutPanel1.Controls.Add(this.btnHelp);
             this.flowLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.flowLayoutPanel1.FlowDirection = System.Windows.Forms.FlowDirection.RightToLeft;
-            this.flowLayoutPanel1.Location = new System.Drawing.Point(3, 591);
+            this.flowLayoutPanel1.Location = new System.Drawing.Point(3, 592);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-            this.flowLayoutPanel1.Size = new System.Drawing.Size(758, 33);
+            this.flowLayoutPanel1.Size = new System.Drawing.Size(758, 32);
             this.flowLayoutPanel1.TabIndex = 1;
             // 
             // btnSaveRule
             // 
             this.btnSaveRule.AutoSize = true;
             this.btnSaveRule.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.btnSaveRule.Location = new System.Drawing.Point(672, 3);
+            this.btnSaveRule.Location = new System.Drawing.Point(675, 3);
             this.btnSaveRule.Name = "btnSaveRule";
-            this.btnSaveRule.Size = new System.Drawing.Size(83, 27);
+            this.btnSaveRule.Size = new System.Drawing.Size(80, 26);
             this.btnSaveRule.TabIndex = 0;
             this.btnSaveRule.Text = "Save Rule";
             this.btnSaveRule.UseVisualStyleBackColor = true;
@@ -272,9 +272,9 @@
             // 
             this.btnTest.AutoSize = true;
             this.btnTest.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.btnTest.Location = new System.Drawing.Point(620, 3);
+            this.btnTest.Location = new System.Drawing.Point(625, 3);
             this.btnTest.Name = "btnTest";
-            this.btnTest.Size = new System.Drawing.Size(46, 27);
+            this.btnTest.Size = new System.Drawing.Size(44, 26);
             this.btnTest.TabIndex = 1;
             this.btnTest.Text = "Test";
             this.btnTest.UseVisualStyleBackColor = true;
@@ -284,9 +284,9 @@
             // 
             this.btnHelp.AutoSize = true;
             this.btnHelp.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.btnHelp.Location = new System.Drawing.Point(567, 3);
+            this.btnHelp.Location = new System.Drawing.Point(573, 3);
             this.btnHelp.Name = "btnHelp";
-            this.btnHelp.Size = new System.Drawing.Size(47, 27);
+            this.btnHelp.Size = new System.Drawing.Size(46, 26);
             this.btnHelp.TabIndex = 2;
             this.btnHelp.Text = "Help";
             this.btnHelp.UseVisualStyleBackColor = true;
@@ -310,8 +310,8 @@
             this.tabPage3.ResumeLayout(false);
             this.tableLayoutPanel3.ResumeLayout(false);
             this.tableLayoutPanel3.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown2)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numRDBuffer)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numRDTC)).EndInit();
             this.flowLayoutPanel1.ResumeLayout(false);
             this.flowLayoutPanel1.PerformLayout();
             this.ResumeLayout(false);
@@ -334,9 +334,9 @@
         private System.Windows.Forms.Button btnHelp;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel3;
         private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.NumericUpDown numericUpDown2;
+        private System.Windows.Forms.NumericUpDown numRDBuffer;
         private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.NumericUpDown numericUpDown1;
+        private System.Windows.Forms.NumericUpDown numRDTC;
         private System.Windows.Forms.Label label4;
     }
 }

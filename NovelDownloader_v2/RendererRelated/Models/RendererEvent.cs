@@ -4,7 +4,6 @@
     {
         public RendererEventEnum Event { get; set; }
         public string Url { get; set; }
-        public string Remarks { get; set; } = "";
 
         public static string RendererEventLog(RendererEvent _event, bool isTestMode = false)
         {
@@ -26,7 +25,7 @@
                 default:
                     return "";
             }
-            return log + (!string.IsNullOrWhiteSpace(_event.Remarks) ? " -> " + _event.Remarks : "");
+            return log;
         }
 
         public static string RendererEventStatus(RendererEvent _event, bool ignoreRedirects = false)
@@ -54,7 +53,7 @@
                 default:
                     break;
             }
-            return status + (!string.IsNullOrWhiteSpace(_event.Remarks) ? " -> " + _event.Remarks : "");
+            return status + (!string.IsNullOrWhiteSpace(_event.Url) ? " -> " + _event.Url : "");
         }
     }
 }

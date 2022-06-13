@@ -19,6 +19,7 @@ namespace NovelDownloader_v2
         public static EventHandler OnOpenLogs { get; set; }
         public static EventHandler OnOpenRenderer { get; set; }
         public static EventHandler OnOpenTestRenderer { get; set; }
+        public static EventHandler<SiteRule> OnUpdateTestRule { get; set; }
 
         public static EventHandler OnShutDown { get; set; }
 
