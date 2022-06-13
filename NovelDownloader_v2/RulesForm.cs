@@ -134,7 +134,7 @@ namespace NovelDownloader_v2
             }
         }
 
-        private void ShowAddEditRule(Models.SiteRule siteRule = null)
+        private void ShowAddEditRule(SiteRule siteRule = null)
         {
             if (Globals.TestRule != null)
             {
