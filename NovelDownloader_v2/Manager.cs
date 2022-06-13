@@ -178,6 +178,27 @@ return JSON.stringify({
             };
             #endregion
 
+            #region Rules Stuff
+            Globals.OnAddRule += (s, e) =>
+            {
+                e.Id = Guid.NewGuid();
+                Globals.Rules.Add(e);
+            };
+            Globals.OnUpdateRule += (s, e) =>
+            {
+                var rule = Globals.Rules.FirstOrDefault(i => i.Id == e.Id);
+                if (rule != null)
+                {
+                    Models.SiteRule.Copy(e, rule);
+                }
+                else
+                {
+                    LogText("Error. Maybe deleted existing rule by mistake ? No worries, added a new rule.");
+                    Globals.Rules.Add(e);
+                }
+            };
+            #endregion
+
             Globals.OnShutDown += (s, e) =>
             {
                 Shutdown();

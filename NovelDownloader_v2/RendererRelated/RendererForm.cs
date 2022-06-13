@@ -46,12 +46,19 @@ namespace NovelDownloader_v2.RendererRelated
                 TestRendererControlsForm = new TestRendererControlsForm(Operations);
                 Globals.OnTestRendererEvent += (s, e) => SetURL(e.Url);
                 Globals.OnUpdateTestRule += OnUpdateTestRule;
+                Globals.OnCloseTestRenderer += OnCloseTestRenderer;
             }
             else
             {
                 // ... load RendererControlsForm
                 Globals.OnRendererEvent += (s, e) => SetURL(e.Url);
             }
+        }
+
+        private void OnCloseTestRenderer(object sender, EventArgs e)
+        {
+            TestRendererControlsForm.Close();
+            Close();
         }
 
         private void OnUpdateTestRule(object sender, SiteRule e)

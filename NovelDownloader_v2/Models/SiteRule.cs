@@ -47,5 +47,27 @@ namespace NovelDownloader_v2.Models
                     return PageTypeEnum.UNKNOWN;
             }
         }
+
+        public static void Copy(SiteRule copyFrom, SiteRule copyTo)
+        {
+            copyTo.Id = copyFrom.Id;
+            copyTo.RuleName = copyFrom.RuleName;
+            copyTo.URLRegex = copyFrom.URLRegex;
+            copyTo.GetPageType_Javascript = copyFrom.GetPageType_Javascript;
+
+            copyTo.GetTOC_Javascript = copyFrom.GetTOC_Javascript;
+            copyTo.IsTOCPageAChapter = copyFrom.IsTOCPageAChapter;
+
+            copyTo.IsSinglePageNovel = copyFrom.IsSinglePageNovel;
+            copyTo.GetSinglePageURL_Javascript = copyFrom.GetSinglePageURL_Javascript;
+
+            copyTo.GetChapter_Javascript = copyFrom.GetChapter_Javascript;
+
+            copyTo.BlockedURLs = copyFrom.BlockedURLs;
+            copyTo.BlockedURLMatchingType = copyFrom.BlockedURLMatchingType;
+
+            copyTo.RapidDownloadBufferSeconds = copyFrom.RapidDownloadBufferSeconds;
+            copyTo.RapidDownloadTillChapter = copyFrom.RapidDownloadTillChapter;
+        }
     }
 }

@@ -18,8 +18,6 @@ namespace NovelDownloader_v2
 
         public AddEditRuleForm(SiteRule rule = null)
         {
-            Globals.TestRule = new SiteRule();
-
             InitializeComponent();
             Size = new Size(880, 625);
             Icon = Properties.Resources.AppIcon;
@@ -27,10 +25,13 @@ namespace NovelDownloader_v2
             if (rule == null)
             {
                 Text = "Add Rule";
+                Globals.TestRule = new SiteRule();
             }
             else
             {
                 IsEditRuleForm = true;
+                Globals.TestRule = rule;
+
                 Text = "Edit Rule";
 
                 txtURLsToBlock.Text = string.Join(Environment.NewLine, rule.BlockedURLs);
@@ -108,8 +109,9 @@ namespace NovelDownloader_v2
                 }
             }
 
-            Globals.OnUpdateRule?.Invoke(sender, new SiteRule()
+            (IsEditRuleForm ? Globals.OnUpdateRule : Globals.OnAddRule)?.Invoke(sender, new SiteRule()
             {
+                Id = IsEditRuleForm ? Globals.TestRule.Id : Guid.Empty,
                 RuleName = addEditRuleUserControl.RuleName,
                 URLRegex = addEditRuleUserControl.URLRegex,
                 GetPageType_Javascript = addEditRuleUserControl.PageTypeScript,
@@ -123,7 +125,9 @@ namespace NovelDownloader_v2
                 RapidDownloadTillChapter = (int)numRDTC.Value,
                 RapidDownloadBufferSeconds = (double)numRDBuffer.Value,
             });
-            
+
+            Globals.OnCloseTestRenderer?.Invoke(sender, e);
+
             Close();
         }
     }

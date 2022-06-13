@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NovelDownloader_v2.Models;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -45,6 +46,17 @@ namespace NovelDownloader_v2
                 new MenuItem("Edit Rule", EditRule),
                 new MenuItem("Delete Rule", DeleteRule),
             });
+
+            Globals.OnAddRule += OnAddUpdateRule;
+            Globals.OnUpdateRule += OnAddUpdateRule;
+        }
+
+        private void OnAddUpdateRule(object sender, SiteRule e)
+        {
+            Invoke(new Action(() =>
+            {
+                RefreshRules();
+            }));
         }
 
         private void RulesForm_Load(object sender, EventArgs e)
@@ -61,6 +73,8 @@ namespace NovelDownloader_v2
 
         private void RefreshRules()
         {
+            listRules.Items.Clear();
+
             var counter = 1;
             foreach (var itm in Globals.Rules)
             {
