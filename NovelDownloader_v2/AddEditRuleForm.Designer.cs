@@ -267,6 +267,7 @@
             this.btnSaveRule.TabIndex = 0;
             this.btnSaveRule.Text = "Save Rule";
             this.btnSaveRule.UseVisualStyleBackColor = true;
+            this.btnSaveRule.Click += new System.EventHandler(this.btnSaveRule_Click);
             // 
             // btnTest
             // 

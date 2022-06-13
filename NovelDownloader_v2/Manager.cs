@@ -80,13 +80,7 @@ let retMe = {
     'PublishedOn': '',
     'UpdatedOn': '',
     'Words': '',
-    'Chapters': [
-        {
-            'Serial': 1,
-            'Name': '',
-            'URL': '',
-        },
-    ],
+    'Chapters': [],
     'ChapterCount': 0,
     'TOC_Extras': [],
 };
@@ -103,7 +97,7 @@ if (match) {
     retMe.PublishedOn = _dat.find(i => i.Key == 'Published').Value;
     let up_dat = _dat.find(i => i.Key == 'Updated');
     if (up_dat)
-        retMe.PublishedOn = up_dat.Value;
+        retMe.UpdatedOn = up_dat.Value;
     retMe.Words = _dat.find(i => i.Key == 'Words').Value;
     Array.from($(document.querySelector('#chap_select')).find('option')).forEach((el, i) => {
         retMe.Chapters.push({
@@ -115,12 +109,20 @@ if (match) {
 } else {
     return null;
 }
-return retMe;
+return JSON.stringify(retMe);
 ",
                     IsTOCPageAChapter = true,
                     IsSinglePageNovel = false,
                     GetSinglePageURL_Javascript = "",
-                    GetChapter_Javascript = @"",
+                    GetChapter_Javascript = @"
+return JSON.stringify({
+    'Volume': '',
+    'Name': $(document.querySelector('#chap_select')).find('option[selected]').get(0).innerText,
+    'Content': $('.storytext').html(),
+    'NextPageURL': '',
+    'Files': [],
+});
+",
                     RapidDownloadTillChapter = 15,
                     RapidDownloadBufferSeconds = 2,
                     BlockedURLs = new List<string>

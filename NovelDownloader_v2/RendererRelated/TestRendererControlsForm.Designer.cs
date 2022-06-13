@@ -41,9 +41,9 @@
             this.txtUrl = new System.Windows.Forms.TextBox();
             this.flowLayoutPanel4 = new System.Windows.Forms.FlowLayoutPanel();
             this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
-            this.button1 = new System.Windows.Forms.Button();
-            this.button2 = new System.Windows.Forms.Button();
-            this.button3 = new System.Windows.Forms.Button();
+            this.btnExecTOCScript = new System.Windows.Forms.Button();
+            this.btnExecSPURLScript = new System.Windows.Forms.Button();
+            this.btnExecChapterScript = new System.Windows.Forms.Button();
             this.flowLayoutPanel5 = new System.Windows.Forms.FlowLayoutPanel();
             this.btnClearCookies = new System.Windows.Forms.Button();
             this.btnClearLocalStorage = new System.Windows.Forms.Button();
@@ -202,9 +202,9 @@
             // 
             this.flowLayoutPanel1.AutoSize = true;
             this.flowLayoutPanel1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.flowLayoutPanel1.Controls.Add(this.button1);
-            this.flowLayoutPanel1.Controls.Add(this.button2);
-            this.flowLayoutPanel1.Controls.Add(this.button3);
+            this.flowLayoutPanel1.Controls.Add(this.btnExecTOCScript);
+            this.flowLayoutPanel1.Controls.Add(this.btnExecSPURLScript);
+            this.flowLayoutPanel1.Controls.Add(this.btnExecChapterScript);
             this.flowLayoutPanel1.Controls.Add(this.flowLayoutPanel5);
             this.flowLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.flowLayoutPanel1.Location = new System.Drawing.Point(3, 75);
@@ -212,41 +212,44 @@
             this.flowLayoutPanel1.Size = new System.Drawing.Size(528, 70);
             this.flowLayoutPanel1.TabIndex = 5;
             // 
-            // button1
+            // btnExecTOCScript
             // 
-            this.button1.AutoSize = true;
-            this.button1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.button1.Enabled = false;
-            this.button1.Location = new System.Drawing.Point(3, 3);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(133, 26);
-            this.button1.TabIndex = 2;
-            this.button1.Text = "Execute TOC Script";
-            this.button1.UseVisualStyleBackColor = true;
+            this.btnExecTOCScript.AutoSize = true;
+            this.btnExecTOCScript.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.btnExecTOCScript.Enabled = false;
+            this.btnExecTOCScript.Location = new System.Drawing.Point(3, 3);
+            this.btnExecTOCScript.Name = "btnExecTOCScript";
+            this.btnExecTOCScript.Size = new System.Drawing.Size(133, 26);
+            this.btnExecTOCScript.TabIndex = 2;
+            this.btnExecTOCScript.Text = "Execute TOC Script";
+            this.btnExecTOCScript.UseVisualStyleBackColor = true;
+            this.btnExecTOCScript.Click += new System.EventHandler(this.btnExecTOCScript_Click);
             // 
-            // button2
+            // btnExecSPURLScript
             // 
-            this.button2.AutoSize = true;
-            this.button2.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.button2.Enabled = false;
-            this.button2.Location = new System.Drawing.Point(142, 3);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(154, 26);
-            this.button2.TabIndex = 3;
-            this.button2.Text = "Execute SP-URL Script";
-            this.button2.UseVisualStyleBackColor = true;
+            this.btnExecSPURLScript.AutoSize = true;
+            this.btnExecSPURLScript.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.btnExecSPURLScript.Enabled = false;
+            this.btnExecSPURLScript.Location = new System.Drawing.Point(142, 3);
+            this.btnExecSPURLScript.Name = "btnExecSPURLScript";
+            this.btnExecSPURLScript.Size = new System.Drawing.Size(154, 26);
+            this.btnExecSPURLScript.TabIndex = 3;
+            this.btnExecSPURLScript.Text = "Execute SP-URL Script";
+            this.btnExecSPURLScript.UseVisualStyleBackColor = true;
+            this.btnExecSPURLScript.Click += new System.EventHandler(this.btnExecSPURLScript_Click);
             // 
-            // button3
+            // btnExecChapterScript
             // 
-            this.button3.AutoSize = true;
-            this.button3.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.button3.Enabled = false;
-            this.button3.Location = new System.Drawing.Point(302, 3);
-            this.button3.Name = "button3";
-            this.button3.Size = new System.Drawing.Size(152, 26);
-            this.button3.TabIndex = 4;
-            this.button3.Text = "Execute Chapter Script";
-            this.button3.UseVisualStyleBackColor = true;
+            this.btnExecChapterScript.AutoSize = true;
+            this.btnExecChapterScript.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.btnExecChapterScript.Enabled = false;
+            this.btnExecChapterScript.Location = new System.Drawing.Point(302, 3);
+            this.btnExecChapterScript.Name = "btnExecChapterScript";
+            this.btnExecChapterScript.Size = new System.Drawing.Size(152, 26);
+            this.btnExecChapterScript.TabIndex = 4;
+            this.btnExecChapterScript.Text = "Execute Chapter Script";
+            this.btnExecChapterScript.UseVisualStyleBackColor = true;
+            this.btnExecChapterScript.Click += new System.EventHandler(this.btnExecChapterScript_Click);
             // 
             // flowLayoutPanel5
             // 
@@ -357,9 +360,9 @@
         private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel3;
         private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel4;
         private System.Windows.Forms.TextBox txtUrl;
-        private System.Windows.Forms.Button button1;
-        private System.Windows.Forms.Button button2;
-        private System.Windows.Forms.Button button3;
+        private System.Windows.Forms.Button btnExecTOCScript;
+        private System.Windows.Forms.Button btnExecSPURLScript;
+        private System.Windows.Forms.Button btnExecChapterScript;
         private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel1;
         private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel5;
         private System.Windows.Forms.Button btnClearCookies;

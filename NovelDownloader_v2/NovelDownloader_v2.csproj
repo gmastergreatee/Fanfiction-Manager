@@ -53,6 +53,9 @@
     <Reference Include="CefSharp.WinForms, Version=101.0.180.0, Culture=neutral, PublicKeyToken=40c4b6fc221f4138, processorArchitecture=MSIL">
       <HintPath>..\packages\CefSharp.WinForms.101.0.180\lib\net452\CefSharp.WinForms.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.13.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -93,6 +96,12 @@
     </Compile>
     <Compile Include="HelpUserControls\AddEditRuleHelpUserControl.Designer.cs">
       <DependentUpon>AddEditRuleHelpUserControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="HelpUserControls\ShowTestResults.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="HelpUserControls\ShowTestResults.Designer.cs">
+      <DependentUpon>ShowTestResults.cs</DependentUpon>
     </Compile>
     <Compile Include="LogsForm.cs">
       <SubType>Form</SubType>
@@ -151,6 +160,7 @@
     <Compile Include="SplashForm.Designer.cs">
       <DependentUpon>SplashForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Utils\JSBeautify.cs" />
     <Compile Include="Utils\RegexUtil.cs" />
     <EmbeddedResource Include="AddEditRuleForm.resx">
       <DependentUpon>AddEditRuleForm.cs</DependentUpon>
@@ -163,6 +173,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="HelpUserControls\AddEditRuleHelpUserControl.resx">
       <DependentUpon>AddEditRuleHelpUserControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="HelpUserControls\ShowTestResults.resx">
+      <DependentUpon>ShowTestResults.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="LogsForm.resx">
       <DependentUpon>LogsForm.cs</DependentUpon>

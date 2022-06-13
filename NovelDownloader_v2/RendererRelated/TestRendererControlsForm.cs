@@ -10,6 +10,8 @@ using System.Collections.Generic;
 using NovelDownloader_v2.RendererRelated.Models;
 using CefSharp;
 using NovelDownloader_v2.Models;
+using NovelDownloader_v2.HelpUserControls;
+using Newtonsoft.Json;
 
 namespace NovelDownloader_v2.RendererRelated
 {
@@ -30,6 +32,7 @@ namespace NovelDownloader_v2.RendererRelated
         {
             Globals.TestRule = e;
             Operations.URLBlocker.BlockURLs(e.BlockedURLs);
+            btnExecSPURLScript.Enabled = e.IsSinglePageNovel;
         }
 
         private void OnTestRendererEvent(object sender, RendererEvent e)
@@ -42,6 +45,15 @@ namespace NovelDownloader_v2.RendererRelated
                     var pageType = SiteRule.GetPageType(Operations.JavascriptExecutor.RunEvaluateJavascriptToString(Globals.TestRule.GetPageType_Javascript));
                     Invoke(new Action(() =>
                     {
+                        btnExecTOCScript.Enabled = pageType == PageTypeEnum.TOC;
+                        btnExecSPURLScript.Enabled =
+                            Globals.TestRule.IsSinglePageNovel &&
+                            (pageType == PageTypeEnum.TOC || pageType == PageTypeEnum.CHAPTER);
+                        btnExecChapterScript.Enabled =
+                            Globals.TestRule.IsTOCPageAChapter ?
+                            (pageType == PageTypeEnum.TOC || pageType == PageTypeEnum.CHAPTER)
+                            :
+                            pageType == PageTypeEnum.CHAPTER;
                         lblPageType.Text = pageType.ToString();
                     }));
                 }));
@@ -88,6 +100,52 @@ namespace NovelDownloader_v2.RendererRelated
         private void btnClearLocalStorage_Click(object sender, EventArgs e)
         {
             Operations.LocalStorage.ClearLocalStorage();
+        }
+
+        private void btnExecTOCScript_Click(object sender, EventArgs e)
+        {
+            RunScript<TOC>(Globals.TestRule.GetTOC_Javascript, btnExecTOCScript);
+        }
+
+        private void btnExecSPURLScript_Click(object sender, EventArgs e)
+        {
+            RunScript<string>(Globals.TestRule.GetSinglePageURL_Javascript, btnExecSPURLScript);
+        }
+
+        private void btnExecChapterScript_Click(object sender, EventArgs e)
+        {
+            RunScript<Chapter>(Globals.TestRule.GetChapter_Javascript, btnExecChapterScript);
+        }
+
+        private void RunScript<T>(string script, Button buttonToEnable)
+        {
+            Task.Run(new Action(() =>
+            {
+                var data = Operations.JavascriptExecutor.RunEvaluateJavascriptToString(script);
+                Invoke(new Action(() =>
+                {
+                    try
+                    {
+                        if (data != null)
+                        {
+                            if (typeof(T) != typeof(string))
+                            {
+                                var result = JsonConvert.DeserializeObject<T>(data);
+                                new HelpForm(new ShowTestResults(JsonConvert.SerializeObject(result, Formatting.Indented)), DockStyle.Fill).ShowDialog();
+                            }
+                            else
+                                new HelpForm(new ShowTestResults(data), DockStyle.Fill).ShowDialog();
+                        }
+                        else
+                            MessageBox.Show("No data received", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                    catch
+                    {
+                        MessageBox.Show("Error while deserializing the data. Make sure you are returning a string.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                    buttonToEnable.Enabled = true;
+                }));
+            }));
         }
     }
 }

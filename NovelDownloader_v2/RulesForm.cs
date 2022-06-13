@@ -64,15 +64,18 @@ namespace NovelDownloader_v2
             var counter = 1;
             foreach (var itm in Globals.Rules)
             {
-                listRules.Items.Add(new ListViewItem(new string[]
+                var item = new ListViewItem(new string[]
                 {
+                    "",
                     itm.RuleName,
                     itm.URLRegex,
                 })
                 {
                     Name = itm.Id.ToString(),
                     Text = counter + ".",
-                });
+                };
+                //item.ListView.Columns[0].
+                listRules.Items.Add(item);
                 counter++;
             }
             ResetColumnWidths();

@@ -28,13 +28,14 @@ namespace NovelDownloader_v2
             InitializeComponent();
             if (rule != null)
             {
-                txtRuleName.Text = rule.RuleName;
-                txtURLRegex.Text = rule.URLRegex;
-                txtPageTypeScript.Text = rule.GetPageType_Javascript;
-                txtTOCPageScript.Text = rule.GetTOC_Javascript;
+                txtRuleName.Text = rule.RuleName.Trim();
+                txtURLRegex.Text = rule.URLRegex.Trim();
+                txtPageTypeScript.Text = rule.GetPageType_Javascript.Trim();
+                txtTOCPageScript.Text = rule.GetTOC_Javascript.Trim();
+                chkTOCPageContainsChapter.Checked = rule.IsTOCPageAChapter;
                 chkSinglePageNovel.Checked = rule.IsSinglePageNovel;
-                txtSinglePageURLScript.Text = rule.GetSinglePageURL_Javascript;
-                txtChapterScript.Text = rule.GetChapter_Javascript;
+                txtSinglePageURLScript.Text = rule.GetSinglePageURL_Javascript.Trim();
+                txtChapterScript.Text = rule.GetChapter_Javascript.Trim();
             }
         }
 

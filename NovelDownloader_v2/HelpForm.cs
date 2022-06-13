@@ -12,7 +12,7 @@ namespace NovelDownloader_v2
 {
     public partial class HelpForm : Form
     {
-        public HelpForm(UserControl userControl = null)
+        public HelpForm(UserControl userControl = null, DockStyle dockStyle = DockStyle.Top)
         {
             InitializeComponent();
             Icon = Properties.Resources.AppIcon;
@@ -20,7 +20,7 @@ namespace NovelDownloader_v2
             if (userControl != null)
             {
                 Controls.Add(userControl);
-                userControl.Dock = DockStyle.Top;
+                userControl.Dock = dockStyle;
             }
         }
     }
