@@ -81,6 +81,7 @@
     <Compile Include="AddEditRuleUserControl.Designer.cs">
       <DependentUpon>AddEditRuleUserControl.cs</DependentUpon>
     </Compile>
+    <Compile Include="DataStore\Store.cs" />
     <Compile Include="FormWrapper.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -118,9 +119,15 @@
     <Compile Include="Manager.cs" />
     <Compile Include="Models\BlockedURLMatchingTypeEnum.cs" />
     <Compile Include="Models\Chapter.cs" />
+    <Compile Include="Models\ChapterBase.cs" />
+    <Compile Include="Models\Novel\NovelChapter_Data.cs" />
+    <Compile Include="Models\Novel\Novel_Chapter.cs" />
+    <Compile Include="Models\Novel\Novel_Data.cs" />
+    <Compile Include="Models\Novel\Novel_Files.cs" />
     <Compile Include="Models\PageTypeEnum.cs" />
     <Compile Include="Models\SiteRule.cs" />
     <Compile Include="Models\TOC.cs" />
+    <Compile Include="Models\TOCBase.cs" />
     <Compile Include="Models\TOC_Chapter.cs" />
     <Compile Include="NativeMethods.cs" />
     <Compile Include="Program.cs" />
@@ -229,7 +236,9 @@
   <ItemGroup>
     <None Include="Icon.ico" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Models\Library\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>

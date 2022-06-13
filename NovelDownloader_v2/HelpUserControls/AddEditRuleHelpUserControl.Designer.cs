@@ -104,7 +104,7 @@
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(541, 1914);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(547, 2182);
             this.tableLayoutPanel1.TabIndex = 0;
             // 
             // label20
@@ -112,11 +112,11 @@
             this.label20.AutoSize = true;
             this.label20.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.label20.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label20.Location = new System.Drawing.Point(125, 1822);
+            this.label20.Location = new System.Drawing.Point(125, 2090);
             this.label20.Margin = new System.Windows.Forms.Padding(4, 2, 4, 2);
             this.label20.Name = "label20";
             this.label20.Padding = new System.Windows.Forms.Padding(4);
-            this.label20.Size = new System.Drawing.Size(412, 90);
+            this.label20.Size = new System.Drawing.Size(418, 90);
             this.label20.TabIndex = 20;
             this.label20.Text = "After completing fetching the no. of chapters as mentioned in RDTL,\r\nthis amount " +
     "of delay(in seconds) is applied before all subsequent\r\nrequests for the \"Chapter" +
@@ -127,7 +127,7 @@
             // 
             this.label17.AutoSize = true;
             this.label17.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label17.Location = new System.Drawing.Point(3, 1820);
+            this.label17.Location = new System.Drawing.Point(3, 2088);
             this.label17.Name = "label17";
             this.label17.Padding = new System.Windows.Forms.Padding(0, 7, 0, 0);
             this.label17.Size = new System.Drawing.Size(115, 94);
@@ -149,7 +149,7 @@
             this.flowLayoutPanel3.Margin = new System.Windows.Forms.Padding(4, 2, 4, 2);
             this.flowLayoutPanel3.Name = "flowLayoutPanel3";
             this.flowLayoutPanel3.Padding = new System.Windows.Forms.Padding(4);
-            this.flowLayoutPanel3.Size = new System.Drawing.Size(412, 256);
+            this.flowLayoutPanel3.Size = new System.Drawing.Size(418, 524);
             this.flowLayoutPanel3.TabIndex = 18;
             this.flowLayoutPanel3.WrapContents = false;
             // 
@@ -174,7 +174,7 @@
             this.flowLayoutPanel4.Controls.Add(this.btnCopyChapterResponse);
             this.flowLayoutPanel4.Location = new System.Drawing.Point(7, 107);
             this.flowLayoutPanel4.Name = "flowLayoutPanel4";
-            this.flowLayoutPanel4.Size = new System.Drawing.Size(268, 104);
+            this.flowLayoutPanel4.Size = new System.Drawing.Size(277, 244);
             this.flowLayoutPanel4.TabIndex = 13;
             // 
             // lblChapterResponse
@@ -184,15 +184,17 @@
             this.lblChapterResponse.Location = new System.Drawing.Point(3, 0);
             this.lblChapterResponse.Name = "lblChapterResponse";
             this.lblChapterResponse.Padding = new System.Windows.Forms.Padding(0, 0, 0, 4);
-            this.lblChapterResponse.Size = new System.Drawing.Size(207, 104);
+            this.lblChapterResponse.Size = new System.Drawing.Size(216, 244);
             this.lblChapterResponse.TabIndex = 14;
-            this.lblChapterResponse.Text = "{\r\n    \'Name\': \'\',\r\n    \'Content\': \'\',\r\n    \'NextPageURL\': \'\',\r\n}";
+            this.lblChapterResponse.Text = "{\r\n    \'Volume\': \'\',\r\n    \'Name\': \'\',\r\n    \'Content\': \'\',\r\n    \'NextPageURL\': \'\'," +
+    "\r\n    \'Files\': [\r\n        {\r\n            \'Url\': \'\',\r\n            \'Data\': \'\',\r\n  " +
+    "      },\r\n    ],\r\n}";
             // 
             // btnCopyChapterResponse
             // 
             this.btnCopyChapterResponse.AutoSize = true;
             this.btnCopyChapterResponse.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.btnCopyChapterResponse.Location = new System.Drawing.Point(216, 3);
+            this.btnCopyChapterResponse.Location = new System.Drawing.Point(225, 3);
             this.btnCopyChapterResponse.Name = "btnCopyChapterResponse";
             this.btnCopyChapterResponse.Size = new System.Drawing.Size(49, 26);
             this.btnCopyChapterResponse.TabIndex = 15;
@@ -203,24 +205,23 @@
             // label19
             // 
             this.label19.AutoSize = true;
-            this.label19.Location = new System.Drawing.Point(7, 214);
+            this.label19.Location = new System.Drawing.Point(7, 354);
             this.label19.Name = "label19";
             this.label19.Padding = new System.Windows.Forms.Padding(0, 0, 0, 4);
-            this.label19.Size = new System.Drawing.Size(359, 36);
+            this.label19.Size = new System.Drawing.Size(402, 164);
             this.label19.TabIndex = 14;
-            this.label19.Text = "if \"NextPageURL\" is a non-empty string, then the URL for the\r\nnext chapter from \"" +
-    "Chapters\" will be overriden with this value";
+            this.label19.Text = resources.GetString("label19.Text");
             // 
             // label16
             // 
             this.label16.AutoSize = true;
             this.label16.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.label16.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label16.Location = new System.Drawing.Point(125, 1680);
+            this.label16.Location = new System.Drawing.Point(125, 1948);
             this.label16.Margin = new System.Windows.Forms.Padding(4, 2, 4, 2);
             this.label16.Name = "label16";
             this.label16.Padding = new System.Windows.Forms.Padding(4);
-            this.label16.Size = new System.Drawing.Size(412, 138);
+            this.label16.Size = new System.Drawing.Size(418, 138);
             this.label16.TabIndex = 16;
             this.label16.Text = "Rapid Download Till Chapter\r\n\r\nThe number of chapters to fetch without any delay\r" +
     "\n\r\n- useful for sites where there\'s a limit to\r\n   the number of requests/minute" +
@@ -232,11 +233,11 @@
             this.label15.AutoSize = true;
             this.label15.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.label15.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label15.Location = new System.Drawing.Point(125, 1570);
+            this.label15.Location = new System.Drawing.Point(125, 1838);
             this.label15.Margin = new System.Windows.Forms.Padding(4, 2, 4, 2);
             this.label15.Name = "label15";
             this.label15.Padding = new System.Windows.Forms.Padding(4);
-            this.label15.Size = new System.Drawing.Size(412, 106);
+            this.label15.Size = new System.Drawing.Size(418, 106);
             this.label15.TabIndex = 15;
             this.label15.Text = "List of URLs to ignore(not-fetch) while rendering the page/s\r\n\r\n- must have one U" +
     "RL in each line\r\n- it can also be part of a URL\r\n    - example, to block all jav" +
@@ -252,7 +253,7 @@
             this.label13.Margin = new System.Windows.Forms.Padding(4, 2, 4, 2);
             this.label13.Name = "label13";
             this.label13.Padding = new System.Windows.Forms.Padding(4);
-            this.label13.Size = new System.Drawing.Size(412, 218);
+            this.label13.Size = new System.Drawing.Size(418, 218);
             this.label13.TabIndex = 13;
             this.label13.Text = resources.GetString("label13.Text");
             this.label13.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -266,7 +267,7 @@
             this.label11.Margin = new System.Windows.Forms.Padding(4, 2, 4, 2);
             this.label11.Name = "label11";
             this.label11.Padding = new System.Windows.Forms.Padding(4);
-            this.label11.Size = new System.Drawing.Size(412, 186);
+            this.label11.Size = new System.Drawing.Size(418, 186);
             this.label11.TabIndex = 11;
             this.label11.Text = resources.GetString("label11.Text");
             this.label11.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -280,7 +281,7 @@
             this.label4.Margin = new System.Windows.Forms.Padding(4, 2, 4, 2);
             this.label4.Name = "label4";
             this.label4.Padding = new System.Windows.Forms.Padding(4);
-            this.label4.Size = new System.Drawing.Size(412, 26);
+            this.label4.Size = new System.Drawing.Size(418, 26);
             this.label4.TabIndex = 10;
             this.label4.Text = "Regex string to match with the Novel\'s URL";
             this.label4.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -289,7 +290,7 @@
             // 
             this.label10.AutoSize = true;
             this.label10.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label10.Location = new System.Drawing.Point(3, 1678);
+            this.label10.Location = new System.Drawing.Point(3, 1946);
             this.label10.Name = "label10";
             this.label10.Padding = new System.Windows.Forms.Padding(0, 7, 0, 0);
             this.label10.Size = new System.Drawing.Size(115, 142);
@@ -316,7 +317,7 @@
             this.label8.Location = new System.Drawing.Point(3, 1308);
             this.label8.Name = "label8";
             this.label8.Padding = new System.Windows.Forms.Padding(0, 7, 0, 0);
-            this.label8.Size = new System.Drawing.Size(115, 260);
+            this.label8.Size = new System.Drawing.Size(115, 528);
             this.label8.TabIndex = 7;
             this.label8.Text = "Chapter Script :";
             this.label8.TextAlign = System.Drawing.ContentAlignment.TopRight;
@@ -337,7 +338,7 @@
             // 
             this.label6.AutoSize = true;
             this.label6.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label6.Location = new System.Drawing.Point(3, 1568);
+            this.label6.Location = new System.Drawing.Point(3, 1836);
             this.label6.Name = "label6";
             this.label6.Padding = new System.Windows.Forms.Padding(0, 7, 0, 0);
             this.label6.Size = new System.Drawing.Size(115, 110);
@@ -377,7 +378,7 @@
             this.label2.Margin = new System.Windows.Forms.Padding(4, 2, 4, 2);
             this.label2.Name = "label2";
             this.label2.Padding = new System.Windows.Forms.Padding(4);
-            this.label2.Size = new System.Drawing.Size(412, 42);
+            this.label2.Size = new System.Drawing.Size(418, 42);
             this.label2.TabIndex = 1;
             this.label2.Text = "The name of the Rule as displayed in the \"Rules List\"\r\n- For identification purpo" +
     "ses only";
@@ -408,7 +409,7 @@
             this.flowLayoutPanel1.Margin = new System.Windows.Forms.Padding(4, 2, 4, 2);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
             this.flowLayoutPanel1.Padding = new System.Windows.Forms.Padding(4);
-            this.flowLayoutPanel1.Size = new System.Drawing.Size(412, 816);
+            this.flowLayoutPanel1.Size = new System.Drawing.Size(418, 816);
             this.flowLayoutPanel1.TabIndex = 17;
             this.flowLayoutPanel1.WrapContents = false;
             // 
@@ -477,7 +478,7 @@
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.Controls.Add(this.tableLayoutPanel1);
             this.Name = "AddEditRuleHelpUserControl";
-            this.Size = new System.Drawing.Size(541, 1914);
+            this.Size = new System.Drawing.Size(547, 2182);
             this.tableLayoutPanel1.ResumeLayout(false);
             this.tableLayoutPanel1.PerformLayout();
             this.flowLayoutPanel3.ResumeLayout(false);
