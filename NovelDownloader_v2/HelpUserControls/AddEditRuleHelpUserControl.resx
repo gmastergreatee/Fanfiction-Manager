@@ -117,18 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="label19.Text" xml:space="preserve">
-    <value>if "NextPageURL" is a non-empty string, then the URL for the
-next chapter from "Chapters" will be overriden with this value
-
-Files will comprise of all the images present in the Content
-    - if Url is defined in the doc, then simply pass this and leave
-      Data empty/null
-    - if image is in raw format
-        - substitute a proper image-name in the "Content"'s image tags,
-          then provide the name in "Url" field and
-          base64-encoded string in "Data" for such images</value>
-  </data>
   <data name="label13.Text" xml:space="preserve">
     <value>Script in JavaScript
 
@@ -156,6 +144,18 @@ Must return a number as described below -
 -1 - Auto Captcha Page
 0  - TOC (Table of Contents) Page
 1  - Chapter Page</value>
+  </data>
+  <data name="label19.Text" xml:space="preserve">
+    <value>if "NextPageURL" is a non-empty string, then the URL for the
+next chapter from "Chapters" will be overriden with this value
+
+Files will comprise of all the images present in the Content
+    - if Url is defined in the doc, then simply pass this and leave
+      Data empty/null
+    - if image is in raw format
+        - substitute a proper image-name in the "Content"'s image tags,
+          then provide the name in "Url" field and
+          base64-encoded string in "Data" for such images</value>
   </data>
   <data name="lblTOCResponse.Text" xml:space="preserve">
     <value>{

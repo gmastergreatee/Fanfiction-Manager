@@ -240,8 +240,8 @@
             this.label15.Size = new System.Drawing.Size(418, 106);
             this.label15.TabIndex = 15;
             this.label15.Text = "List of URLs to ignore(not-fetch) while rendering the page/s\r\n\r\n- must have one U" +
-    "RL in each line\r\n- it can also be part of a URL\r\n    - example, to block all jav" +
-    "ascript files, type\r\n        .js";
+    "RL in each line\r\n- it can also be part of a URL\r\n    - example, to block all ads" +
+    " by google, type\r\n       googleads";
             this.label15.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // label13
