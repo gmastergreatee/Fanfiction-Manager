@@ -31,6 +31,7 @@ namespace NovelDownloader_v2.RendererRelated
         private void UpdateTestRule(object sender, SiteRule e)
         {
             Globals.TestRule = e;
+            Globals.OnLog?.Invoke(sender, "Test-Rule updated");
             Operations.URLBlocker.BlockURLs(e.BlockedURLs);
             btnExecSPURLScript.Enabled = e.IsSinglePageNovel;
         }

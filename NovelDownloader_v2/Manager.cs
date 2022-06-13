@@ -305,7 +305,7 @@ return JSON.stringify({
 
         private void LoadRules()
         {
-            // Load existing novel-grabber rules
+            DataStore.Store.LoadAppData();
         }
 
         private void LoadNovels()
