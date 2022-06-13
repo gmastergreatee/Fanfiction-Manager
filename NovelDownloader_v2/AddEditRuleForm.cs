@@ -13,7 +13,7 @@ namespace NovelDownloader_v2
 {
     public partial class AddEditRuleForm : Form
     {
-        private AddEditRuleUserControl addEditRuleUserControl { get; set; };
+        private AddEditRuleUserControl addEditRuleUserControl { get; set; }
         private bool IsEditRuleForm { get; set; } = false;
 
         public AddEditRuleForm(SiteRule rule = null)
