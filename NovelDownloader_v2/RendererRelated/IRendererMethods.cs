@@ -9,6 +9,7 @@ namespace NovelDownloader_v2.RendererRelated
         IRendererLocalStorage LocalStorage { get; }
         IRendererURLBlocker URLBlocker { get; }
         void ResetPage();
+        void LoadURL(string url);
         void ResetCookies(string resetCookiesUrl = "");
     }
 }

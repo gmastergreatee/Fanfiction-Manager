@@ -73,7 +73,7 @@ namespace NovelDownloader_v2
 
         private void addNovelToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            new AddNovelForm().Show();
+            Globals.OnOpenAddNovel?.Invoke(sender, e);
         }
     }
 }

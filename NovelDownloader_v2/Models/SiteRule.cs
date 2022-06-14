@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace NovelDownloader_v2.Models
@@ -68,6 +69,11 @@ namespace NovelDownloader_v2.Models
 
             copyTo.RapidDownloadBufferSeconds = copyFrom.RapidDownloadBufferSeconds;
             copyTo.RapidDownloadTillChapter = copyFrom.RapidDownloadTillChapter;
+        }
+
+        public static SiteRule MatchRule(string url)
+        {
+            return Globals.Rules.FirstOrDefault(i => new Regex(i.URLRegex).IsMatch(url));
         }
     }
 }

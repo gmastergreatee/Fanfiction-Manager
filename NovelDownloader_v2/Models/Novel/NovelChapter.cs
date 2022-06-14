@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace NovelDownloader_v2.Models.Novel
 {
-    public class Novel_Chapter : ChapterBase
+    public class NovelChapter : ChapterBase
     {
         public List<Novel_Files> Files { get; set; } = new List<Novel_Files>();
     }

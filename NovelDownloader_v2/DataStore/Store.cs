@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using NovelDownloader_v2.Utils;
 using System.Collections.Generic;
 using NovelDownloader_v2.Models.Novel;
-using NovelDownloader_v2.DataStore.Models;
+using NovelDownloader_v2.Models.DataStore;
 
 namespace NovelDownloader_v2.DataStore
 {

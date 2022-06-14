@@ -37,15 +37,30 @@ namespace NovelDownloader_v2
 
         public void AppendText(string text)
         {
-            var now = DateTime.Now.ToString("[yyyy-MM-dd HH:mm:ss] ");
-            if (!IsHandleCreated)
+            if (!InvokeRequired)
             {
-                CreateHandle();
+                var now = DateTime.Now.ToString("[yyyy-MM-dd HH:mm:ss] ");
+                txtConsole.AppendText(now + text + Environment.NewLine);
+                return;
             }
 
             Invoke(new Action(() =>
             {
-                txtConsole.AppendText(now + text + Environment.NewLine);
+                AppendText(text);
+            }));
+        }
+
+        public void ShowMessageBox(string text)
+        {
+            if (!InvokeRequired)
+            {
+                MessageBox.Show(text, "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            Invoke(new Action(() =>
+            {
+                ShowMessageBox(text);
             }));
         }
     }

@@ -72,5 +72,10 @@ namespace NovelDownloader_v2.RendererRelated
                 Cef.GetGlobalCookieManager().DeleteCookies();
             }
         }
+
+        public void LoadURL(string url)
+        {
+            _Browser.LoadUrl(url);
+        }
     }
 }

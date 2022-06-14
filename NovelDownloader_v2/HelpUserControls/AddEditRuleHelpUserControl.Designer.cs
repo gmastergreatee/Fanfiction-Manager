@@ -104,7 +104,7 @@
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(547, 2202);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(547, 2218);
             this.tableLayoutPanel1.TabIndex = 0;
             // 
             // label20
@@ -112,7 +112,7 @@
             this.label20.AutoSize = true;
             this.label20.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.label20.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label20.Location = new System.Drawing.Point(125, 2110);
+            this.label20.Location = new System.Drawing.Point(125, 2126);
             this.label20.Margin = new System.Windows.Forms.Padding(4, 2, 4, 2);
             this.label20.Name = "label20";
             this.label20.Padding = new System.Windows.Forms.Padding(4);
@@ -127,7 +127,7 @@
             // 
             this.label17.AutoSize = true;
             this.label17.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label17.Location = new System.Drawing.Point(3, 2108);
+            this.label17.Location = new System.Drawing.Point(3, 2124);
             this.label17.Name = "label17";
             this.label17.Padding = new System.Windows.Forms.Padding(0, 7, 0, 0);
             this.label17.Size = new System.Drawing.Size(115, 94);
@@ -145,7 +145,7 @@
             this.flowLayoutPanel3.Controls.Add(this.label19);
             this.flowLayoutPanel3.Dock = System.Windows.Forms.DockStyle.Fill;
             this.flowLayoutPanel3.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
-            this.flowLayoutPanel3.Location = new System.Drawing.Point(125, 1330);
+            this.flowLayoutPanel3.Location = new System.Drawing.Point(125, 1346);
             this.flowLayoutPanel3.Margin = new System.Windows.Forms.Padding(4, 2, 4, 2);
             this.flowLayoutPanel3.Name = "flowLayoutPanel3";
             this.flowLayoutPanel3.Padding = new System.Windows.Forms.Padding(4);
@@ -217,7 +217,7 @@
             this.label16.AutoSize = true;
             this.label16.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.label16.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label16.Location = new System.Drawing.Point(125, 1968);
+            this.label16.Location = new System.Drawing.Point(125, 1984);
             this.label16.Margin = new System.Windows.Forms.Padding(4, 2, 4, 2);
             this.label16.Name = "label16";
             this.label16.Padding = new System.Windows.Forms.Padding(4);
@@ -233,7 +233,7 @@
             this.label15.AutoSize = true;
             this.label15.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.label15.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label15.Location = new System.Drawing.Point(125, 1858);
+            this.label15.Location = new System.Drawing.Point(125, 1874);
             this.label15.Margin = new System.Windows.Forms.Padding(4, 2, 4, 2);
             this.label15.Name = "label15";
             this.label15.Padding = new System.Windows.Forms.Padding(4);
@@ -249,7 +249,7 @@
             this.label13.AutoSize = true;
             this.label13.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.label13.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label13.Location = new System.Drawing.Point(125, 1108);
+            this.label13.Location = new System.Drawing.Point(125, 1124);
             this.label13.Margin = new System.Windows.Forms.Padding(4, 2, 4, 2);
             this.label13.Name = "label13";
             this.label13.Padding = new System.Windows.Forms.Padding(4);
@@ -290,7 +290,7 @@
             // 
             this.label10.AutoSize = true;
             this.label10.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label10.Location = new System.Drawing.Point(3, 1966);
+            this.label10.Location = new System.Drawing.Point(3, 1982);
             this.label10.Name = "label10";
             this.label10.Padding = new System.Windows.Forms.Padding(0, 7, 0, 0);
             this.label10.Size = new System.Drawing.Size(115, 142);
@@ -302,7 +302,7 @@
             // 
             this.label9.AutoSize = true;
             this.label9.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label9.Location = new System.Drawing.Point(3, 1106);
+            this.label9.Location = new System.Drawing.Point(3, 1122);
             this.label9.Name = "label9";
             this.label9.Padding = new System.Windows.Forms.Padding(0, 10, 0, 0);
             this.label9.Size = new System.Drawing.Size(115, 222);
@@ -314,7 +314,7 @@
             // 
             this.label8.AutoSize = true;
             this.label8.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label8.Location = new System.Drawing.Point(3, 1328);
+            this.label8.Location = new System.Drawing.Point(3, 1344);
             this.label8.Name = "label8";
             this.label8.Padding = new System.Windows.Forms.Padding(0, 7, 0, 0);
             this.label8.Size = new System.Drawing.Size(115, 528);
@@ -329,7 +329,7 @@
             this.label7.Location = new System.Drawing.Point(3, 266);
             this.label7.Name = "label7";
             this.label7.Padding = new System.Windows.Forms.Padding(0, 7, 0, 0);
-            this.label7.Size = new System.Drawing.Size(115, 840);
+            this.label7.Size = new System.Drawing.Size(115, 856);
             this.label7.TabIndex = 6;
             this.label7.Text = "TOC Page Script :";
             this.label7.TextAlign = System.Drawing.ContentAlignment.TopRight;
@@ -338,7 +338,7 @@
             // 
             this.label6.AutoSize = true;
             this.label6.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label6.Location = new System.Drawing.Point(3, 1856);
+            this.label6.Location = new System.Drawing.Point(3, 1872);
             this.label6.Name = "label6";
             this.label6.Padding = new System.Windows.Forms.Padding(0, 7, 0, 0);
             this.label6.Size = new System.Drawing.Size(115, 110);
@@ -409,7 +409,7 @@
             this.flowLayoutPanel1.Margin = new System.Windows.Forms.Padding(4, 2, 4, 2);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
             this.flowLayoutPanel1.Padding = new System.Windows.Forms.Padding(4);
-            this.flowLayoutPanel1.Size = new System.Drawing.Size(418, 836);
+            this.flowLayoutPanel1.Size = new System.Drawing.Size(418, 852);
             this.flowLayoutPanel1.TabIndex = 17;
             this.flowLayoutPanel1.WrapContents = false;
             // 
@@ -466,7 +466,7 @@
             this.label18.Location = new System.Drawing.Point(7, 554);
             this.label18.Name = "label18";
             this.label18.Padding = new System.Windows.Forms.Padding(0, 0, 0, 4);
-            this.label18.Size = new System.Drawing.Size(366, 276);
+            this.label18.Size = new System.Drawing.Size(353, 292);
             this.label18.TabIndex = 14;
             this.label18.Text = resources.GetString("label18.Text");
             // 
@@ -478,7 +478,7 @@
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.Controls.Add(this.tableLayoutPanel1);
             this.Name = "AddEditRuleHelpUserControl";
-            this.Size = new System.Drawing.Size(547, 2202);
+            this.Size = new System.Drawing.Size(547, 2218);
             this.tableLayoutPanel1.ResumeLayout(false);
             this.tableLayoutPanel1.PerformLayout();
             this.flowLayoutPanel3.ResumeLayout(false);

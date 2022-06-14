@@ -11,6 +11,7 @@ namespace NovelDownloader_v2
     public static class Globals
     {
         public static EventHandler<string> OnLog { get; set; }
+        public static EventHandler<string> OnMsgBox { get; set; }
         public static EventHandler<string> OnLogVerbose { get; set; }
         public static EventHandler OnOpenLogs { get; set; }
 

@@ -191,7 +191,8 @@ Must return a number as described below -
         - in such case "ChapterCount" value is used
            (if provided) to display the no. of chapters
             - zero value will mean an unknown no. of "Chapters"
-            - "ChapterCount" is always discarded in all other cases
+
+- "ChapterCount" is simply the number of chapters found
 
 - "TOC_Extras" is an array of string
     - can be anything

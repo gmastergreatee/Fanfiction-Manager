@@ -81,7 +81,8 @@
     <Compile Include="AddEditRuleUserControl.Designer.cs">
       <DependentUpon>AddEditRuleUserControl.cs</DependentUpon>
     </Compile>
-    <Compile Include="DataStore\Models\AppDataModel.cs" />
+    <Compile Include="Downloader\Downloader.cs" />
+    <Compile Include="Models\DataStore\AppDataModel.cs" />
     <Compile Include="DataStore\Store.cs" />
     <Compile Include="AddNovelForm.cs">
       <SubType>Form</SubType>
@@ -89,6 +90,7 @@
     <Compile Include="AddNovelForm.Designer.cs">
       <DependentUpon>AddNovelForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Downloader\Novel_Downloader.cs" />
     <Compile Include="FormWrapper.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -127,8 +129,14 @@
     <Compile Include="Models\BlockedURLMatchingTypeEnum.cs" />
     <Compile Include="Models\Chapter.cs" />
     <Compile Include="Models\ChapterBase.cs" />
+    <Compile Include="Models\Downloader\DownloadEntry.cs" />
+    <Compile Include="Models\Downloader\DownloadEntryChangedEnum.cs" />
+    <Compile Include="Models\Downloader\DownloadEntryChangedEvent.cs" />
+    <Compile Include="Models\Downloader\DownloadStatusEnum.cs" />
+    <Compile Include="Models\Downloader\NovelRendererEvent.cs" />
+    <Compile Include="Models\Library\Library.cs" />
     <Compile Include="Models\Novel\NovelChapter_Data.cs" />
-    <Compile Include="Models\Novel\Novel_Chapter.cs" />
+    <Compile Include="Models\Novel\NovelChapter.cs" />
     <Compile Include="Models\Novel\Novel_Data.cs" />
     <Compile Include="Models\Novel\Novel_Files.cs" />
     <Compile Include="Models\PageTypeEnum.cs" />
@@ -175,6 +183,7 @@
       <DependentUpon>SplashForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Utils\JSBeautify.cs" />
+    <Compile Include="Utils\Utils.cs" />
     <Compile Include="Utils\ZipUnzip.cs" />
     <EmbeddedResource Include="AddEditRuleForm.resx">
       <DependentUpon>AddEditRuleForm.cs</DependentUpon>
@@ -248,7 +257,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Library\" />
-    <Folder Include="Models\Library\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

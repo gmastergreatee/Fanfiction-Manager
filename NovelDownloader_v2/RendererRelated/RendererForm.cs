@@ -11,6 +11,7 @@ namespace NovelDownloader_v2.RendererRelated
     {
         #region EventHandlers
         public event EventHandler OnBrowserDevToolsToggled;
+        public event EventHandler<NovelDownloader_v2.Models.Downloader.NovelRendererEvent> OnNovelRendererEvent;
         #endregion
 
         #region privates vars
@@ -21,6 +22,7 @@ namespace NovelDownloader_v2.RendererRelated
 
         public bool IsWorking { get; set; } = false;
         public IRendererMethods Operations { get; private set; }
+        Guid DownloadEntryGuid { get; set; }
 
         public RendererForm(bool isTestMode = false)
         {
@@ -55,6 +57,21 @@ namespace NovelDownloader_v2.RendererRelated
             }
         }
 
+        /// <summary>
+        /// Need to execute only once at startup of any Novel download
+        /// </summary>
+        /// <param name="downloadEntryGuid"></param>
+        /// <param name="url"></param>
+        public void LoadNovelUrl(Guid downloadEntryGuid, string url)
+        {
+            DownloadEntryGuid = downloadEntryGuid;
+#if DEBUG
+            Show();
+            Activate();
+#endif
+            Operations.LoadURL(url);
+        }
+
         private void OnCloseTestRenderer(object sender, EventArgs e)
         {
             TestRendererControlsForm.Close();
@@ -67,17 +84,28 @@ namespace NovelDownloader_v2.RendererRelated
             TestRendererControlsForm.Activate();
         }
 
+        #region Browser Events
+
         private void Browser_FrameLoadEnd(object sender, FrameLoadEndEventArgs e)
         {
             if (e.Frame.IsMain)
             {
+                var _event = new RendererEvent
+                {
+                    Event = RendererEventEnum.PageLoaded,
+                    Url = e.Url,
+                };
                 Invoke(new Action(() =>
                 {
-                    (IsTestMode ? Globals.OnTestRendererEvent : Globals.OnRendererEvent)?.Invoke(sender, new RendererEvent()
+                    (IsTestMode ? Globals.OnTestRendererEvent : Globals.OnRendererEvent)?.Invoke(sender, _event);
+                    if (!IsTestMode)
                     {
-                        Event = RendererEventEnum.PageLoaded,
-                        Url = e.Url,
-                    });
+                        OnNovelRendererEvent?.Invoke(sender, new NovelDownloader_v2.Models.Downloader.NovelRendererEvent()
+                        {
+                            DownloadEntryGuid = DownloadEntryGuid,
+                            RendererEvent = _event,
+                        });
+                    }
                 }));
             }
         }
@@ -86,30 +114,56 @@ namespace NovelDownloader_v2.RendererRelated
         {
             if (e.Frame.IsMain)
             {
+                var _event = new RendererEvent
+                {
+                    Event = (
+                        e.TransitionType == TransitionType.IsRedirect || 
+                        e.TransitionType == TransitionType.ClientRedirect || 
+                        e.TransitionType == TransitionType.ServerRedirect
+                    ) ?
+                    RendererEventEnum.BrowserRedirect :
+                    RendererEventEnum.PageLoading,
+                    Url = e.Url,
+                };
+
                 Invoke(new Action(() =>
                 {
-                    (IsTestMode ? Globals.OnTestRendererEvent : Globals.OnRendererEvent)?.Invoke(sender, new RendererEvent()
+                    (IsTestMode ? Globals.OnTestRendererEvent : Globals.OnRendererEvent)?.Invoke(sender, _event);
+
+                    if (!IsTestMode)
                     {
-                        Event = (e.TransitionType == TransitionType.IsRedirect || e.TransitionType == TransitionType.ClientRedirect || e.TransitionType == TransitionType.ServerRedirect) ? RendererEventEnum.BrowserRedirect : RendererEventEnum.PageLoading,
-                        Url = e.Url,
-                    });
+                        OnNovelRendererEvent?.Invoke(sender, new NovelDownloader_v2.Models.Downloader.NovelRendererEvent()
+                        {
+                            DownloadEntryGuid = DownloadEntryGuid,
+                            RendererEvent = _event,
+                        });
+                    }
                 }));
             }
         }
-
-        #region Browser Events
 
         private void browser_LoadError(object sender, LoadErrorEventArgs e)
         {
             if (e.Frame.IsMain)
             {
+                var _event = new RendererEvent
+                {
+                    Event = RendererEventEnum.PageLoadingStopped,
+                    Url = Operations.Browser.Address + " -> " + e.ErrorText,
+                };
+
                 Invoke(new Action(() =>
                 {
-                    (IsTestMode ? Globals.OnTestRendererEvent : Globals.OnRendererEvent)?.Invoke(sender, new RendererEvent()
+                    (IsTestMode ? Globals.OnTestRendererEvent : Globals.OnRendererEvent)?.Invoke(sender, _event);
+
+                    if (!IsTestMode)
                     {
-                        Event = RendererEventEnum.PageLoadingStopped,
-                        Url = Operations.Browser.Address + " -> " + e.ErrorText,
-                    });
+                        OnNovelRendererEvent?.Invoke(sender, new NovelDownloader_v2.Models.Downloader.NovelRendererEvent()
+                        {
+                            DownloadEntryGuid = DownloadEntryGuid,
+                            RendererEvent = _event,
+                        });
+                    }
                 }));
             }
         }

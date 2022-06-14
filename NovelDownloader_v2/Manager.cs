@@ -158,6 +158,10 @@ return JSON.stringify({
             {
                 LogText(RendererEvent.RendererEventLog(e, true), true);
             };
+            Globals.OnMsgBox += (s, e) =>
+            {
+                LogsForm.ShowMessageBox(e);
+            };
             #endregion
 
             #region Show Stuff
@@ -176,6 +180,10 @@ return JSON.stringify({
             Globals.OnOpenTestRenderer += (s, e) =>
             {
                 ShowTestRenderer();
+            };
+            Globals.OnOpenAddNovel += (s, e) =>
+            {
+                ShowAddNovel();
             };
             #endregion
 
@@ -272,6 +280,12 @@ return JSON.stringify({
         {
             RulesForm.Show();
             RulesForm.Activate();
+        }
+
+        private void ShowAddNovel()
+        {
+            AddNovelForm.Show();
+            AddNovelForm.Activate();
         }
 
         private void ShowTrayContextMenu()

@@ -45,14 +45,15 @@ if (up_dat)
     retMe.UpdatedOn = up_dat.Value;
 let match = (new RegExp('(?:https://)*(?:www|m)\.fanfiction\.net/([a-z]+)/([0-9]+)/([0-9]+)/([a-zA-Z0-9\-]+)').exec(window.location.href));
 if (match) {
-    let chaps = $(document.querySelector('#chap_select')).find('option');
-    Array.from(chaps).forEach((el, i) => {
+    let chaps = Array.from($(document.querySelector('#chap_select')).find('option'));
+    chaps.forEach((el, i) => {
         retMe.Chapters.push({
             'Serial': (i + 1),
             'Name': el.innerText,
             'URL': window.location.origin + match[1] + '/' + match[2] + '/' + el.value + '/' + match[4],
         });
     });
+    retMe.ChapterCount = chaps.length;
 } else {
     return null;
 }
