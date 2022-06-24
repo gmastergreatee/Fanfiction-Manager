@@ -1,0 +1,12 @@
+{
+  "name": "novel-downloader",
+  "version": "3.0.0",
+  "description": "Downloads novels",
+  "main": "main.js",
+  "author": "gmastergreatee",
+  "license": "MIT",
+  "dependencies": {
+    "@types/electron": "^1.6.10",
+    "@types/vue": "^2.0.0"
+  }
+}

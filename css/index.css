@@ -1,0 +1,216 @@
+* {
+  font-family: Consolas;
+  box-sizing: border-box;
+  user-select: none;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100vh;
+  width: 100vw;
+}
+
+.df {
+  display: flex;
+}
+
+.dn {
+  display: none;
+}
+
+.dib {
+  display: inline-block;
+}
+
+.w-0 {
+  width: 0;
+}
+
+.w-100 {
+  width: 100%;
+}
+
+.h-0 {
+  height: 0;
+}
+
+.h-100 {
+  height: 100%;
+}
+
+.bl {
+  border-left: 1px solid black;
+}
+
+.bl4 {
+  border-left: 4px solid black;
+}
+
+.bt {
+  border-top: 1px solid black;
+}
+
+.bt4 {
+  border-top: 4px solid black;
+}
+
+.br {
+  border-right: 1px solid black;
+}
+
+.bb {
+  border-bottom: 1px solid black;
+}
+
+.wp-200 {
+  width: 200px;
+}
+
+.wp-400 {
+  width: 400px;
+}
+
+.mh70p {
+  max-height: 70vh;
+}
+
+.hp-200 {
+  height: 200px;
+}
+
+.hp-300 {
+  height: 300px;
+}
+
+.fdr {
+  flex-direction: row;
+}
+
+.fdc {
+  flex-direction: column;
+}
+
+.f1 {
+  flex: 1;
+}
+
+.fww {
+  flex-wrap: wrap;
+}
+
+.jcc {
+  justify-content: center;
+}
+
+.jce {
+  justify-content: end;
+}
+
+.aic {
+  align-items: center;
+}
+
+.tac {
+  text-align: center;
+}
+
+.fwb {
+  font-weight: bold;
+}
+
+.pp-2 {
+  padding: 2px;
+}
+
+.pp-4 {
+  padding: 4px;
+}
+
+.oa {
+  overflow: auto;
+}
+
+.oya {
+  overflow-y: auto;
+}
+
+.ccr {
+  cursor: col-resize;
+}
+
+.crr {
+  cursor: row-resize;
+}
+
+.cp {
+  cursor: pointer;
+}
+
+.mt4 {
+  margin-top: 4px;
+}
+
+.mx4,
+.mr4 {
+  margin-right: 4px;
+}
+
+.mx4,
+.ml4 {
+  margin-left: 4px;
+}
+
+.mb4 {
+  margin-bottom: 4px;
+}
+
+.rn {
+  resize: none;
+}
+
+.ust,
+.ust * {
+  user-select: text;
+}
+
+.pr {
+  position: relative;
+}
+
+.pa {
+  position: absolute;
+}
+
+.wsn {
+  white-space: nowrap;
+}
+
+.wsn::-webkit-input-placeholder {
+  white-space: pre;
+}
+
+.pen {
+  pointer-events: none;
+}
+
+pre {
+  margin: 0;
+}
+
+
+::-webkit-scrollbar {
+  height: 12px;
+  width: 12px;
+  background: #e0e0e0;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #989898;
+  -webkit-border-radius: 1ex;
+  -webkit-box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.75);
+}
+
+::-webkit-scrollbar-corner {
+  background: #e0e0e0;
+}
