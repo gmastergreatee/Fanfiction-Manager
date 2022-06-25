@@ -116,20 +116,28 @@ body {
   font-weight: bold;
 }
 
+.pp-4,
 .pl-4 {
   padding-left: 4px;
 }
 
+.pp-4,
 .pr-4 {
   padding-right: 4px;
 }
 
-.pp-2 {
-  padding: 2px;
+.pp-4,
+.pt-4 {
+  padding-top: 4px;
 }
 
-.pp-4 {
-  padding: 4px;
+.pp-4,
+.pb-4 {
+  padding-bottom: 4px;
+}
+
+.pp-2 {
+  padding: 2px;
 }
 
 .oa {
@@ -237,4 +245,8 @@ pre {
 
 .cr {
   color: red;
+}
+
+.wsp {
+  white-space: pre;
 }

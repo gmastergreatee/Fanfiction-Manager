@@ -43,12 +43,18 @@ return retMe;`,
   },
 ];
 
+let chap_select = document.getElementById('chap_select');
+if (chap_select != null) {
+    retMe[0].title = chap_select.options[chap_select.selectedIndex].text;
+}
+
 return retMe;`,
   },
 ];
 
 let default_TOC_Code = `let retMe = {
   'Title': 'novel name here',
+  'Summary': '',
   'ChapterCount': 1, // chapter count here
   'ChapterURLs': [   // list of chapter-URLs
       '', // must contain atleast the first chapter URL
@@ -62,7 +68,8 @@ let default_Chapter_Code = `let retMe = [
   {
     "title": "",    // title of chapter
     "content": "",  // content
-    "nextURL": ""
+    "nextURL": ""   // when "ChapterCount" <= 0 & "nextURL" always comes non-empty
+                    // will loop infinitely unless something else(javascript) breaks
   },
 ];
 
@@ -92,6 +99,9 @@ const simpleEvent = function (context) {
         return cb.apply(context, args);
       });
     },
+    clearAllListeners: function () {
+      cbs.splice(0);
+    },
   };
 };
 
@@ -106,11 +116,12 @@ app = new Vue({
 
     loadAllConfigs();
     this.mainWebView = document.getElementById("mainWebView");
+    this.console = document.getElementById("web-console");
 
     this.mainWebView.addEventListener("did-start-loading", () => {
       if (!this.iframe_url.endsWith(dummyPageUrl)) {
         this.iframe_working = true;
-        log("Loading url...", this.iframe_url);
+        log("Loading url", this.iframe_url);
       }
     });
     this.mainWebView.addEventListener("did-stop-loading", () => {
@@ -124,15 +135,26 @@ app = new Vue({
   data() {
     return {
       darkMode: true,
+
       rules: [],
       loading_rules: true,
 
+      novels: [],
+      loading_novels: true,
+
       //......... Main variables
       mainWebView: null,
+      console: null,
       tabs: ["Library", "Rules", "Tester"],
-      activeTab: 1,
-      showIframe: true,
+      activeTab: 0,
+
+      showWebPage: true,
       showTestResults: true,
+      showConsole: true,
+
+      //......... Add Novel
+
+      add_novel_url: "",
 
       //......... tester related
 
@@ -142,6 +164,7 @@ app = new Vue({
       test_url_regex: "",
       test_pagetype_code: "",
       test_toc_code: default_TOC_Code,
+      test_novel_toc_data: null,
       test_chapter_code: default_Chapter_Code,
 
       test_result_page_type: "UNKNOWN",
@@ -166,10 +189,10 @@ app = new Vue({
         this.activeTab = tabIndex;
         switch (this.activeTab) {
           case 0:
-            this.showIframe = false;
+            this.showWebPage = false;
             break;
           case 2:
-            this.showIframe = true;
+            this.showWebPage = true;
             this.showTestResults = true;
             break;
           default:
@@ -178,7 +201,10 @@ app = new Vue({
       }
     },
     toggleRenderer() {
-      this.showIframe = !this.showIframe;
+      this.showWebPage = !this.showWebPage;
+    },
+    clearWebConsole() {
+      this.console.textContent = "";
     },
     openRendererDevTools() {
       try {
@@ -194,10 +220,13 @@ app = new Vue({
         );
       }
     },
-    //#region Rules Related
+    toggleWebConsole() {
+      this.showConsole = !this.showConsole;
+    },
     getEvaluateJavascriptCode(script = "") {
       return "(function(){" + script + "})()";
     },
+    //#region Rules Related
     toggleTestResults() {
       this.showTestResults = !this.showTestResults;
     },
@@ -205,6 +234,8 @@ app = new Vue({
       if (clearGUID) {
         this.test_rule_guid = "";
       }
+
+      this.test_novel_toc_data = null;
 
       if (!debugTestMode) {
         let r = {
@@ -257,20 +288,24 @@ app = new Vue({
           return;
         }
 
+        onMainWebViewLoadedEvent.clearAllListeners();
         onMainWebViewLoadedEvent.addListener(this.runTestPageTypeScript);
-        if (this.test_url != this.iframe_url) {
+        if (this.test_url.trim() != this.iframe_url) {
           this.iframe_url = this.test_url.trim();
         } else {
           try {
-            this.mainWebView.loadURL(this.test_url);
+            this.mainWebView.loadURL(this.test_url.trim());
           } catch {
             this.mainWebView.reload();
           }
         }
+      } else if (!this.test_url.trim()) {
+        msgBox("Empty URL");
+      } else if (this.iframe_working) {
+        msgBox("Renderer busy, please wait");
       }
     },
     async runTestPageTypeScript() {
-      onMainWebViewLoadedEvent.removeListener(this.runTestPageTypeScript);
       try {
         let data = await this.mainWebView.executeJavaScript(
           this.getEvaluateJavascriptCode(this.test_pagetype_code)
@@ -279,6 +314,9 @@ app = new Vue({
           switch (data) {
             case 0:
               this.test_result_page_type = "TOCPage";
+              onMainWebViewLoadedEvent.removeListener(
+                this.runTestPageTypeScript
+              );
               break;
             case -1:
               this.test_result_page_type = "Auto Captcha";
@@ -288,12 +326,17 @@ app = new Vue({
               break;
             default:
               this.test_result_page_type = "UNKNOWN";
+              onMainWebViewLoadedEvent.removeListener(
+                this.runTestPageTypeScript
+              );
               break;
           }
+          return;
         } else this.test_result_page_type = "UNKNOWN";
       } catch {
         this.test_result_page_type = "UNKNOWN";
       }
+      onMainWebViewLoadedEvent.removeListener(this.runTestPageTypeScript);
     },
     async runTestTOCScript() {
       try {
@@ -301,16 +344,17 @@ app = new Vue({
         let data = await this.mainWebView.executeJavaScript(
           this.getEvaluateJavascriptCode(this.test_toc_code)
         );
+        this.test_novel_toc_data = null;
         if (data) {
+          this.test_novel_toc_data = data;
           this.test_result_content =
             "<pre>" + JSON.stringify(data, null, 4) + "</pre>";
-        } else window.electronAPI.msgBox("No data received", appName);
+        } else msgBox("No data received");
         log("Script executed successfully");
       } catch {
         log("Error");
-        window.electronAPI.msgBox(
-          "Error executing script.\nMake sure an URL is already loaded & the script is valid.\n\nCheck DevTools for more details.",
-          appName
+        msgBox(
+          "Error executing script.\nMake sure an URL is already loaded & the script is valid.\n\nCheck DevTools for more details."
         );
       }
     },
@@ -318,10 +362,18 @@ app = new Vue({
       try {
         log("Running Chapter Script...");
         let data = await this.mainWebView.executeJavaScript(
-          this.getEvaluateJavascriptCode(this.test_chapter_code)
+          this.getEvaluateJavascriptCode(
+            (this.test_novel_toc_data != null
+              ? "let ndata = " + JSON.stringify(this.test_novel_toc_data) + ";"
+              : "") + this.test_chapter_code
+          )
         );
         if (data && data.length > 0) {
-          this.test_result_content = data[0].content;
+          let t_data = data[0];
+          this.test_result_content =
+            (t_data.title
+              ? '<div class="fwb">' + t_data.title + "</div>"
+              : "") + t_data.content;
         } else window.electronAPI.msgBox("No data received", appName);
         log("Script executed successfully");
       } catch {
@@ -424,10 +476,109 @@ app = new Vue({
       }
     },
     //#endregion
+    //#region Add Novel Related
+    addNewNovel() {
+      if (this.iframe_working) {
+        msgBox("Renderer busy, please wait");
+        return;
+      }
+
+      if (!this.add_novel_url.trim()) {
+        msgBox("Please enter the URL");
+        return;
+      }
+
+      try {
+        new URL(this.add_novel_url.trim());
+      } catch {
+        msgBox("Please enter a valid URL");
+        return;
+      }
+
+      let t_rule = null;
+      this.rules.every((el) => {
+        if (new RegExp(el.url_regex).test(this.add_novel_url)) {
+          t_rule = el;
+          return false;
+        }
+        return true;
+      });
+
+      if (!t_rule) {
+        msgBox("No matching rule found for the URL. Please add the rule.");
+        return;
+      }
+
+      log("Rule applied -> " + t_rule.rule_name);
+
+      this.iframe_working = true;
+
+      let onTOCPageConfirmed = async () => {
+        try {
+          log("Running TOC Script...");
+          let data = await this.mainWebView.executeJavaScript(
+            this.getEvaluateJavascriptCode(t_rule.toc_code)
+          );
+          if (data) {
+            this.novels.push(data);
+            saveConfigData("novels");
+            log("TOC data retrieved");
+            log("Added novel -> " + data.Title);
+            this.add_novel_url = "";
+          } else log("Error");
+        } catch {
+          log("Error");
+        }
+        this.iframe_working = false;
+      };
+
+      let onLoadCallback = async () => {
+        try {
+          log("Checking page-type...");
+          let data = await this.mainWebView.executeJavaScript(
+            this.getEvaluateJavascriptCode(t_rule.pagetype_code)
+          );
+          if (data || data == 0) {
+            switch (data) {
+              case 0:
+                onMainWebViewLoadedEvent.clearAllListeners();
+                log("TOC page found");
+                await onTOCPageConfirmed();
+                break;
+              case -1:
+              case -2:
+                break;
+              default:
+                onMainWebViewLoadedEvent.clearAllListeners();
+                this.iframe_working = false;
+                break;
+            }
+            return;
+          } else log("Error");
+        } catch {
+          log("Error");
+          onMainWebViewLoadedEvent.clearAllListeners();
+          this.iframe_working = false;
+        }
+      };
+
+      onMainWebViewLoadedEvent.clearAllListeners();
+      onMainWebViewLoadedEvent.addListener(onLoadCallback);
+      if (this.add_novel_url.trim() != this.iframe_url) {
+        this.iframe_url = this.add_novel_url.trim();
+      } else {
+        try {
+          this.mainWebView.loadURL(this.add_novel_url);
+        } catch {
+          this.mainWebView.reload();
+        }
+      }
+    },
+    //#endregion
   },
   computed: {
     showRenderer() {
-      return this.showIframe && this.activeTabStr != "Rules";
+      return this.showWebPage && this.activeTabStr != "Rules";
     },
     activeTabStr() {
       return this.tabs[this.activeTab];
@@ -449,9 +600,13 @@ function log(text = "", more_text = "") {
   }
   if (more_text.trim().length > 0) {
     console.log(text, "->", more_text);
+    app.console.textContent =
+      app.console.textContent + text + " -> " + more_text + "\r\n";
   } else {
     console.log(text);
+    app.console.textContent = app.console.textContent + text + "\r\n";
   }
+  app.console.scrollTo(0, app.console.scrollHeight);
 }
 
 async function loadAllConfigs() {
@@ -461,8 +616,11 @@ async function loadAllConfigs() {
   if (!configDirPresent) {
     await createDir(configDirPath);
   }
-  loadConfigData("rules");
+  await loadConfigData("rules");
   app.loading_rules = false;
+
+  await loadConfigData("novels");
+  app.loading_novels = false;
 }
 
 /**
