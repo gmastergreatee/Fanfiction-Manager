@@ -116,27 +116,27 @@ body {
   font-weight: bold;
 }
 
-.pp-4,
+.p-4,
 .pl-4 {
   padding-left: 4px;
 }
 
-.pp-4,
+.p-4,
 .pr-4 {
   padding-right: 4px;
 }
 
-.pp-4,
+.p-4,
 .pt-4 {
   padding-top: 4px;
 }
 
-.pp-4,
+.p-4,
 .pb-4 {
   padding-bottom: 4px;
 }
 
-.pp-2 {
+.p-2 {
   padding: 2px;
 }
 
@@ -160,20 +160,20 @@ body {
   cursor: pointer;
 }
 
-.mm-4,
-.mt4 {
+.m-4,
+.mt-4 {
   margin-top: 4px;
 }
 
-.mm-4,
-.mx4,
-.mr4 {
+.m-4,
+.mx-4,
+.mr-4 {
   margin-right: 4px;
 }
 
-.mm-4,
-.mx4,
-.ml4 {
+.m-4,
+.mx-4,
+.ml-4 {
   margin-left: 4px;
 }
 
@@ -181,8 +181,8 @@ body {
   margin-right: 10px;
 }
 
-.mm-4,
-.mb4 {
+.m-4,
+.mb-4 {
   margin-bottom: 4px;
 }
 
@@ -249,4 +249,9 @@ pre {
 
 .wsp {
   white-space: pre;
+}
+
+a.disabled {
+  color: #adadad;
+  pointer-events: none;
 }

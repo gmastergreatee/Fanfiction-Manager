@@ -16,38 +16,67 @@
     <div class="df f1 w-100">
       <link v-if="darkMode" rel="stylesheet" href="./css/dark.css" />
       <div class="fdc br wp-200" :class="{ 'df': showSideBar, 'dn': !showSideBar }">
-        <div class="dib bb tac fwb pp-4">ND_v3</div>
+        <div class="dib bb tac fwb p-4">ND_v3</div>
         <div class="df fdc">
-          <div v-for="(t, i) in tabs" @click="setActiveTab(i)" class="df fdr bb cp pp-4">
+          <div v-for="(t, i) in tabs" @click="setActiveTab(i)" class="df fdr bb cp p-4">
             <div class="f1"><a href="#">{{ t }}</a></div>
             <div v-if="activeTab == i">-></div>
           </div>
         </div>
       </div>
       <div class="df fdc f1">
-        <div class="df bb fwb pp-4">
+        <div class="df bb fwb p-4">
           <div class="f1">{{ tabs[activeTab] }} -</div>
           <div>
-            <a href="#" class="mx4" @click="toggleDarkMode()">SwitchTo{{ darkMode ? 'LightMode' : 'DarkMode' }}</a>
-            <a v-if="tabs[activeTab] != 'Rules'" class="ml4" href="#" @click="toggleRenderer()">{{ showRenderer ? 'Hide'
+            <a href="#" class="mx-4" @click="toggleDarkMode()">SwitchTo{{ darkMode ? 'LightMode' : 'DarkMode' }}</a>
+            <a v-if="tabs[activeTab] != 'Rules'" class="ml-4" href="#" @click="toggleRenderer()">{{ showRenderer ?
+              'Hide'
               : 'Show' }} Renderer</a>
           </div>
         </div>
         <div class="df f1 fdr">
+
+          <!-- tabs code start -->
+
           <div class="df fdc f1 oya pr">
             <div class="df fdc h-100 w-100 pa">
               <!-- library part start -->
 
               <div v-if="isTabActive('Library')" class="df fdc f1 w-100">
-                <div class="f1 fdr"></div>
-                <div class="df fdr pp-4 bt">
-                  <div class="f1"></div>
-                  <a href="#">Import Novel</a>
+                <div class="df f1 fdc pr">
+                  <div class="df f1 fdc pa w-100 h-100 oya p-4">
+                    <div v-for="(n,i) in novels" class="m-4 bt bb bl br df fdc p-4">
+                      <div class="f1">
+                        {{ n.Title }} ({{ n.DownloadedCount }}/{{ n.ChapterCount }})
+                      </div>
+                      <div class="bt mt-4 pt-4" :class="{'dn': !n.Summary}">
+                        {{ n.Summary }}
+                      </div>
+                      <div class="bt mt-4 pt-4 df fdr jce">
+                        <a href="#" class="mx-4" :class="{'disabled': iframe_working}">UpdateInfo</a>
+                        <a href="#" class="mx-4"
+                          :class="{'disabled': iframe_working, 'dn': n.ChapterCount <= n.DownloadedCount}">Download</a>
+                        <a href="#" class="ml-4" :class="{'disabled': iframe_working}"
+                          @click="deleteNovel($event,i)">Delete</a>
+                      </div>
+                    </div>
+                  </div>
+                  <div v-if="novels.length == 0" class="df fdr h-100 w-100 jcc aic">
+                    {{loading_novels ? '!~~~ Loading Novels ~~~!' : 'No novels added yet' }}
+                  </div>
                 </div>
-                <div class="df bt fdr aic pp-4">
-                  <div class="mr4">URL :</div>
-                  <input class="f1 mr4" type="text" v-model="add_novel_url" placeholder="Enter the target URL of Novel-page here">
-                  <a href="#" @click="addNewNovel()">Load URL</a>
+                <div class="df fdr p-4 bt">
+                  <div class="f1">
+                    <a href="#">Grid Layout</a>
+                  </div>
+                  <a href="#" class="mx-4" :class="{'disabled': iframe_working}">Update All Info</a>
+                  <a href="#" class="ml-4">Import Novel</a>
+                </div>
+                <div class="df bt fdr aic p-4">
+                  <div class="mr-4">URL :</div>
+                  <input class="f1 mr-4" type="text" v-model="add_novel_url"
+                    placeholder="Enter the target URL of Novel-page here">
+                  <a href="#" :class="{'disabled': iframe_working}" @click="addNewNovel()">Load URL</a>
                 </div>
               </div>
 
@@ -56,7 +85,7 @@
               <!-- rules page start -->
 
               <div v-if="isTabActive('Rules')" class="df fdc f1 w-100">
-                <div v-for="r in rules" class="df fdr pp-4 mm-4 bt bl br bb">
+                <div v-for="r in rules" class="df fdr p-4 m-4 bt bl br bb">
                   <div class="df fdr f1">
                     <div class="pr-4">{{ r.rule_name }} -></div>
                     <div class="df fdr f1 mr-10 pr">
@@ -66,8 +95,8 @@
                     </div>
                   </div>
                   <div>
-                    <a href="#" @click="editRule(r)">Edit</a>
-                    <a href="#" @click="deleteRule($event, r)">Delete</a>
+                    <a href="#" :class="{'disabled': iframe_working}" @click="editRule(r)">Edit</a>
+                    <a href="#" :class="{'disabled': iframe_working}" @click="deleteRule($event, r)">Delete</a>
                   </div>
                 </div>
                 <div v-if="rules.length == 0" class="df f1 fdr jcc aic">
@@ -78,74 +107,84 @@
               <!-- rules page end -->
 
               <!-- testing tab start -->
+
               <div v-if="isTabActive('Tester')" class="df fdc f1 w-100">
                 <div class="f1 oya pr">
                   <div class="pa w-100 h-100">
-                    <div v-if="isTabActive('Tester')" class="df f1 fdc pp-4 oya">
-                      <div class="df fdr aic mb4">
-                        <label class="mr4">Rule Name :</label>
-                        <input type="text" class="pp-2 f1" v-model="test_rule_name"
-                          placeholder="Enter rule name here" />
+                    <div v-if="isTabActive('Tester')" class="df f1 fdc p-4 oya">
+                      <div class="df fdr aic mb-4">
+                        <label class="mr-4">Rule Name :</label>
+                        <input type="text" class="p-2 f1" v-model="test_rule_name" placeholder="Enter rule name here" />
                       </div>
-                      <div class="df fdr aic mb4">
-                        <label class="mr4">URL Regex :</label>
-                        <input type="text" class="pp-2 f1" v-model="test_url_regex"
+                      <div class="df fdr aic mb-4">
+                        <label class="mr-4">URL Regex :</label>
+                        <input type="text" class="p-2 f1" v-model="test_url_regex"
                           placeholder="Regex for the URL to match the rule to" />
                       </div>
-                      <div class="df fdr aic mb4">
-                        <label class="mr4">Test URL&nbsp; :</label>
-                        <input type="text" class="pp-2 f1" v-model="test_url" placeholder="URL for testing" />
+                      <div class="df fdr aic mb-4">
+                        <label class="mr-4">Test URL&nbsp; :</label>
+                        <input type="text" class="p-2 f1" v-model="test_url" placeholder="URL for testing" />
                       </div>
-                      <div class="df fdr mb4">
-                        <label class="mr4 mt4">Page Type :</label>
-                        <textarea class="pp-2 f1 hp-200 rn wsn" v-model="test_pagetype_code"
+                      <div class="df fdr mb-4">
+                        <label class="mr-4 mt-4">Page Type :</label>
+                        <textarea class="p-2 f1 hp-200 rn wsn" v-model="test_pagetype_code"
                           placeholder="JavaScript code to determine is the page is TOC or Chapter page&#10;&#10;Return type should be number(int) -&#10;&#10;-2 for Manual-Captcha&#10;-1 for Auto-Captcha&#10; 0 for TOC&#10;&#10;Returning anything else will be treated as UNKNOWN"
                           spellcheck="false"></textarea>
                       </div>
-                      <div class="df fdr mb4">
-                        <label class="mr4 mt4">TOCScript :</label>
-                        <textarea class="pp-2 f1 hp-200 rn wsn" v-model="test_toc_code"
-                          placeholder="JavaScript code to get content from TOC page&#10;&#10;Return type should be JSON & must contain the following JSON nodes -&#10;&#10;{&#10;    'Title': 'novel name here',&#10;    'Summary': '',&#10;    'ChapterCount': 1, // chapter count here&#10;    'ChapterURLs': [   // list of chapter-URLs&#10;        '', // must contain atleast the first chapter URL&#10;        '',&#10;    ],&#10;}&#10;&#10;This object will be passed as 'ndata' to the Ch-Script"
+                      <div class="df fdr mb-4">
+                        <label class="mr-4 mt-4">TOCScript :</label>
+                        <textarea class="p-2 f1 hp-200 rn wsn" v-model="test_toc_code"
+                          placeholder="JavaScript code to get content from TOC page&#10;&#10;Return type should be JSON & must contain the following JSON nodes -&#10;&#10;{&#10;    'CoverURL': ''              // may be empty&#10;    'Title': 'novel name here',&#10;    'Summary': '',              // may be empty&#10;    'ChapterCount': 1,          // chapter count here&#10;    'ChapterURLs': [            // list of chapter-URLs&#10;        '', // must contain atleast the first chapter URL&#10;        '',&#10;    ],&#10;}&#10;&#10;This object will be passed as 'ndata' to the Ch-Script"
                           spellcheck="false"></textarea>
                       </div>
-                      <div class="df fdr mb4">
-                        <label class="mr4 mt4">Ch-Script :</label>
-                        <textarea class="pp-2 f1 hp-200 rn wsn" v-model="test_chapter_code"
+                      <div class="df fdr mb-4">
+                        <label class="mr-4 mt-4">Ch-Script :</label>
+                        <textarea class="p-2 f1 hp-200 rn wsn" v-model="test_chapter_code"
                           placeholder="JavaScript code to get content from Chapter page.&#10;Can be one or multiple chapters at once.&#10;&#10;Return type should be JSON in the following format -&#10;&#10;[&#10;    {&#10;        'title': '',&#10;        'content': '',&#10;        'nextURL': ''&#10;    },&#10;]&#10;&#10;'nextURL' will be used in case it is non-empty"
                           spellcheck="false"></textarea>
                       </div>
                       <div class="df fdr jce fwb fww">
-                        <a href="#" class="mx4" @click="loadTestURL()">LoadURL</a>
-                        <a href="#" class="mx4" @click="runTestTOCScript()">RunTOCScript</a>
-                        <a href="#" class="mx4" @click="runTestChapterScript()">RunChapterScript</a>
-                        <a href="#" class="mx4" @click="resetTestFields()">ResetFields</a>
-                        <a href="#" class="mx4" @click="saveTestRule()">SaveRule</a>
-                        <a v-if="test_rule_guid.length > 0" href="#" class="ml4" @click="goBackFromEditRule()">Back</a>
+                        <a href="#" class="mx-4" :class="{'disabled': iframe_working}"
+                          @click="loadTestURL()">LoadURL</a>
+                        <a href="#" class="mx-4" :class="{'disabled': iframe_working}"
+                          @click="runTestTOCScript()">RunTOCScript</a>
+                        <a href="#" class="mx-4" :class="{'disabled': iframe_working}"
+                          @click="runTestChapterScript()">RunChapterScript</a>
+                        <a href="#" class="mx-4" :class="{'disabled': iframe_working}"
+                          @click="resetTestFields()">ResetFields</a>
+                        <a href="#" class="mx-4" :class="{'disabled': iframe_working}"
+                          @click="saveTestRule()">SaveRule</a>
+                        <a v-if="test_rule_guid.length > 0" href="#" class="ml-4" :class="{'disabled': iframe_working}"
+                          @click="goBackFromEditRule()">Back</a>
                       </div>
                     </div>
                   </div>
                 </div>
 
                 <div class="df fdc">
-                  <div class="df fdr pp-4 bt fwb">
+                  <div class="df fdr p-4 bt fwb">
                     <div class="f1">Test Results -</div>
                     <a href="#" @click="toggleTestResults">{{ showTestResults ? 'Collapse' : 'Expand' }}</a>
                   </div>
                   <div class="hp-300 pr bt" :class="{'dib': showTestResults, 'dn': !showTestResults}">
                     <div class="df fdc w-100 h-100">
-                      <div class="bb pp-4">
+                      <div class="bb p-4">
                         Page Type : {{ test_result_page_type }}
                       </div>
                       <div class="f1 pr">
-                        <div class="pa pp-4 w-100 h-100 oya ust" v-html="test_result_content"></div>
+                        <div class="pa p-4 w-100 h-100 oya ust" v-html="test_result_content"></div>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
+
               <!-- testing tab end -->
             </div>
           </div>
+
+          <!-- tabs code end -->
+
           <div class="slide bl w-0" :class="{'df': showRenderer, 'dn': !showRenderer}" slider="1">
             &nbsp;
           </div>
@@ -153,19 +192,21 @@
           <!-- renderer code start -->
 
           <div class="wp-400 fdc" :class="{'df': showRenderer, 'dn': !showRenderer}" slider-targ="1">
-            <div class="df fdr pp-4 bb">
+            <div class="df fdr p-4 bb">
               <div class="fwb f1">Renderer</div>
               <a href="#" @click="openRendererDevTools()">OpenDevTools</a>
             </div>
-            <webview id="mainWebView" :src="iframe_url" class="w-100 h-100" :class="{ 'pen': iframe_working }">
-            </webview>
-            <div class="df fdr pp-4 bt">
+            <div class="pr f1">
+              <webview id="mainWebView" :src="iframe_url" class="pa w-100 h-100" :class="{ 'pen': iframe_working }">
+              </webview>
+            </div>
+            <div class="df fdr p-4 bt">
               <div class="f1">Console</div>
-              <a v-if="showConsole" href="#" class="mr4 pr-4" @click="clearWebConsole()">Clear</a>
+              <a v-if="showConsole" href="#" class="mr-4 pr-4" @click="clearWebConsole()">Clear</a>
               <a href="#" @click="toggleWebConsole()">{{ showConsole ? 'Hide' : 'Show' }}</a>
             </div>
             <div class="bt hp-300 pr" :class="{ 'dn': !showConsole }">
-              <textarea id="web-console" class="w-100 h-100 rn wsp pp-4" readonly></textarea>
+              <textarea id="web-console" class="w-100 h-100 rn wsp p-4" readonly></textarea>
             </div>
           </div>
 
@@ -173,7 +214,7 @@
         </div>
       </div>
     </div>
-    <div class="df fdr pp-4 bt">
+    <div class="df fdr p-4 bt">
       <div class="fwb wsn">Status :</div>
       <div class="wsn pl-4 toe oh">{{ status }}</div>
     </div>

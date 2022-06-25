@@ -16,7 +16,9 @@ if (document.querySelector('#chap_select'))
     return 0;
 return -3;`,
     toc_code: `let retMe = {
+  'CoverURL': '',
   'Title': 'novel name here',
+  'Summary': '',
   'ChapterCount': 1,
   'ChapterURLs': [],
 };
@@ -33,6 +35,11 @@ chaps.forEach(el => {
 
 retMe.ChapterCount = chaps.length;
 retMe.Title = $('#profile_top b').html();
+retMe.Summary = $('#profile_top div.xcontrast_txt').html();
+let cover_url = $('#profile_top .cimage')[0].src;
+if (cover_url) {
+    retMe.CoverURL = cover_url.substr(0, cover_url.length - 3) + '180/';
+}
 
 return retMe;`,
     chapter_code: `let retMe = [
@@ -53,11 +60,12 @@ return retMe;`,
 ];
 
 let default_TOC_Code = `let retMe = {
+  'CoverURL': '',              // may be empty
   'Title': 'novel name here',
-  'Summary': '',
-  'ChapterCount': 1, // chapter count here
-  'ChapterURLs': [   // list of chapter-URLs
-      '', // must contain atleast the first chapter URL
+  'Summary': '',               // may be empty
+  'ChapterCount': 1,           // chapter count here
+  'ChapterURLs': [             // list of chapter-URLs
+      '',                      // must contain atleast the first chapter URL
       '',
   ],
 };
@@ -76,6 +84,10 @@ let default_Chapter_Code = `let retMe = [
 return retMe;`;
 
 let dummyPageUrl = "/dummy.html";
+
+let configDirectoryPath = "/config/";
+let dataDirectoryPath = "/data/";
+let coverDirectoryPath = dataDirectoryPath + "covers/";
 
 const simpleEvent = function (context) {
   if (context === void 0) {
@@ -468,6 +480,10 @@ app = new Vue({
           } catch {}
         }, 3000);
       } else {
+        try {
+          targ.innerHTML = "Delete";
+          targ.classList.remove("cr");
+        } catch {}
         let t_rule_index = this.rules.indexOf(t_rule);
         if (t_rule_index >= 0) {
           this.rules.splice(t_rule_index, 1);
@@ -476,20 +492,21 @@ app = new Vue({
       }
     },
     //#endregion
-    //#region Add Novel Related
+    //#region Novel Related
     addNewNovel() {
+      let t_url = this.add_novel_url.trim();
       if (this.iframe_working) {
         msgBox("Renderer busy, please wait");
         return;
       }
 
-      if (!this.add_novel_url.trim()) {
+      if (!t_url) {
         msgBox("Please enter the URL");
         return;
       }
 
       try {
-        new URL(this.add_novel_url.trim());
+        new URL(t_url);
       } catch {
         msgBox("Please enter a valid URL");
         return;
@@ -497,7 +514,7 @@ app = new Vue({
 
       let t_rule = null;
       this.rules.every((el) => {
-        if (new RegExp(el.url_regex).test(this.add_novel_url)) {
+        if (new RegExp(el.url_regex).test(t_url)) {
           t_rule = el;
           return false;
         }
@@ -520,7 +537,22 @@ app = new Vue({
             this.getEvaluateJavascriptCode(t_rule.toc_code)
           );
           if (data) {
-            this.novels.push(data);
+            data["GUID"] = guid();
+            if (data.CoverURL) {
+              try {
+                new URL(data.CoverURL);
+                let cover_file_name = data["GUID"] + ".png";
+                let cover_file_path =
+                  rootDir() + coverDirectoryPath + cover_file_name;
+                await downloadFile(data.CoverURL, cover_file_path);
+                data.CoverURL = coverDirectoryPath + cover_file_name;
+              } catch {
+                data.CoverURL = "";
+              }
+            }
+            data["URL"] = t_url;
+            data["DownloadedCount"] = 0;
+            this.novels.unshift(data);
             saveConfigData("novels");
             log("TOC data retrieved");
             log("Added novel -> " + data.Title);
@@ -564,13 +596,37 @@ app = new Vue({
 
       onMainWebViewLoadedEvent.clearAllListeners();
       onMainWebViewLoadedEvent.addListener(onLoadCallback);
-      if (this.add_novel_url.trim() != this.iframe_url) {
-        this.iframe_url = this.add_novel_url.trim();
+      if (t_url != this.iframe_url) {
+        this.iframe_url = t_url;
       } else {
         try {
-          this.mainWebView.loadURL(this.add_novel_url);
+          this.mainWebView.loadURL(t_url);
         } catch {
           this.mainWebView.reload();
+        }
+      }
+    },
+    deleteNovel(event, index = -1) {
+      if (index >= 0) {
+        let targ = event.target;
+        if (!targ.classList.contains("cr")) {
+          targ.innerHTML = "Seriously buddy?";
+          targ.classList.add("cr");
+
+          setTimeout(() => {
+            try {
+              targ.innerHTML = "Delete";
+              targ.classList.remove("cr");
+            } catch {}
+          }, 3000);
+        } else {
+          try {
+            targ.innerHTML = "Delete";
+            targ.classList.remove("cr");
+          } catch {}
+          if (this.novels.splice(index, 1).length > 0) {
+            saveConfigData("novels");
+          }
         }
       }
     },
@@ -639,7 +695,7 @@ function guid() {
 async function loadConfigData(configFileName = "") {
   if (configFileName.trim()) {
     let root = await rootDir();
-    let configFilePath = root + "/config/" + configFileName + ".json";
+    let configFilePath = root + configDirectoryPath + configFileName + ".json";
     let configFilePresent = await pathExists(configFilePath);
     if (configFilePresent) {
       let fileData = await readFile(configFilePath);
@@ -657,7 +713,7 @@ async function loadConfigData(configFileName = "") {
 async function saveConfigData(configFileName = "") {
   if (configFileName.trim()) {
     let root = await rootDir();
-    let configFilePath = root + "/config/" + configFileName + ".json";
+    let configFilePath = root + configDirectoryPath + configFileName + ".json";
     if (app[configFileName] != null) {
       await writeFile(
         configFilePath,
@@ -667,7 +723,15 @@ async function saveConfigData(configFileName = "") {
   }
 }
 
-//#region Electron APIs
+// -------- main to renderer
+
+window.electronAPI.log((event, text) => {
+  if (text) {
+    log(text);
+  }
+});
+
+//#region Electron API wrappers
 
 function msgBox(text, caption = appName) {
   window.electronAPI.msgBox(text, caption);
@@ -706,6 +770,15 @@ async function readFile(filePath) {
  */
 async function writeFile(filePath, contents) {
   await window.electronAPI.writeFile(filePath, contents);
+}
+
+/**
+ * Downloads the file and saves it to the provided destination
+ * @param {string} url The URL of the file to download
+ * @param {string} filePath Download destination filepath
+ */
+async function downloadFile(url, filePath) {
+  await window.electronAPI.downloadFile(url, filePath);
 }
 
 /**

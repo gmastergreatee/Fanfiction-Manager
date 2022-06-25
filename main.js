@@ -3,6 +3,7 @@
 // Modules to control application life and create native browser window
 const { app, BrowserWindow, ipcMain, dialog, session } = require("electron");
 const path = require("path");
+var http = require("http");
 const fs = require("fs");
 
 let mainWindow;
@@ -89,6 +90,7 @@ function handleComs() {
   ipcMain.handle("dir-root", rootDir);
   ipcMain.handle("file-read", readFile);
   ipcMain.handle("file-write", writeFile);
+  ipcMain.handle("file-download", downloadFile);
   ipcMain.handle("path-exists", pathExists);
   ipcMain.handle("path-delete", deletePath);
 }
@@ -106,7 +108,9 @@ function showMessageBox(e, text = "", caption = "") {
 function createDirectory(e, dirPath) {
   if (!fs.existsSync(dirPath)) {
     try {
-      fs.mkdirSync(dirPath);
+      fs.mkdirSync(dirPath, {
+        recursive: true,
+      });
     } catch {
       return null;
     }
@@ -137,5 +141,35 @@ async function readFile(e, filePath) {
 
 async function rootDir() {
   return __dirname;
+}
+
+async function downloadFile(e, url, filePath) {
+  let dirPath = path.dirname(filePath);
+  let dirPathExists = await pathExists(dirPath);
+  if (!dirPathExists) {
+    createDirectory(null, dirPath);
+  }
+
+  var file = fs.createWriteStream(filePath);
+  http
+    .get(url, function (response) {
+      response.pipe(file);
+      file.on("finish", function () {
+        file.close(() => {
+          mainWindow.webContents.send(
+            "log-messager",
+            "File Downloaded -> " + url
+          );
+        }); // close() is async, call cb after close completes.
+      });
+    })
+    .on("error", function (err) {
+      // Handle errors
+      fs.unlink(dest); // Delete the file async. (But we don't check the result)
+      mainWindow.webContents.send(
+        "log-messager",
+        "Error downloading file -> " + url
+      );
+    });
 }
 //#endregion
