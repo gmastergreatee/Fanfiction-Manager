@@ -20,6 +20,10 @@ textarea {
   color: white;
 }
 
+[placeholder]::placeholder {
+  color: #b0bd7a;
+}
+
 .bl {
   border-left: 1px solid white;
 }

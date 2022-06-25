@@ -1,12 +1,5 @@
-window.addEventListener("DOMContentLoaded", () => {
-  //   document.querySelectorAll(".slide-right").forEach((el) => {
-  //     el.addEventListener("mousedown", (e) => {
-  //         e.
-  //     });
-  //   });
-});
-
-let debugMode = true;
+let appName = "Novel Downloader v3";
+let debugTestMode = false;
 let debugTestIndex = 0;
 let debugTestVals = [
   {
@@ -19,7 +12,9 @@ let debugTestVals = [
     return -2;
 if (document.querySelector('.cf-browser-verification.cf-im-under-attack'))
     return -1;
-return 0;`,
+if (document.querySelector('#chap_select'))
+    return 0;
+return -3;`,
     toc_code: `let retMe = {
   'Title': 'novel name here',
   'ChapterCount': 1,
@@ -73,22 +68,59 @@ let default_Chapter_Code = `let retMe = [
 
 return retMe;`;
 
+let dummyPageUrl = "/dummy.html";
+
+const simpleEvent = function (context) {
+  if (context === void 0) {
+    context = null;
+  }
+  var cbs = [];
+  return {
+    addListener: function (cb) {
+      cbs.push(cb);
+    },
+    removeListener: function (cb) {
+      var i = cbs.indexOf(cb);
+      cbs.splice(i, 1);
+    },
+    trigger: function () {
+      var args = [];
+      for (var _i = 0; _i < arguments.length; _i++) {
+        args[_i] = arguments[_i];
+      }
+      return cbs.forEach(function (cb) {
+        return cb.apply(context, args);
+      });
+    },
+  };
+};
+
+let onMainWebViewLoadedEvent = simpleEvent();
+
 app = new Vue({
   el: "#main",
   mounted() {
-    this.resetTestFields();
+    if (debugTestMode) {
+      this.resetTestFields();
+    }
+
+    loadAllConfigs();
     this.mainWebView = document.getElementById("mainWebView");
 
     this.mainWebView.addEventListener("did-start-loading", () => {
       this.iframe_working = true;
+      log("Loading url...", this.iframe_url);
     });
     this.mainWebView.addEventListener("did-stop-loading", () => {
       this.iframe_working = false;
+      log("Url loaded", this.mainWebView.getURL());
+      onMainWebViewLoadedEvent.trigger();
     });
   },
   data() {
     return {
       darkMode: true,
+      rules: [],
 
       //......... Main variables
       mainWebView: null,
@@ -111,8 +143,9 @@ app = new Vue({
 
       //.........
 
-      iframe_working: true,
-      iframe_url: "",
+      iframe_working: false,
+      iframe_url: dummyPageUrl,
+      status: "NA",
     };
   },
   methods: {
@@ -132,7 +165,7 @@ app = new Vue({
       this.showTestResults = !this.showTestResults;
     },
     resetTestFields() {
-      if (!debugMode) {
+      if (!debugTestMode) {
         this.test_rule_name = "";
         this.test_url_regex = "";
         this.test_url = "";
@@ -148,17 +181,29 @@ app = new Vue({
         this.test_toc_code = testRule.toc_code;
         this.test_chapter_code = testRule.chapter_code;
       }
-      this.test_result_page_type = "NA";
+      this.test_result_page_type = "UNKNOWN";
 
-      this.iframe_url = "";
-      this.iframe_working = true;
+      this.iframe_url = dummyPageUrl;
+      this.iframe_working = false;
     },
     loadTestURL() {
-      if (this.test_url.trim()) {
+      if (this.test_url.trim() && this.iframe_working == false) {
+        try {
+          new URL(this.test_url.trim());
+        } catch {
+          msgBox("Please enter a valid URL");
+          return;
+        }
+
+        onMainWebViewLoadedEvent.addListener(this.runTestPageTypeScript);
         if (this.test_url != this.iframe_url) {
           this.iframe_url = this.test_url.trim();
         } else {
-          this.mainWebView.reload();
+          try {
+            this.mainWebView.loadURL(this.test_url);
+          } catch {
+            this.mainWebView.reload();
+          }
         }
       }
     },
@@ -170,43 +215,88 @@ app = new Vue({
           this.mainWebView.closeDevTools();
         }
       } catch {
-        alert("Please load an URL before opening DevTools");
+        window.electronAPI.msgBox(
+          "Please load an URL before opening DevTools",
+          appName
+        );
       }
     },
     evaluateJavascriptCode(script = "") {
       return "(function(){" + script + "})()";
     },
+    async runTestPageTypeScript() {
+      onMainWebViewLoadedEvent.removeListener(this.runTestPageTypeScript);
+      try {
+        let data = await this.mainWebView.executeJavaScript(
+          this.evaluateJavascriptCode(this.test_pagetype_code)
+        );
+        if (data || data == 0) {
+          switch (data) {
+            case 0:
+              this.test_result_page_type = "TOCPage";
+              break;
+            case -1:
+              this.test_result_page_type = "Auto Captcha";
+              break;
+            case -2:
+              this.test_result_page_type = "Manual Captcha";
+              break;
+            default:
+              this.test_result_page_type = "UNKNOWN";
+              break;
+          }
+        } else this.test_result_page_type = "UNKNOWN";
+      } catch {
+        this.test_result_page_type = "UNKNOWN";
+      }
+    },
     async runTestTOCScript() {
       try {
+        log("Running TOC Script...");
         let data = await this.mainWebView.executeJavaScript(
           this.evaluateJavascriptCode(this.test_toc_code)
         );
         if (data) {
           this.test_result_content =
             "<pre>" + JSON.stringify(data, null, 4) + "</pre>";
-        } else alert("No data received");
+        } else window.electronAPI.msgBox("No data received", appName);
+        log("Script executed successfully");
       } catch {
-        alert(
-          "Error executing script.\nMake sure an URL is already loaded & the script is valid.\n\nCheck DevTools for more details."
+        log("Error");
+        window.electronAPI.msgBox(
+          "Error executing script.\nMake sure an URL is already loaded & the script is valid.\n\nCheck DevTools for more details.",
+          appName
         );
       }
     },
     async runTestChapterScript() {
       try {
+        log("Running Chapter Script...");
         let data = await this.mainWebView.executeJavaScript(
           this.evaluateJavascriptCode(this.test_chapter_code)
         );
         if (data && data.length > 0) {
           this.test_result_content = data[0].content;
-        } else alert("No data received");
+        } else window.electronAPI.msgBox("No data received", appName);
+        log("Script executed successfully");
       } catch {
-        alert(
-          "Error executing script.\nMake sure an URL is already loaded & the script is valid.\n\nCheck DevTools for more details."
+        log("Error");
+        window.electronAPI.msgBox(
+          "Error executing script.\nMake sure an URL is already loaded & the script is valid.\n\nCheck DevTools for more details.",
+          appName
         );
       }
     },
     saveTestRule() {
-      // ... save rule code
+      this.rules.push({
+        rule_name: this.test_rule_name,
+        url_regex: this.test_url_regex,
+        pagetype_code: this.test_pagetype_code,
+        toc_code: this.test_toc_code,
+        chapter_code: this.test_chapter_code,
+      });
+      saveConfigData("rules");
+      this.resetTestFields();
     },
   },
   computed: {
@@ -218,3 +308,132 @@ app = new Vue({
     },
   },
 });
+
+/**
+ * Changes the status text and logs to console
+ * @param {string} text The text to log
+ * @param {*} more_text Extra text to be displayed in the console only
+ */
+function log(text = "", more_text = "") {
+  if (app.status) {
+    app.status = text.trim();
+  }
+  if (more_text.trim().length > 0) {
+    console.log(text, "->", more_text);
+  } else {
+    console.log(text);
+  }
+}
+
+async function loadAllConfigs() {
+  let root = await rootDir();
+  let configDirPath = root + "/config";
+  let configDirPresent = await pathExists(configDirPath);
+  if (!configDirPresent) {
+    await createDir(configDirPath);
+  }
+  loadConfigData("rules");
+}
+
+/**
+ * Generates and returns a GUID `string`
+ * @returns {string} GUID
+ */
+function guid() {
+  return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, (c) =>
+    (
+      c ^
+      (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))
+    ).toString(16)
+  );
+}
+
+async function loadConfigData(configFileName = "") {
+  if (configFileName.trim()) {
+    let root = await rootDir();
+    let configFilePath = root + "/config/" + configFileName + ".json";
+    let configFilePresent = await pathExists(configFilePath);
+    if (configFilePresent) {
+      let fileData = await readFile(configFilePath);
+      if (app[configFileName]) {
+        app[configFileName] = JSON.parse(fileData);
+      }
+    } else {
+      if (app[configFileName]) {
+        app[configFileName] = [];
+      }
+    }
+  }
+}
+
+async function saveConfigData(configFileName = "") {
+  if (configFileName.trim()) {
+    let root = await rootDir();
+    let configFilePath = root + "/config/" + configFileName + ".json";
+    if (app[configFileName] != null) {
+      await writeFile(
+        configFilePath,
+        JSON.stringify(app[configFileName], null, 4)
+      );
+    }
+  }
+}
+
+//#region Electron APIs
+
+function msgBox(text, caption = appName) {
+  window.electronAPI.msgBox(text, caption);
+}
+
+/**
+ * Returns the root directory of the app
+ * @returns {Promise<string>} Root-directory path
+ */
+async function rootDir() {
+  return await window.electronAPI.rootDir();
+}
+
+/**
+ * Creates the supplied directory
+ * @param {string} dirPath The directory-path to create
+ * @returns {Promise<string>} The full path of the directory
+ */
+async function createDir(dirPath) {
+  return await window.electronAPI.createDir(dirPath);
+}
+
+/**
+ * Reads the target file as a string
+ * @param {string} filePath The path of the file
+ * @returns {Promise<string>} The contents of the file
+ */
+async function readFile(filePath) {
+  return await window.electronAPI.readFile(filePath);
+}
+
+/**
+ * Writes to a file
+ * @param {string} filePath The path of the file
+ * @param {string} contents The data of the file
+ */
+async function writeFile(filePath, contents) {
+  await window.electronAPI.writeFile(filePath, contents);
+}
+
+/**
+ * Checks if the given path exists or not
+ * @param {string} somePath The path to check
+ * @returns {Promise<bool>} Whether path exists or not
+ */
+async function pathExists(somePath) {
+  return await window.electronAPI.pathExists(somePath);
+}
+
+/**
+ * Deletes the file or directory path specified recursively
+ * @param {string} somePath Path of file/directory to delete
+ */
+async function deletePath(somePath) {
+  await window.electronAPI.deletePath(somePath);
+}
+//#endregion

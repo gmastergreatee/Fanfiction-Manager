@@ -6,174 +6,188 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Novel Downloader v3</title>
     <link rel="stylesheet" href="./css/index.css" />
-    <script src="./js/vue.js"></script>
+    <script src="./js/vue.min.js"></script>
     <script src="./js/index.js" defer></script>
   </head>
   <body>
-    <div id="main" class="df h-100 w-100 fdr">
-      <link v-if="darkMode" rel="stylesheet" href="./css/dark.css" />
-      <div class="df fdc br wp-200">
-        <div class="dib bb tac fwb pp-4">ND_v3</div>
-        <div class="df fdc">
-          <div
-            v-for="(t, i) in tabs"
-            @click="setActiveTab(i)"
-            class="df fdr bb cp pp-4"
-          >
-            <div class="f1"><a href="#">{{ t }}</a></div>
-            <div v-if="activeTab == i">-></div>
+    <div id="main" class="df h-100 w-100 fdc" v-cloak>
+      <div class="df f1 w-100">
+        <link v-if="darkMode" rel="stylesheet" href="./css/dark.css" />
+        <div class="df fdc br wp-200">
+          <div class="dib bb tac fwb pp-4">ND_v3</div>
+          <div class="df fdc">
+            <div
+              v-for="(t, i) in tabs"
+              @click="setActiveTab(i)"
+              class="df fdr bb cp pp-4"
+            >
+              <div class="f1"><a href="#">{{ t }}</a></div>
+              <div v-if="activeTab == i">-></div>
+            </div>
+          </div>
+        </div>
+        <div class="df fdc f1">
+          <div class="df bb fwb pp-4">
+            <div class="f1">{{ tabs[activeTab] }} -</div>
+            <div>
+              <a href="#" class="mx4" @click="toggleDarkMode()"
+                >SwitchTo{{ darkMode ? 'LightMode' : 'DarkMode' }}</a
+              >
+              <a
+                v-if="tabs[activeTab] != 'Rules'"
+                class="ml4"
+                href="#"
+                @click="toggleRenderer()"
+                >{{ showRenderer ? 'Hide' : 'Show' }} Renderer</a
+              >
+            </div>
+          </div>
+          <div class="df f1 fdr">
+            <div class="df fdc f1 oya pr">
+              <div class="df fdc h-100 w-100 pa">
+                <!-- testing tab start -->
+                <div v-if="isTabActive('Tester')" class="df fdc f1 w-100">
+                  <div class="f1 oya pr">
+                    <div class="pa w-100 h-100">
+                      <div
+                        v-if="isTabActive('Tester')"
+                        class="df f1 fdc pp-4 oya"
+                      >
+                        <div class="df fdr aic mb4">
+                          <label class="mr4">Rule Name :</label>
+                          <input
+                            type="text"
+                            class="pp-2 f1"
+                            v-model="test_rule_name"
+                            placeholder="Enter rule name here"
+                          />
+                        </div>
+                        <div class="df fdr aic mb4">
+                          <label class="mr4">URL Regex :</label>
+                          <input
+                            type="text"
+                            class="pp-2 f1"
+                            v-model="test_url_regex"
+                            placeholder="Regex for the URL to match the rule to"
+                          />
+                        </div>
+                        <div class="df fdr aic mb4">
+                          <label class="mr4">Test URL&nbsp; :</label>
+                          <input
+                            type="text"
+                            class="pp-2 f1"
+                            v-model="test_url"
+                            placeholder="URL for testing"
+                          />
+                        </div>
+                        <div class="df fdr mb4">
+                          <label class="mr4 mt4">Page Type :</label>
+                          <textarea
+                            class="pp-2 f1 hp-200 rn wsn"
+                            v-model="test_pagetype_code"
+                            placeholder="JavaScript code to determine is the page is TOC or Chapter page&#10;&#10;Return type should be number(int) -&#10;&#10;-1 for Captcha&#10; 0 for TOC&#10; 1 for Chapter"
+                            spellcheck="false"
+                          ></textarea>
+                        </div>
+                        <div class="df fdr mb4">
+                          <label class="mr4 mt4">TOCScript :</label>
+                          <textarea
+                            class="pp-2 f1 hp-200 rn wsn"
+                            v-model="test_toc_code"
+                            placeholder="JavaScript code to get content from TOC page&#10;&#10;Return type should be JSON & must contain the following JSON nodes -&#10;&#10;{&#10;    'Title': 'novel name here',&#10;    'ChapterCount': 1, // chapter count here&#10;    'ChapterURLs': [   // list of chapter-URLs&#10;        '', // must contain atleast the first chapter URL&#10;        '',&#10;    ],&#10;}&#10;&#10;This object will be passed as 'ndata' to the subsequent functions"
+                            spellcheck="false"
+                          ></textarea>
+                        </div>
+                        <div class="df fdr mb4">
+                          <label class="mr4 mt4">Ch-Script :</label>
+                          <textarea
+                            class="pp-2 f1 hp-200 rn wsn"
+                            v-model="test_chapter_code"
+                            placeholder="JavaScript code to get content from Chapter page.&#10;Can be one or multiple chapters at once.&#10;&#10;Return type should be JSON in the following format -&#10;&#10;{&#10;  'title': '',&#10;  'content': '',&#10;  'nextURL': ''&#10;}&#10;&#10;'nextURL' will be used in case it is non-empty"
+                            spellcheck="false"
+                          ></textarea>
+                        </div>
+                        <div class="df fdr jce fwb fww">
+                          <a href="#" class="mx4" @click="loadTestURL()"
+                            >LoadURL</a
+                          >
+                          <a href="#" class="mx4" @click="runTestTOCScript()"
+                            >RunTOCScript</a
+                          >
+                          <a
+                            href="#"
+                            class="mx4"
+                            @click="runTestChapterScript()"
+                            >RunChapterScript</a
+                          >
+                          <a href="#" class="mx4" @click="resetTestFields()"
+                            >ResetFields</a
+                          >
+                          <a href="#" class="ml4" @click="saveTestRule()"
+                            >SaveRule</a
+                          >
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="df fdc">
+                    <div class="df fdr pp-4 bt fwb">
+                      <div class="f1">Test Results -</div>
+                      <a href="#" @click="toggleTestResults"
+                        >{{ showTestResults ? 'Collapse' : 'Expand' }}</a
+                      >
+                    </div>
+                    <div
+                      class="hp-300 pr bt"
+                      :class="{'dib': showTestResults, 'dn': !showTestResults}"
+                    >
+                      <div class="df fdc w-100 h-100">
+                        <div class="bb pp-4">
+                          Page Type : {{ test_result_page_type }}
+                        </div>
+                        <div class="f1 pr">
+                          <div
+                            class="pa pp-4 w-100 h-100 oya ust"
+                            v-html="test_result_content"
+                          ></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <!-- testing tab end -->
+              </div>
+            </div>
+            <div
+              class="slide bl4 w-0 ccr"
+              :class="{'df': showRenderer, 'dn': !showRenderer}"
+              slider="1"
+            >
+              &nbsp;
+            </div>
+            <div
+              class="wp-400 fdc"
+              :class="{'df': showRenderer, 'dn': !showRenderer}"
+              slider-targ="1"
+            >
+              <div class="df fdr pp-4 bb">
+                <div class="fwb f1">Renderer</div>
+                <a href="#" @click="openRendererDevTools()">OpenDevTools</a>
+              </div>
+              <webview
+                id="mainWebView"
+                :src="iframe_url"
+                class="w-100 h-100"
+                :class="{ 'pen': iframe_working }"
+              ></webview>
+            </div>
           </div>
         </div>
       </div>
-      <div class="df fdc f1">
-        <div class="df bb fwb pp-4">
-          <div class="f1">{{ tabs[activeTab] }} -</div>
-          <div>
-            <a href="#" class="mx4" @click="toggleDarkMode()"
-              >SwitchTo{{ darkMode ? 'LightMode' : 'DarkMode' }}</a
-            >
-            <a
-              v-if="tabs[activeTab] != 'Rules'"
-              class="ml4"
-              href="#"
-              @click="toggleRenderer()"
-              >{{ showRenderer ? 'Hide' : 'Show' }} Renderer</a
-            >
-          </div>
-        </div>
-        <div class="df f1 fdr">
-          <div class="df fdc f1 oya pr">
-            <div class="df fdc h-100 w-100 pa">
-              <!-- testing tab start -->
-
-              <div class="f1 oya pr">
-                <div class="pa w-100 h-100">
-                  <div v-if="isTabActive('Tester')" class="df f1 fdc pp-4 oya">
-                    <div class="df fdr aic mb4">
-                      <label class="mr4">Rule Name :</label>
-                      <input
-                        type="text"
-                        class="pp-2 f1"
-                        v-model="test_rule_name"
-                        placeholder="Enter rule name here"
-                      />
-                    </div>
-                    <div class="df fdr aic mb4">
-                      <label class="mr4">URL Regex :</label>
-                      <input
-                        type="text"
-                        class="pp-2 f1"
-                        v-model="test_url_regex"
-                        placeholder="Regex for the URL to match the rule to"
-                      />
-                    </div>
-                    <div class="df fdr aic mb4">
-                      <label class="mr4">Test URL&nbsp; :</label>
-                      <input
-                        type="text"
-                        class="pp-2 f1"
-                        v-model="test_url"
-                        placeholder="URL for testing"
-                      />
-                    </div>
-                    <div class="df fdr mb4">
-                      <label class="mr4 mt4">Page Type :</label>
-                      <textarea
-                        class="pp-2 f1 hp-200 rn wsn"
-                        v-model="test_pagetype_code"
-                        placeholder="JavaScript code to determine is the page is TOC or Chapter page&#10;&#10;Return type should be number(int) -&#10;&#10;-1 for Captcha&#10; 0 for TOC&#10; 1 for Chapter"
-                        spellcheck="false"
-                      ></textarea>
-                    </div>
-                    <div class="df fdr mb4">
-                      <label class="mr4 mt4">TOCScript :</label>
-                      <textarea
-                        class="pp-2 f1 hp-200 rn wsn"
-                        v-model="test_toc_code"
-                        placeholder="JavaScript code to get content from TOC page&#10;&#10;Return type should be JSON & must contain the following JSON nodes -&#10;&#10;{&#10;    'Title': 'novel name here',&#10;    'ChapterCount': 1, // chapter count here&#10;    'ChapterURLs': [   // list of chapter-URLs&#10;        '', // must contain atleast the first chapter URL&#10;        '',&#10;    ],&#10;}&#10;&#10;This object will be passed as 'ndata' to the subsequent functions"
-                        spellcheck="false"
-                      ></textarea>
-                    </div>
-                    <div class="df fdr mb4">
-                      <label class="mr4 mt4">Ch-Script :</label>
-                      <textarea
-                        class="pp-2 f1 hp-200 rn wsn"
-                        v-model="test_chapter_code"
-                        placeholder="JavaScript code to get content from Chapter page.&#10;Can be one or multiple chapters at once.&#10;&#10;Return type should be JSON in the following format -&#10;&#10;{&#10;  'title': '',&#10;  'content': '',&#10;  'nextURL': ''&#10;}&#10;&#10;'nextURL' will be used in case it is non-empty"
-                        spellcheck="false"
-                      ></textarea>
-                    </div>
-                    <div class="df fdr jce fwb fww">
-                      <a href="#" class="mx4" @click="loadTestURL()">LoadURL</a>
-                      <a href="#" class="mx4" @click="runTestTOCScript()"
-                        >RunTOCScript</a
-                      >
-                      <a href="#" class="mx4" @click="runTestChapterScript()"
-                        >RunChapterScript</a
-                      >
-                      <a href="#" class="mx4" @click="resetTestFields()"
-                        >ResetFields</a
-                      >
-                      <a href="#" class="ml4" @click="saveTestRule()"
-                        >SaveRule</a
-                      >
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div v-if="isTabActive('Tester')" class="df fdc">
-                <div class="df fdr pp-4 bt bb fwb">
-                  <div class="f1">Test Results -</div>
-                  <a href="#" @click="toggleTestResults"
-                    >{{ showTestResults ? 'Collapse' : 'Expand' }}</a
-                  >
-                </div>
-                <div
-                  class="hp-300 pr"
-                  :class="{'dib': showTestResults, 'dn': !showTestResults}"
-                >
-                  <div class="df fdc w-100 h-100">
-                    <div class="bb pp-4">
-                      Page Type : {{ test_result_page_type }}
-                    </div>
-                    <div class="f1 pr">
-                      <div
-                        class="pa pp-4 w-100 h-100 oya ust"
-                        v-html="test_result_content"
-                      ></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- testing tab end -->
-            </div>
-          </div>
-          <div
-            class="slide bl4 w-0 ccr"
-            :class="{'df': showRenderer, 'dn': !showRenderer}"
-            slider="1"
-          >
-            &nbsp;
-          </div>
-          <div
-            class="wp-400 fdc"
-            :class="{'df': showRenderer, 'dn': !showRenderer}"
-            slider-targ="1"
-          >
-            <div class="df fdr pp-4 bb">
-              <div class="fwb f1">Renderer</div>
-              <a href="#" @click="openRendererDevTools()">OpenDevTools</a>
-            </div>
-            <webview
-              id="mainWebView"
-              :src="iframe_url"
-              class="w-100 h-100"
-              :class="{ 'pen': iframe_working }"
-            ></webview>
-          </div>
-        </div>
+      <div class="df fdr pp-4 bt">
+        <div class="fwb wsn">Status :</div>
+        <div class="wsn pl-4 toe oh">{{ status }}</div>
       </div>
     </div>
   </body>

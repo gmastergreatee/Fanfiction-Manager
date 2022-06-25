@@ -15,7 +15,8 @@ body {
   display: flex;
 }
 
-.dn {
+.dn,
+[v-cloak] {
   display: none;
 }
 
@@ -119,6 +120,10 @@ body {
   font-weight: bold;
 }
 
+.pl-4 {
+  padding-left: 4px;
+}
+
 .pp-2 {
   padding: 2px;
 }
@@ -198,7 +203,6 @@ pre {
   margin: 0;
 }
 
-
 ::-webkit-scrollbar {
   height: 12px;
   width: 12px;
@@ -213,4 +217,12 @@ pre {
 
 ::-webkit-scrollbar-corner {
   background: #e0e0e0;
+}
+
+.toe {
+  text-overflow: ellipsis;
+}
+
+.oh {
+  overflow: hidden;
 }
