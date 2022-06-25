@@ -48,13 +48,25 @@
           <div class="df f1 fdr">
             <div class="df fdc f1 oya pr">
               <div class="df fdc h-100 w-100 pa">
+                <!-- library part start -->
+
+                <div v-if="isTabActive('Library')" class="df fdc f1 w-100">
+                  Lib
+                </div>
+
+                <!-- library part end -->
+
                 <!-- rules page start -->
 
                 <div v-if="isTabActive('Rules')" class="df fdc f1 w-100">
                   <div v-for="r in rules" class="df fdr pp-4 mm-4 bt bl br bb">
                     <div class="df fdr f1">
-                      <div>{{ r.rule_name }}</div>
-                      <div class="f1 toe oh pl-4">-> {{ r.url_regex }}</div>
+                      <div class="pr-4">{{ r.rule_name }} -></div>
+                      <div class="df fdr f1 mr-10 pr">
+                        <div class="f1 pa w-100 h-100 wsn toe oh">
+                          {{ r.url_regex }}
+                        </div>
+                      </div>
                     </div>
                     <div>
                       <a href="#" @click="editRule(r)">Edit</a>
@@ -198,7 +210,7 @@
             </div>
 
             <!-- renderer code start -->
-            
+
             <div
               class="wp-400 fdc"
               :class="{'df': showRenderer, 'dn': !showRenderer}"
@@ -217,7 +229,6 @@
             </div>
 
             <!-- renderer code end -->
-            
           </div>
         </div>
       </div>

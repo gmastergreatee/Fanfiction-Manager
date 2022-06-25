@@ -125,11 +125,12 @@ app = new Vue({
     return {
       darkMode: true,
       rules: [],
+      loading_rules: true,
 
       //......... Main variables
       mainWebView: null,
       tabs: ["Library", "Rules", "Tester"],
-      activeTab: 0,
+      activeTab: 1,
       showIframe: true,
       showTestResults: true,
 
@@ -461,6 +462,7 @@ async function loadAllConfigs() {
     await createDir(configDirPath);
   }
   loadConfigData("rules");
+  app.loading_rules = false;
 }
 
 /**

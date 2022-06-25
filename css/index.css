@@ -120,6 +120,10 @@ body {
   padding-left: 4px;
 }
 
+.pr-4 {
+  padding-right: 4px;
+}
+
 .pp-2 {
   padding: 2px;
 }
@@ -163,6 +167,10 @@ body {
 .mx4,
 .ml4 {
   margin-left: 4px;
+}
+
+.mr-10 {
+  margin-right: 10px;
 }
 
 .mm-4,
