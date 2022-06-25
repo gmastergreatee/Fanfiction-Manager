@@ -2,6 +2,7 @@
   "liveServer.settings.ignoreFiles": [
     "**/node_modules/**",
     "config/**",
+    "data/**",
     ".vscode/**",
     "**/*.scss",
     "**/*.sass",

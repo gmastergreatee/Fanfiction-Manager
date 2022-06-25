@@ -3,6 +3,7 @@
 // Modules to control application life and create native browser window
 const { app, BrowserWindow, ipcMain, dialog, session } = require("electron");
 const path = require("path");
+var https = require("https");
 var http = require("http");
 const fs = require("fs");
 
@@ -129,7 +130,7 @@ function writeFile(e, filePath, contents) {
   fs.writeFileSync(filePath, contents);
 }
 
-async function pathExists(e, somePath) {
+function pathExists(e, somePath) {
   return fs.existsSync(somePath);
 }
 
@@ -143,33 +144,57 @@ async function rootDir() {
   return __dirname;
 }
 
-async function downloadFile(e, url, filePath) {
+async function downloadFile(e, url, filePath, index, callBackName) {
   let dirPath = path.dirname(filePath);
-  let dirPathExists = await pathExists(dirPath);
+  let dirPathExists = pathExists(null, dirPath);
   if (!dirPathExists) {
     createDirectory(null, dirPath);
   }
 
   var file = fs.createWriteStream(filePath);
-  http
-    .get(url, function (response) {
-      response.pipe(file);
-      file.on("finish", function () {
-        file.close(() => {
-          mainWindow.webContents.send(
-            "log-messager",
-            "File Downloaded -> " + url
-          );
-        }); // close() is async, call cb after close completes.
+  if (url.startsWith("https")) {
+    https
+      .get(url, function (response) {
+        response.pipe(file);
+        file.on("finish", function () {
+          file.end(() => {
+            mainWindow.webContents.send("globalCallBack", callBackName, {
+              index: index,
+              fileStatus: true,
+            });
+          });
+        });
+      })
+      .on("error", function (err) {
+        // Handle errors
+        fs.unlink(dest); // Delete the file async. (But we don't check the result)
+        mainWindow.webContents.send("globalCallBack", callBackName, {
+          index: index,
+          fileStatus: true,
+        });
       });
-    })
-    .on("error", function (err) {
-      // Handle errors
-      fs.unlink(dest); // Delete the file async. (But we don't check the result)
-      mainWindow.webContents.send(
-        "log-messager",
-        "Error downloading file -> " + url
-      );
-    });
+  } else {
+    http
+      .get(url, function (response) {
+        response.pipe(file);
+        file.on("finish", function () {
+          file.end(() => {
+            mainWindow.webContents.send(
+              "log-messager",
+              "File Downloaded -> " + url
+            );
+          });
+        });
+      })
+      .on("error", function (err) {
+        // Handle errors
+        fs.unlink(dest); // Delete the file async. (But we don't check the result)
+        mainWindow.webContents.send(
+          "log-messager",
+          "Error downloading file -> " + url,
+          err.message
+        );
+      });
+  }
 }
 //#endregion

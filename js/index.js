@@ -89,6 +89,8 @@ let configDirectoryPath = "/config/";
 let dataDirectoryPath = "/data/";
 let coverDirectoryPath = dataDirectoryPath + "covers/";
 
+let globalCallbacks = {};
+
 const simpleEvent = function (context) {
   if (context === void 0) {
     context = null;
@@ -113,6 +115,60 @@ const simpleEvent = function (context) {
     },
     clearAllListeners: function () {
       cbs.splice(0);
+    },
+  };
+};
+
+const fileDownloader = function (context) {
+  if (context === void 0) {
+    context = null;
+  }
+  var urlFileMaps = [];
+  var callBackName = null;
+  return {
+    addEntry: function (url, filePath) {
+      urlFileMaps.push({
+        url: url,
+        path: filePath,
+        done: false,
+      });
+    },
+    download: function (_callbackName = "file_0") {
+      if (urlFileMaps.length > 0) {
+        callBackName = _callbackName;
+        globalCallbacks[callBackName] = this.recurse;
+        log(
+          "[1/" + urlFileMaps.length + "] File Downloading",
+          urlFileMaps[0].url
+        );
+        downloadFile(urlFileMaps[0].url, urlFileMaps[0].path, 0, callBackName);
+      }
+    },
+    recurse: function (fileDownloadStatus) {
+      let index = fileDownloadStatus.index;
+      let fileStatus = fileDownloadStatus.fileStatus;
+
+      if (index != null && fileStatus != null) {
+        urlFileMaps[index].done = fileStatus;
+        if (!fileStatus) {
+          log("File Download Error", urlFileMaps[index].url);
+        }
+        index++;
+        if (index < urlFileMaps.length) {
+          log(
+            "[" + (index + 1) + "/" + urlFileMaps.length + "] File Downloading",
+            urlFileMaps[0].url
+          );
+          downloadFile(
+            urlFileMaps[index].url,
+            urlFileMaps[index].path,
+            index,
+            callBackName
+          );
+        } else {
+          log("All Files Downloaded");
+        }
+      }
     },
   };
 };
@@ -543,8 +599,11 @@ app = new Vue({
                 new URL(data.CoverURL);
                 let cover_file_name = data["GUID"] + ".png";
                 let cover_file_path =
-                  rootDir() + coverDirectoryPath + cover_file_name;
-                await downloadFile(data.CoverURL, cover_file_path);
+                  (await rootDir()) + coverDirectoryPath + cover_file_name;
+                let downloader = fileDownloader();
+                downloader.addEntry(data.CoverURL, cover_file_path);
+                downloader.download();
+                // await downloadFile(data.CoverURL, cover_file_path);
                 data.CoverURL = coverDirectoryPath + cover_file_name;
               } catch {
                 data.CoverURL = "";
@@ -725,9 +784,16 @@ async function saveConfigData(configFileName = "") {
 
 // -------- main to renderer
 
-window.electronAPI.log((event, text) => {
+window.electronAPI.log((event, text, more_text = "") => {
   if (text) {
-    log(text);
+    log(text, more_text);
+  }
+});
+
+window.electronAPI.callGlobalCallBack((event, callBackName, data) => {
+  let cb = globalCallbacks[callBackName];
+  if (cb) {
+    cb(data);
   }
 });
 
@@ -777,8 +843,8 @@ async function writeFile(filePath, contents) {
  * @param {string} url The URL of the file to download
  * @param {string} filePath Download destination filepath
  */
-async function downloadFile(url, filePath) {
-  await window.electronAPI.downloadFile(url, filePath);
+async function downloadFile(url, filePath, index = 0, callBackName = null) {
+  await window.electronAPI.downloadFile(url, filePath, index, callBackName);
 }
 
 /**

@@ -14,11 +14,12 @@ contextBridge.exposeInMainWorld("electronAPI", {
   readFile: (filePath) => ipcRenderer.invoke("file-read", filePath),
   writeFile: (filePath, contents) =>
     ipcRenderer.invoke("file-write", filePath, contents),
-  downloadFile: (url, filePath) =>
-    ipcRenderer.invoke("file-download", url, filePath),
+  downloadFile: (url, filePath, index, cb) =>
+    ipcRenderer.invoke("file-download", url, filePath, index, cb),
   pathExists: (somePath) => ipcRenderer.invoke("path-exists", somePath),
   deletePath: (somePath) => ipcRenderer.invoke("path-delete", somePath),
 
   // --- main to renderer
   log: (callback) => ipcRenderer.on("log-message", callback),
+  callGlobalCallBack: (callback) => ipcRenderer.on("globalCallBack", callback),
 });
