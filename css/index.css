@@ -72,10 +72,6 @@ body {
   width: 400px;
 }
 
-.mh70p {
-  max-height: 70vh;
-}
-
 .hp-200 {
   height: 200px;
 }
@@ -152,20 +148,24 @@ body {
   cursor: pointer;
 }
 
+.mm-4,
 .mt4 {
   margin-top: 4px;
 }
 
+.mm-4,
 .mx4,
 .mr4 {
   margin-right: 4px;
 }
 
+.mm-4,
 .mx4,
 .ml4 {
   margin-left: 4px;
 }
 
+.mm-4,
 .mb4 {
   margin-bottom: 4px;
 }
@@ -225,4 +225,8 @@ pre {
 
 .oh {
   overflow: hidden;
+}
+
+.cr {
+  color: red;
 }

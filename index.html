@@ -13,7 +13,10 @@
     <div id="main" class="df h-100 w-100 fdc" v-cloak>
       <div class="df f1 w-100">
         <link v-if="darkMode" rel="stylesheet" href="./css/dark.css" />
-        <div class="df fdc br wp-200">
+        <div
+          class="fdc br wp-200"
+          :class="{ 'df': showSideBar, 'dn': !showSideBar }"
+        >
           <div class="dib bb tac fwb pp-4">ND_v3</div>
           <div class="df fdc">
             <div
@@ -45,6 +48,26 @@
           <div class="df f1 fdr">
             <div class="df fdc f1 oya pr">
               <div class="df fdc h-100 w-100 pa">
+                <!-- rules page start -->
+
+                <div v-if="isTabActive('Rules')" class="df fdc f1 w-100">
+                  <div v-for="r in rules" class="df fdr pp-4 mm-4 bt bl br bb">
+                    <div class="df fdr f1">
+                      <div>{{ r.rule_name }}</div>
+                      <div class="f1 toe oh pl-4">-> {{ r.url_regex }}</div>
+                    </div>
+                    <div>
+                      <a href="#" @click="editRule(r)">Edit</a>
+                      <a href="#" @click="deleteRule($event, r)">Delete</a>
+                    </div>
+                  </div>
+                  <div v-if="rules.length == 0" class="df f1 fdr jcc aic">
+                    No rules added yet
+                  </div>
+                </div>
+
+                <!-- rules page end -->
+
                 <!-- testing tab start -->
                 <div v-if="isTabActive('Tester')" class="df fdc f1 w-100">
                   <div class="f1 oya pr">
@@ -85,7 +108,7 @@
                           <textarea
                             class="pp-2 f1 hp-200 rn wsn"
                             v-model="test_pagetype_code"
-                            placeholder="JavaScript code to determine is the page is TOC or Chapter page&#10;&#10;Return type should be number(int) -&#10;&#10;-1 for Captcha&#10; 0 for TOC&#10; 1 for Chapter"
+                            placeholder="JavaScript code to determine is the page is TOC or Chapter page&#10;&#10;Return type should be number(int) -&#10;&#10;-2 for Manual-Captcha&#10;-1 for Auto-Captcha&#10; 0 for TOC&#10;&#10;Returning anything else will be treated as UNKNOWN"
                             spellcheck="false"
                           ></textarea>
                         </div>
@@ -123,8 +146,15 @@
                           <a href="#" class="mx4" @click="resetTestFields()"
                             >ResetFields</a
                           >
-                          <a href="#" class="ml4" @click="saveTestRule()"
+                          <a href="#" class="mx4" @click="saveTestRule()"
                             >SaveRule</a
+                          >
+                          <a
+                            v-if="test_rule_guid.length > 0"
+                            href="#"
+                            class="ml4"
+                            @click="goBackFromEditRule()"
+                            >Back</a
                           >
                         </div>
                       </div>
@@ -160,12 +190,15 @@
               </div>
             </div>
             <div
-              class="slide bl4 w-0 ccr"
+              class="slide bl w-0"
               :class="{'df': showRenderer, 'dn': !showRenderer}"
               slider="1"
             >
               &nbsp;
             </div>
+
+            <!-- renderer code start -->
+            
             <div
               class="wp-400 fdc"
               :class="{'df': showRenderer, 'dn': !showRenderer}"
@@ -182,6 +215,9 @@
                 :class="{ 'pen': iframe_working }"
               ></webview>
             </div>
+
+            <!-- renderer code end -->
+            
           </div>
         </div>
       </div>

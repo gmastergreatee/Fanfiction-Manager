@@ -1,5 +1,6 @@
 [
     {
+        "guid": "af121d85-7b7e-42f4-aa7e-1a6a7eb145aa",
         "rule_name": "Fanfiction.net",
         "url_regex": "(?:https://)*(?:www|m).fanfiction.net/([a-z]+)/([0-9]+)/([0-9]+)/([a-zA-Z0-9-]+)",
         "pagetype_code": "if (document.querySelector('#cf-wrapper #cookie-alert'))\n    return -2;\nif (document.querySelector('.cf-browser-verification.cf-im-under-attack'))\n    return -1;\nif (document.querySelector('#chap_select'))\n    return 0;\nreturn -3;",

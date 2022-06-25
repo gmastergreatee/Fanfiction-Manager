@@ -108,12 +108,16 @@ app = new Vue({
     this.mainWebView = document.getElementById("mainWebView");
 
     this.mainWebView.addEventListener("did-start-loading", () => {
-      this.iframe_working = true;
-      log("Loading url...", this.iframe_url);
+      if (!this.iframe_url.endsWith(dummyPageUrl)) {
+        this.iframe_working = true;
+        log("Loading url...", this.iframe_url);
+      }
     });
     this.mainWebView.addEventListener("did-stop-loading", () => {
-      this.iframe_working = false;
-      log("Url loaded", this.mainWebView.getURL());
+      if (!this.mainWebView.getURL().endsWith(dummyPageUrl)) {
+        this.iframe_working = false;
+        log("Url loaded", this.mainWebView.getURL());
+      }
       onMainWebViewLoadedEvent.trigger();
     });
   },
@@ -125,12 +129,13 @@ app = new Vue({
       //......... Main variables
       mainWebView: null,
       tabs: ["Library", "Rules", "Tester"],
-      activeTab: 2,
+      activeTab: 0,
       showIframe: true,
       showTestResults: true,
 
       //......... tester related
 
+      test_rule_guid: "",
       test_url: "",
       test_rule_name: "",
       test_url_regex: "",
@@ -138,7 +143,7 @@ app = new Vue({
       test_toc_code: default_TOC_Code,
       test_chapter_code: default_Chapter_Code,
 
-      test_result_page_type: "NA",
+      test_result_page_type: "UNKNOWN",
       test_result_content: "",
 
       //.........
@@ -156,22 +161,76 @@ app = new Vue({
       return this.tabs[this.activeTab] == tabName;
     },
     setActiveTab(tabIndex = 0) {
-      this.activeTab = tabIndex;
+      if (this.activeTab != tabIndex) {
+        this.activeTab = tabIndex;
+        switch (this.activeTab) {
+          case 0:
+            this.showIframe = false;
+            break;
+          case 2:
+            this.showIframe = true;
+            this.showTestResults = true;
+            break;
+          default:
+            break;
+        }
+      }
     },
     toggleRenderer() {
       this.showIframe = !this.showIframe;
     },
+    openRendererDevTools() {
+      try {
+        if (!this.mainWebView.isDevToolsOpened()) {
+          this.mainWebView.openDevTools();
+        } else {
+          this.mainWebView.closeDevTools();
+        }
+      } catch {
+        window.electronAPI.msgBox(
+          "Please load an URL before opening DevTools",
+          appName
+        );
+      }
+    },
+    //#region Rules Related
+    getEvaluateJavascriptCode(script = "") {
+      return "(function(){" + script + "})()";
+    },
     toggleTestResults() {
       this.showTestResults = !this.showTestResults;
     },
-    resetTestFields() {
+    resetTestFields(clearGUID = false) {
+      if (clearGUID) {
+        this.test_rule_guid = "";
+      }
+
       if (!debugTestMode) {
-        this.test_rule_name = "";
-        this.test_url_regex = "";
-        this.test_url = "";
-        this.test_pagetype_code = "";
-        this.test_toc_code = default_TOC_Code;
-        this.test_chapter_code = default_Chapter_Code;
+        let r = {
+          rule_name: "",
+          url_regex: "",
+          pagetype_code: "",
+          toc_code: default_TOC_Code,
+          chapter_code: default_Chapter_Code,
+        };
+        if (this.test_rule_guid) {
+          let t_rule = this.rules.find((i) => i.guid == this.test_rule_guid);
+          if (t_rule) {
+            r = {
+              rule_name: t_rule.rule_name,
+              url_regex: t_rule.url_regex,
+              pagetype_code: t_rule.pagetype_code,
+              toc_code: t_rule.toc_code,
+              chapter_code: t_rule.chapter_code,
+            };
+          }
+        }
+        this.test_rule_name = r.rule_name;
+        this.test_url_regex = r.url_regex;
+        // this.test_url = "";
+        this.test_pagetype_code = r.pagetype_code;
+        this.test_toc_code = r.toc_code;
+        this.test_chapter_code = r.chapter_code;
       } else {
         let testRule = debugTestVals[debugTestIndex];
         this.test_rule_name = testRule.rule_name;
@@ -182,9 +241,11 @@ app = new Vue({
         this.test_chapter_code = testRule.chapter_code;
       }
       this.test_result_page_type = "UNKNOWN";
+      this.test_result_content = "";
 
       this.iframe_url = dummyPageUrl;
       this.iframe_working = false;
+      this.status = "NA";
     },
     loadTestURL() {
       if (this.test_url.trim() && this.iframe_working == false) {
@@ -207,28 +268,11 @@ app = new Vue({
         }
       }
     },
-    openRendererDevTools() {
-      try {
-        if (!this.mainWebView.isDevToolsOpened()) {
-          this.mainWebView.openDevTools();
-        } else {
-          this.mainWebView.closeDevTools();
-        }
-      } catch {
-        window.electronAPI.msgBox(
-          "Please load an URL before opening DevTools",
-          appName
-        );
-      }
-    },
-    evaluateJavascriptCode(script = "") {
-      return "(function(){" + script + "})()";
-    },
     async runTestPageTypeScript() {
       onMainWebViewLoadedEvent.removeListener(this.runTestPageTypeScript);
       try {
         let data = await this.mainWebView.executeJavaScript(
-          this.evaluateJavascriptCode(this.test_pagetype_code)
+          this.getEvaluateJavascriptCode(this.test_pagetype_code)
         );
         if (data || data == 0) {
           switch (data) {
@@ -254,7 +298,7 @@ app = new Vue({
       try {
         log("Running TOC Script...");
         let data = await this.mainWebView.executeJavaScript(
-          this.evaluateJavascriptCode(this.test_toc_code)
+          this.getEvaluateJavascriptCode(this.test_toc_code)
         );
         if (data) {
           this.test_result_content =
@@ -273,7 +317,7 @@ app = new Vue({
       try {
         log("Running Chapter Script...");
         let data = await this.mainWebView.executeJavaScript(
-          this.evaluateJavascriptCode(this.test_chapter_code)
+          this.getEvaluateJavascriptCode(this.test_chapter_code)
         );
         if (data && data.length > 0) {
           this.test_result_content = data[0].content;
@@ -288,16 +332,97 @@ app = new Vue({
       }
     },
     saveTestRule() {
-      this.rules.push({
-        rule_name: this.test_rule_name,
-        url_regex: this.test_url_regex,
-        pagetype_code: this.test_pagetype_code,
-        toc_code: this.test_toc_code,
-        chapter_code: this.test_chapter_code,
-      });
+      if (!this.test_rule_name.trim()) {
+        msgBox("Please enter a valid Rule-Name");
+        return;
+      }
+
+      if (!this.test_url_regex.trim()) {
+        msgBox("Please enter a valid URL-Regex");
+        return;
+      }
+
+      if (!this.test_pagetype_code.trim()) {
+        msgBox("Please provide PageType-Script");
+        return;
+      }
+
+      if (!this.test_toc_code.trim()) {
+        msgBox("Please provide TOC-Script");
+        return;
+      }
+
+      if (!this.test_chapter_code.trim()) {
+        msgBox("Please provide Chapter-Script");
+        return;
+      }
+
+      if (this.test_rule_guid) {
+        let t_rule = this.rules.find((i) => i.guid == this.test_rule_guid);
+        if (t_rule) {
+          t_rule.rule_name = this.test_rule_name;
+          t_rule.url_regex = this.test_url_regex;
+          t_rule.pagetype_code = this.test_pagetype_code;
+          t_rule.toc_code = this.test_toc_code;
+          t_rule.chapter_code = this.test_chapter_code;
+        } else {
+          this.rules.push({
+            guid: guid(),
+            rule_name: this.test_rule_name,
+            url_regex: this.test_url_regex,
+            pagetype_code: this.test_pagetype_code,
+            toc_code: this.test_toc_code,
+            chapter_code: this.test_chapter_code,
+          });
+        }
+      } else {
+        this.rules.push({
+          guid: guid(),
+          rule_name: this.test_rule_name,
+          url_regex: this.test_url_regex,
+          pagetype_code: this.test_pagetype_code,
+          toc_code: this.test_toc_code,
+          chapter_code: this.test_chapter_code,
+        });
+      }
       saveConfigData("rules");
-      this.resetTestFields();
+      this.goBackFromEditRule();
     },
+    editRule(r) {
+      this.test_rule_guid = r.guid;
+      this.test_rule_name = r.rule_name;
+      this.test_url_regex = r.url_regex;
+      this.test_pagetype_code = r.pagetype_code;
+      this.test_toc_code = r.toc_code;
+      this.test_chapter_code = r.chapter_code;
+
+      this.setActiveTab(2);
+    },
+    goBackFromEditRule() {
+      this.resetTestFields(true);
+      this.setActiveTab(1);
+    },
+    deleteRule(event, t_rule) {
+      let targ = event.target;
+      if (!targ.classList.contains("cr")) {
+        targ.innerHTML = "Seriously buddy?";
+        targ.classList.add("cr");
+
+        setTimeout(() => {
+          try {
+            targ.innerHTML = "Delete";
+            targ.classList.remove("cr");
+          } catch {}
+        }, 3000);
+      } else {
+        let t_rule_index = this.rules.indexOf(t_rule);
+        if (t_rule_index >= 0) {
+          this.rules.splice(t_rule_index, 1);
+          saveConfigData("rules");
+        }
+      }
+    },
+    //#endregion
   },
   computed: {
     showRenderer() {
@@ -305,6 +430,9 @@ app = new Vue({
     },
     activeTabStr() {
       return this.tabs[this.activeTab];
+    },
+    showSideBar() {
+      return this.test_rule_guid.length <= 0;
     },
   },
 });
