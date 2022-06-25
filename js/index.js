@@ -83,7 +83,7 @@ let default_Chapter_Code = `let retMe = [
 
 return retMe;`;
 
-let dummyPageUrl = "/dummy.html";
+let dummyPageUrl = "./dummy.html";
 
 let configDirectoryPath = "/config/";
 let dataDirectoryPath = "/data/";
@@ -166,6 +166,7 @@ const fileDownloader = function (context) {
             callBackName
           );
         } else {
+          globalCallbacks[callBackName] = null;
           log("All Files Downloaded");
         }
       }
@@ -174,10 +175,13 @@ const fileDownloader = function (context) {
 };
 
 let onMainWebViewLoadedEvent = simpleEvent();
+let rootDirectory = "";
 
 app = new Vue({
   el: "#main",
-  mounted() {
+  async mounted() {
+    rootDirectory = await rootDir();
+
     if (debugTestMode) {
       this.resetTestFields();
     }
@@ -222,7 +226,9 @@ app = new Vue({
 
       //......... Add Novel
 
+      toc_page_found_on_add_novel: false,
       add_novel_url: "",
+      detailing_novel: null,
 
       //......... tester related
 
@@ -509,15 +515,17 @@ app = new Vue({
       saveConfigData("rules");
       this.goBackFromEditRule();
     },
-    editRule(r) {
-      this.test_rule_guid = r.guid;
-      this.test_rule_name = r.rule_name;
-      this.test_url_regex = r.url_regex;
-      this.test_pagetype_code = r.pagetype_code;
-      this.test_toc_code = r.toc_code;
-      this.test_chapter_code = r.chapter_code;
+    editRule(t_rule) {
+      if (t_rule) {
+        this.test_rule_guid = t_rule.guid;
+        this.test_rule_name = t_rule.rule_name;
+        this.test_url_regex = t_rule.url_regex;
+        this.test_pagetype_code = t_rule.pagetype_code;
+        this.test_toc_code = t_rule.toc_code;
+        this.test_chapter_code = t_rule.chapter_code;
 
-      this.setActiveTab(2);
+        this.setActiveTab(2);
+      }
     },
     goBackFromEditRule() {
       this.resetTestFields(true);
@@ -561,6 +569,15 @@ app = new Vue({
         return;
       }
 
+      let old_novel = this.novels.find(
+        (i) => i.URL.toLowerCase() == t_url.toLowerCase()
+      );
+      if (old_novel) {
+        msgBox("Novel already added");
+        this.add_novel_url = "";
+        return;
+      }
+
       try {
         new URL(t_url);
       } catch {
@@ -599,23 +616,24 @@ app = new Vue({
                 new URL(data.CoverURL);
                 let cover_file_name = data["GUID"] + ".png";
                 let cover_file_path =
-                  (await rootDir()) + coverDirectoryPath + cover_file_name;
+                  rootDirectory + coverDirectoryPath + cover_file_name;
                 let downloader = fileDownloader();
                 downloader.addEntry(data.CoverURL, cover_file_path);
                 downloader.download();
-                // await downloadFile(data.CoverURL, cover_file_path);
-                data.CoverURL = coverDirectoryPath + cover_file_name;
+                data.CoverURL = "." + coverDirectoryPath + cover_file_name;
               } catch {
                 data.CoverURL = "";
               }
             }
             data["URL"] = t_url;
             data["DownloadedCount"] = 0;
+            data["CheckUpdates"] = true;
             this.novels.unshift(data);
             saveConfigData("novels");
             log("TOC data retrieved");
             log("Added novel -> " + data.Title);
             this.add_novel_url = "";
+            this.iframe_url = dummyPageUrl;
           } else log("Error");
         } catch {
           log("Error");
@@ -625,6 +643,26 @@ app = new Vue({
 
       let onLoadCallback = async () => {
         try {
+          let curr_url = this.mainWebView.getURL();
+          if (!curr_url.includes(t_url)) {
+            log("URL changed, probably redirection");
+            log("Re-matching rule");
+            let t_rule_2 = null;
+            this.rules.every((el) => {
+              if (new RegExp(el.url_regex).test(t_url)) {
+                t_rule_2 = el;
+                return false;
+              }
+              return true;
+            });
+            if (!t_rule_2) {
+              log("No rules matched. Keeping original rule.");
+            } else {
+              t_rule = t_rule_2;
+              log("Rule applied -> " + t_rule.rule_name);
+            }
+          }
+
           log("Checking page-type...");
           let data = await this.mainWebView.executeJavaScript(
             this.getEvaluateJavascriptCode(t_rule.pagetype_code)
@@ -632,9 +670,12 @@ app = new Vue({
           if (data || data == 0) {
             switch (data) {
               case 0:
-                onMainWebViewLoadedEvent.clearAllListeners();
-                log("TOC page found");
-                await onTOCPageConfirmed();
+                if (!this.toc_page_found_on_add_novel) {
+                  this.toc_page_found_on_add_novel = true;
+                  onMainWebViewLoadedEvent.clearAllListeners();
+                  log("TOC page found");
+                  await onTOCPageConfirmed();
+                }
                 break;
               case -1:
               case -2:
@@ -653,6 +694,7 @@ app = new Vue({
         }
       };
 
+      this.toc_page_found_on_add_novel = false;
       onMainWebViewLoadedEvent.clearAllListeners();
       onMainWebViewLoadedEvent.addListener(onLoadCallback);
       if (t_url != this.iframe_url) {
@@ -665,7 +707,7 @@ app = new Vue({
         }
       }
     },
-    deleteNovel(event, index = -1) {
+    async deleteNovel(event, index = -1) {
       if (index >= 0) {
         let targ = event.target;
         if (!targ.classList.contains("cr")) {
@@ -683,11 +725,39 @@ app = new Vue({
             targ.innerHTML = "Delete";
             targ.classList.remove("cr");
           } catch {}
+          let t_novel = this.novels[index];
+          let cover_url_from_root_path = t_novel.CoverURL.replace(/^\.+/, "");
+          if (cover_url_from_root_path) {
+            pathExists(rootDirectory + cover_url_from_root_path).then(
+              async (e) => {
+                if (e) {
+                  await deletePath(rootDirectory + cover_url_from_root_path);
+                }
+              }
+            );
+          }
           if (this.novels.splice(index, 1).length > 0) {
             saveConfigData("novels");
           }
         }
       }
+    },
+    isDetailingMode(t_novel) {
+      if (!this.detailing_novel) return false;
+      if (this.detailing_novel.GUID == t_novel.GUID) return true;
+      return false;
+    },
+    viewNovelDetails(t_novel) {
+      this.detailing_novel = t_novel;
+    },
+    hideNovelDetails() {
+      this.detailing_novel = null;
+    },
+    async saveNovelDatas(closeDetailView = false) {
+      if (closeDetailView) {
+        this.detailing_novel = null;
+      }
+      await saveConfigData("novels");
     },
     //#endregion
   },
@@ -725,7 +795,7 @@ function log(text = "", more_text = "") {
 }
 
 async function loadAllConfigs() {
-  let root = await rootDir();
+  let root = rootDirectory;
   let configDirPath = root + "/config";
   let configDirPresent = await pathExists(configDirPath);
   if (!configDirPresent) {
@@ -753,7 +823,7 @@ function guid() {
 
 async function loadConfigData(configFileName = "") {
   if (configFileName.trim()) {
-    let root = await rootDir();
+    let root = rootDirectory;
     let configFilePath = root + configDirectoryPath + configFileName + ".json";
     let configFilePresent = await pathExists(configFilePath);
     if (configFilePresent) {
@@ -771,7 +841,7 @@ async function loadConfigData(configFileName = "") {
 
 async function saveConfigData(configFileName = "") {
   if (configFileName.trim()) {
-    let root = await rootDir();
+    let root = rootDirectory;
     let configFilePath = root + configDirectoryPath + configFileName + ".json";
     if (app[configFileName] != null) {
       await writeFile(
@@ -843,8 +913,18 @@ async function writeFile(filePath, contents) {
  * @param {string} url The URL of the file to download
  * @param {string} filePath Download destination filepath
  */
-async function downloadFile(url, filePath, index = 0, callBackName = null) {
-  await window.electronAPI.downloadFile(url, filePath, index, callBackName);
+async function downloadFile(
+  url,
+  filePath,
+  index = 0,
+  globalCallBackName = null
+) {
+  await window.electronAPI.downloadFile(
+    url,
+    filePath,
+    index,
+    globalCallBackName
+  );
 }
 
 /**

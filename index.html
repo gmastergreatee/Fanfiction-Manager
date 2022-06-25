@@ -53,10 +53,13 @@
                         {{ n.Summary }}
                       </div>
                       <div class="bt mt-4 pt-4 df fdr jce">
-                        <a href="#" class="mx-4" :class="{'disabled': iframe_working}">UpdateInfo</a>
+                        <a href="#" class="mx-4" :class="{'disabled': iframe_working}"
+                          @click="viewNovelDetails(n)">Details</a>
                         <a href="#" class="mx-4"
-                          :class="{'disabled': iframe_working, 'dn': n.ChapterCount <= n.DownloadedCount}">Download</a>
-                        <a href="#" class="ml-4" :class="{'disabled': iframe_working}"
+                          :class="{'disabled': iframe_working || isDetailingMode(n)}">UpdateInfo</a>
+                        <a href="#" class="mx-4"
+                          :class="{'disabled': iframe_working || isDetailingMode(n), 'dn': n.ChapterCount <= n.DownloadedCount}">Download</a>
+                        <a href="#" class="ml-4" :class="{'disabled': iframe_working || isDetailingMode(n)}"
                           @click="deleteNovel($event,i)">Delete</a>
                       </div>
                     </div>
@@ -65,11 +68,48 @@
                     {{loading_novels ? '!~~~ Loading Novels ~~~!' : 'No novels added yet' }}
                   </div>
                 </div>
+                <div v-if="detailing_novel" class="df fdc hp-300">
+                  <div class="df fdr bt p-4">
+                    <div class="f1">Details</div>
+                    <a href="#" @click="saveNovelDatas(true)" class="mx-4">Save&Close</a>
+                    <a href="#" @click="hideNovelDetails()" class="ml-4">Close</a>
+                  </div>
+                  <div class="f1 bt pr">
+                    <div class="df fdc pa w-100 h-100 oya">
+                      <table class="w-100 p-4">
+                        <tr>
+                          <td class="wp-1">URL</td>
+                          <td>
+                            <input type="text" v-model="detailing_novel.URL" class="w-100">
+                          </td>
+                        </tr>
+                        <tr>
+                          <td class="wp-1">CoverURL</td>
+                          <td>
+                            <input type="text" v-model="detailing_novel.CoverURL" class="w-100">
+                          </td>
+                        </tr>
+                        <tr>
+                          <td class="wp-1">Title</td>
+                          <td>
+                            <input type="text" v-model="detailing_novel.Title" class="w-100">
+                          </td>
+                        </tr>
+                        <tr>
+                          <td class="wp-1 vat pt-4">Summary</td>
+                          <td>
+                            <textarea v-model="detailing_novel.Summary" class="w-100 hp-100 rn"></textarea>
+                          </td>
+                        </tr>
+                      </table>
+                    </div>
+                  </div>
+                </div>
                 <div class="df fdr p-4 bt">
                   <div class="f1">
                     <a href="#">Grid Layout</a>
                   </div>
-                  <a href="#" class="mx-4" :class="{'disabled': iframe_working}">Update All Info</a>
+                  <a href="#" class="mx-4" :class="{'disabled': iframe_working || detailing_novel}">Update All Info</a>
                   <a href="#" class="ml-4">Import Novel</a>
                 </div>
                 <div class="df bt fdr aic p-4">
