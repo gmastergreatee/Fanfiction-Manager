@@ -200,8 +200,8 @@ app = new Vue({
       tabs: ["Library", "Rules", "Tester"],
       activeTab: 0,
 
-      showWebPage: true,
-      showTestResults: true,
+      showWebPage: false,
+      showTestResults: false,
       showConsole: true,
 
       //......... Library
