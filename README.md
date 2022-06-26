@@ -5,7 +5,9 @@ Current Status: APLHA
 
 - Add new `Novel`
 - Download `Novel`
-- `Fanfiction.net` rule included
+- Rules included
+  - `Fanfiction.net`
+  - `Webnovel.com`
 - Rules editor
 - Novel `Reading Mode`
 - Novel details editor
