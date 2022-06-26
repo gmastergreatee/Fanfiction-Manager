@@ -84,6 +84,10 @@ let default_Chapter_Code = `let retMe = [
 
 return retMe;`;
 
+let debugReadingMode = true;
+
+// --------------------------------------------------------------------------------------------------------------------
+
 let dummyPageUrl = "./dummy.html";
 
 let configDirectoryPath = "/config/";
@@ -188,6 +192,29 @@ app = new Vue({
       this.resetTestFields();
     }
 
+    if (debugReadingMode) {
+      this.reading_mode = true;
+      this.r_novel = {
+        CoverURL: "./data/covers/7d466fe2-210a-4ce7-bd08-86ab4955e728.png",
+        Title: "Reincarnation Of Overlord",
+        Summary:
+          "What if Suzuki Satoru gets reincarnated in the new world. What will happen ? Will he take the path of Overlord ? Or will he create his own path ? (Being rewritten)",
+        ChapterCount: 5,
+        ChapterURLs: [
+          "https://www.fanfiction.net/s/13861458/1/Reincarnation-Of-Overlord",
+          "https://www.fanfiction.net/s/13861458/2/Reincarnation-Of-Overlord",
+          "https://www.fanfiction.net/s/13861458/3/Reincarnation-Of-Overlord",
+          "https://www.fanfiction.net/s/13861458/4/Reincarnation-Of-Overlord",
+          "https://www.fanfiction.net/s/13861458/5/Reincarnation-Of-Overlord",
+        ],
+        GUID: "7d466fe2-210a-4ce7-bd08-86ab4955e728",
+        URL: "https://www.fanfiction.net/s/13861458/1/Reincarnation-Of-Overlord",
+        DownloadedCount: 5,
+        CheckUpdates: true,
+      };
+      this.loadChapters();
+    }
+
     loadAllConfigs();
     this.mainWebView = document.getElementById("mainWebView");
     this.console = document.getElementById("web-console");
@@ -215,6 +242,13 @@ app = new Vue({
 
       novels: [],
       loading_novels: true,
+
+      //......... Reader
+      reading_mode: false,
+      r_novel: null,
+      loading_chapters: false,
+      r_chapters: [],
+      r_chapter_index: 0,
 
       //......... Main variables
       mainWebView: null,
@@ -851,6 +885,8 @@ app = new Vue({
 
       if (urls_to_download.length <= 0) {
         log("Already up to date");
+        t_novel.DownloadedCount = t_novel.ChapterCount;
+        saveConfigData("novels");
         this.iframe_working = false;
         return;
       }
@@ -1015,6 +1051,52 @@ app = new Vue({
       this.stop_download_update_novel = true;
     },
     //#endregion
+    //#region Reading Mode
+    enterReadingMode(t_novel) {
+      this.reading_mode = true;
+      this.r_novel = t_novel;
+      this.loadChapters();
+      document.title = this.r_novel.Title;
+    },
+    async loadChapters() {
+      this.loading_chapters = true;
+      this.r_chapters = [];
+      let chapter_urls = this.r_novel.ChapterURLs;
+      let novel_directory =
+        rootDirectory + novelDirectoryPath + this.r_novel.GUID + "/";
+      for (let i = 0; i < chapter_urls.length; i++) {
+        let chapter_file_name = novel_directory + (i + 1) + ".json";
+        let chapter_file_exist = await pathExists(chapter_file_name);
+        if (chapter_file_exist) {
+          let data = await readFile(chapter_file_name);
+          this.r_chapters.push(JSON.parse(data));
+        } else {
+          this.r_chapters.push(null);
+        }
+      }
+      this.loading_chapters = false;
+    },
+    getChapterName(index = 0) {
+      return this.r_chapters.length < index + 1
+        ? (index + 1).toString() +
+            ". " +
+            (this.loading_chapters ? "Loading" : "Not Downloaded")
+        : this.r_chapters[index].title
+        ? this.r_chapters[index].title
+        : "Chapter " + (index + 1).toString();
+    },
+    setReadingChapterIndex(index = 0) {
+      this.r_chapter_index = index;
+    },
+    exitReadingMode() {
+      this.reading_mode = false;
+      this.r_novel = null;
+      this.loading_chapters = false;
+      this.r_chapters = [];
+      this.r_chapter_index = 0;
+      document.title = appName;
+    },
+    //#endregion
   },
   computed: {
     showRenderer() {
@@ -1026,6 +1108,7 @@ app = new Vue({
     showSideBar() {
       return this.test_rule_guid.length <= 0;
     },
+    //#region Library
     getNovels() {
       return this.novels.filter(
         (i) =>
@@ -1034,6 +1117,28 @@ app = new Vue({
             : true) && (this.showCheckUpdatedOnly ? i.CheckUpdates : true)
       );
     },
+    //#endregion
+    //#region Reader
+    getSelectedChapterName() {
+      let index = this.r_chapter_index;
+      return this.r_chapters.length < index + 1
+        ? (index + 1).toString() +
+            ". " +
+            (this.loading_chapters ? "Loading" : "Not Downloaded")
+        : this.r_chapters[index].title
+        ? this.r_chapters[index].title
+        : "Chapter " + (index + 1).toString();
+    },
+    getSelectedChapterContent() {
+      if (this.r_chapters.length > this.r_chapter_index) {
+        return this.r_chapters[this.r_chapter_index].content;
+      } else if (this.loading_chapters) {
+        return "!~~~ Loading Chapter ~~~!";
+      } else {
+        return "!~~~ Page not downloaded yet ~~~!";
+      }
+    },
+    //#endregion
   },
 });
 

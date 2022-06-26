@@ -85,3 +85,9 @@ div.detailing {
   border-color: magenta;
   box-shadow: 0 0 20px 2px magenta;
 }
+
+div.chapter-active {
+  border-color: greenyellow;
+  box-shadow: 0 0 20px 1px greenyellow;
+  background-color: black;
+}
