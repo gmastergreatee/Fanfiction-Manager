@@ -45,7 +45,8 @@
               <div v-if="isTabActive('Library')" class="df fdc f1 w-100">
                 <div class="df f1 fdc pr">
                   <div class="df f1 fdc pa w-100 h-100 oya p-4">
-                    <div v-for="n in getNovels" class="m-4 bt bb bl br df fdc p-4">
+                    <div v-for="n in getNovels" class="m-4 bt bb bl br df fdc p-4"
+                      :class="{'detailing': isDetailingMode(n), 'new-updates': n.ChapterCount > n.DownloadedCount}">
                       <div class="f1">
                         {{ n.Title }} ({{ n.DownloadedCount }}/{{ n.ChapterCount }})
                       </div>
@@ -59,21 +60,22 @@
                         <a href="#" class="mx-4"
                           :class="{'disabled': iframe_working || isDetailingMode(n)}">UpdateInfo</a>
                         <a href="#" class="mx-4"
-                          :class="{'disabled': iframe_working || isDetailingMode(n), 'dn': n.ChapterCount <= n.DownloadedCount}">Download</a>
+                          :class="{'disabled': iframe_working || isDetailingMode(n), 'dn': n.ChapterCount <= n.DownloadedCount}"
+                          @click="downloadUpdateNovel(n)">Download</a>
                         <a href="#" class="ml-4" :class="{'disabled': iframe_working || isDetailingMode(n)}"
                           @click="deleteNovel($event,n)">Delete</a>
                       </div>
                     </div>
                   </div>
                   <div v-if="getNovels.length == 0" class="df fdr h-100 w-100 jcc aic">
-                    {{loading_novels ?
-                    '!~~~ Loading Novels ~~~!' :
+                    !~~~ {{loading_novels ?
+                    'Loading Novels' :
                     (
                     this.novels.length > 0 ?
                     'No novels for the filters applied' :
                     'No novels added yet'
                     )
-                    }}
+                    }} ~~~!
                   </div>
                 </div>
                 <div v-if="detailing_novel" class="df fdc hp-300">
@@ -121,14 +123,14 @@
                 </div>
                 <div class="df fdr p-4 bt">
                   <div class="f1">
-                    <a href="#">Grid Layout</a>
+                    <a href="#">GridLayout</a>
                     <a href="#" @click="toggleNewOnly()">{{ showNewOnly ? 'NewOnlyOff' : 'NewOnlyOn'}}</a>
                     <a href="#" @click="toggleCheckUpdatedOnly()">{{ showCheckUpdatedOnly ? 'CheckUpdatedOnlyOff' :
                       'CheckUpdatedOnlyOn'}}</a>
                   </div>
                   <div>
-                    <a href="#" :class="{'disabled': iframe_working || detailing_novel}">Update All Info</a>
-                    <a href="#">Import Novel</a>
+                    <a href="#" :class="{'disabled': iframe_working || detailing_novel}">UpdateAllInfo</a>
+                    <a href="#">ImportNovel</a>
                   </div>
                 </div>
                 <div class="df bt fdr aic p-4">

@@ -272,3 +272,21 @@ a.disabled {
 .vat {
   vertical-align: top;
 }
+
+div.new-updates {
+  border-color: lightgreen;
+  box-shadow: 0 0 20px 2px lightgreen;
+}
+
+div.updating,
+div.downloading {
+  z-index: 1;
+  border-color: chocolate;
+  box-shadow: 0 0 20px 2px chocolate;
+}
+
+div.detailing {
+  z-index: 2;
+  border-color: magenta;
+  box-shadow: 0 0 20px 2px magenta;
+}

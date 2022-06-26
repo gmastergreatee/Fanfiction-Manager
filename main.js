@@ -128,6 +128,16 @@ function deletePath(e, somePath) {
 }
 
 function writeFile(e, filePath, contents) {
+  let dirPath = path.dirname(filePath);
+  if (!fs.existsSync(dirPath)) {
+    try {
+      fs.mkdirSync(dirPath, {
+        recursive: true,
+      });
+    } catch {
+      return null;
+    }
+  }
   fs.writeFileSync(filePath, contents);
 }
 
