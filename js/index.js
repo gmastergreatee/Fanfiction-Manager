@@ -1,5 +1,5 @@
 let appName = "Novel Downloader v3";
-let verboseMode = true;
+let verboseMode = false;
 let debugTestMode = false;
 let debugTestIndex = 0;
 let debugTestVals = [

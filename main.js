@@ -17,7 +17,6 @@ const fs = require("fs");
 let mainWindow;
 
 process.env["ELECTRON_DISABLE_SECURITY_WARNINGS"] = "true";
-app.commandLine.appendSwitch('enable-features','SharedArrayBuffer');
 
 const createWindow = () => {
   // Create the browser window.
