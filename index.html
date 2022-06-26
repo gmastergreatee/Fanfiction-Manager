@@ -71,8 +71,8 @@
                 <div v-if="detailing_novel" class="df fdc hp-300">
                   <div class="df fdr bt p-4">
                     <div class="f1">Details</div>
-                    <a href="#" @click="saveNovelDatas(true)" class="mx-4">Save&Close</a>
-                    <a href="#" @click="hideNovelDetails()" class="ml-4">Close</a>
+                    <a href="#" @click="saveCloseNovelDetails()" class="mx-4">Save&Close</a>
+                    <a href="#" @click="discardNovelDetailsChanges()" class="ml-4">Discard</a>
                   </div>
                   <div class="f1 bt pr">
                     <div class="df fdc pa w-100 h-100 oya">

@@ -199,7 +199,9 @@ app = new Vue({
     this.mainWebView.addEventListener("did-stop-loading", () => {
       if (!this.mainWebView.getURL().endsWith(dummyPageUrl)) {
         this.iframe_working = false;
-        log("Url loaded", this.mainWebView.getURL());
+        let curr_url = this.mainWebView.getURL();
+        if (!curr_url.endsWith("dummy.html"))
+          log("Url loaded", this.mainWebView.getURL());
       }
       onMainWebViewLoadedEvent.trigger();
     });
@@ -228,6 +230,7 @@ app = new Vue({
 
       toc_page_found_on_add_novel: false,
       add_novel_url: "",
+      temp_detailing_novel: null,
       detailing_novel: null,
 
       //......... tester related
@@ -749,14 +752,19 @@ app = new Vue({
     },
     viewNovelDetails(t_novel) {
       this.detailing_novel = t_novel;
+      this.temp_detailing_novel = JSON.parse(JSON.stringify(t_novel));
     },
-    hideNovelDetails() {
+    discardNovelDetailsChanges() {
+      let novel_index = this.novels.indexOf(this.detailing_novel);
       this.detailing_novel = null;
+      this.novels[novel_index] = JSON.parse(
+        JSON.stringify(this.temp_detailing_novel)
+      );
+      this.temp_detailing_novel = null;
     },
-    async saveNovelDatas(closeDetailView = false) {
-      if (closeDetailView) {
-        this.detailing_novel = null;
-      }
+    async saveCloseNovelDetails() {
+      this.detailing_novel = null;
+      this.temp_detailing_novel = null;
       await saveConfigData("novels");
     },
     //#endregion
