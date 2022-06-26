@@ -1,64 +1,5 @@
 let appName = "Novel Downloader v3";
 let verboseMode = false;
-let debugTestMode = false;
-let debugTestIndex = 0;
-let debugTestVals = [
-  {
-    rule_name: "Fanfiction.net",
-    test_url:
-      "https://www.fanfiction.net/s/13861458/1/Reincarnation-Of-Overlord",
-    url_regex:
-      "(?:https://)*(?:www|m).fanfiction.net/([a-z]+)/([0-9]+)/([0-9]+)/([a-zA-Z0-9-]+)",
-    page_type_code: `if (document.querySelector('#cf-wrapper #cookie-alert'))
-    return -2;
-if (document.querySelector('.cf-browser-verification.cf-im-under-attack'))
-    return -1;
-if (document.querySelector('#chap_select'))
-    return 0;
-return -3;`,
-    toc_code: `let retMe = {
-  'CoverURL': '',
-  'Title': 'novel name here',
-  'Summary': '',
-  'ChapterCount': 1,
-  'ChapterURLs': [],
-};
-
-let chaps = [];
-Array.from($('#chap_select').first().find('option')).forEach(el=>{
-    chaps.push(el.value);
-});
-
-let matches = new RegExp('(?:https://)*(?:www|m).fanfiction.net/([a-z]+)/([0-9]+)/([0-9]+)/([a-zA-Z0-9-]+)').exec(window.location.href);
-chaps.forEach(el => {
-    retMe.ChapterURLs.push([window.location.origin, matches[1], matches[2], el, matches[4]].join('/'));
-});
-
-retMe.ChapterCount = chaps.length;
-retMe.Title = $('#profile_top b').html();
-retMe.Summary = $('#profile_top div.xcontrast_txt').html();
-let cover_url = $('#profile_top .cimage')[0].src;
-if (cover_url) {
-    retMe.CoverURL = cover_url.substr(0, cover_url.length - 3) + '180/';
-}
-
-return retMe;`,
-    chapter_code: `let retMe = [
-  {
-    "title": "",    // title of chapter
-    "content": $('.storytext').html(),  // content
-    "nextURL": ""
-  },
-];
-
-let chap_select = document.getElementById('chap_select');
-if (chap_select != null) {
-    retMe[0].title = chap_select.options[chap_select.selectedIndex].text;
-}
-
-return retMe;`,
-  },
-];
 
 let default_TOC_Code = `let retMe = {
   'CoverURL': '',              // may be empty
@@ -187,10 +128,6 @@ app = new Vue({
   el: "#main",
   async mounted() {
     rootDirectory = await rootDir();
-
-    if (debugTestMode) {
-      this.resetTestFields();
-    }
 
     if (debugReadingMode) {
       this.reading_mode = true;
@@ -367,42 +304,34 @@ app = new Vue({
       }
 
       this.test_novel_toc_data = null;
+      
+      let r = {
+        rule_name: "",
+        url_regex: "",
+        pagetype_code: "",
+        toc_code: default_TOC_Code,
+        chapter_code: default_Chapter_Code,
+      };
 
-      if (!debugTestMode) {
-        let r = {
-          rule_name: "",
-          url_regex: "",
-          pagetype_code: "",
-          toc_code: default_TOC_Code,
-          chapter_code: default_Chapter_Code,
-        };
-        if (this.test_rule_guid) {
-          let t_rule = this.rules.find((i) => i.guid == this.test_rule_guid);
-          if (t_rule) {
-            r = {
-              rule_name: t_rule.rule_name,
-              url_regex: t_rule.url_regex,
-              pagetype_code: t_rule.pagetype_code,
-              toc_code: t_rule.toc_code,
-              chapter_code: t_rule.chapter_code,
-            };
-          }
+      if (this.test_rule_guid) {
+        let t_rule = this.rules.find((i) => i.guid == this.test_rule_guid);
+        if (t_rule) {
+          r = {
+            rule_name: t_rule.rule_name,
+            url_regex: t_rule.url_regex,
+            pagetype_code: t_rule.pagetype_code,
+            toc_code: t_rule.toc_code,
+            chapter_code: t_rule.chapter_code,
+          };
         }
-        this.test_rule_name = r.rule_name;
-        this.test_url_regex = r.url_regex;
-        // this.test_url = "";
-        this.test_pagetype_code = r.pagetype_code;
-        this.test_toc_code = r.toc_code;
-        this.test_chapter_code = r.chapter_code;
-      } else {
-        let testRule = debugTestVals[debugTestIndex];
-        this.test_rule_name = testRule.rule_name;
-        this.test_url_regex = testRule.url_regex;
-        this.test_url = testRule.test_url;
-        this.test_pagetype_code = testRule.page_type_code;
-        this.test_toc_code = testRule.toc_code;
-        this.test_chapter_code = testRule.chapter_code;
       }
+
+      this.test_rule_name = r.rule_name;
+      this.test_url_regex = r.url_regex;
+      // this.test_url = "";
+      this.test_pagetype_code = r.pagetype_code;
+      this.test_toc_code = r.toc_code;
+      this.test_chapter_code = r.chapter_code;
       this.test_result_page_type = "UNKNOWN";
       this.test_result_content = "";
 
@@ -973,7 +902,7 @@ app = new Vue({
           );
           let t_c_url = urls_to_download[curr_url_index];
           if (data && data.length > 0) {
-            let next_url = '';
+            let next_url = "";
             for (let i = 0; i < data.length; i++) {
               let chapter_file_path =
                 rootDirectory +
@@ -1004,7 +933,9 @@ app = new Vue({
                     t_novel.ChapterCount +
                     "] Downloading chapter..."
                 );
-                t_url = next_url ? next_url : urls_to_download[curr_url_index].url;
+                t_url = next_url
+                  ? next_url
+                  : urls_to_download[curr_url_index].url;
                 if (t_url != this.iframe_url) {
                   this.iframe_url = t_url;
                 } else {
