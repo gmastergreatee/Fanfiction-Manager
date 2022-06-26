@@ -304,7 +304,7 @@ app = new Vue({
       }
 
       this.test_novel_toc_data = null;
-      
+
       let r = {
         rule_name: "",
         url_regex: "",
@@ -1066,6 +1066,7 @@ app = new Vue({
     },
     setReadingChapterIndex(index = 0) {
       this.r_chapter_index = index;
+      document.getElementById("novel-reader").scrollTo(0, 0);
     },
     exitReadingMode() {
       this.reading_mode = false;

@@ -45,25 +45,29 @@
               <div v-if="isTabActive('Library')" class="df fdc f1 w-100">
                 <div class="df f1 fdc pr">
                   <div class="df f1 fdc pa w-100 h-100 oya p-4">
-                    <div v-for="n in getNovels" class="m-4 bt bb bl br df fdc p-4"
-                      :class="{'detailing': isDetailingMode(n), 'new-updates': n.ChapterCount > n.DownloadedCount, 'downloading': n == d_novel}">
+                    <div v-for="n in getNovels" class="m-4 bt bb bl br df fdc p-4" :class="{
+                        'detailing': isDetailingMode(n), 
+                        'new-updates': n.ChapterCount > n.DownloadedCount,
+                        'downloading': n == d_novel}">
                       <div class="f1">
                         {{ n.Title }} ({{ n.DownloadedCount }}/{{ n.ChapterCount }})
                       </div>
                       <div class="bt mt-4 pt-4"
-                        :class="{'dn': !n.Summary, 'summary-shrunk': summaryExpandedGUID != n.GUID}"
-                        v-html="n.Summary"></div>
+                        :class="{'dn': !n.Summary, 'summary-shrunk': summaryExpandedGUID != n.GUID}" v-html="n.Summary">
+                      </div>
                       <div class="bt mt-4 pt-4 df fdr">
                         <div class="f1">
-                          <a href="#" @click="setSummaryGUID(n.GUID)">{{ summaryExpandedGUID == n.GUID ? 'Shrink' : 'Expand' }}</a>
+                          <a href="#" @click="setSummaryGUID(n.GUID)">{{ summaryExpandedGUID == n.GUID ? 'Shrink' :
+                            'Expand' }}</a>
                         </div>
                         <div>
                           <a href="#" @click="enterReadingMode(n)">Read</a>
                           <a href="#" :class="{'disabled': iframe_working}" @click="viewNovelDetails(n)">Details</a>
                           <a href="#" :class="{'disabled': iframe_working || isDetailingMode(n)}">UpdateInfo</a>
-                          <a href="#"
-                            :class="{'disabled': iframe_working || isDetailingMode(n), 'dn': n.ChapterCount <= n.DownloadedCount}"
-                            @click="downloadUpdateNovel(n)">Download</a>
+                          <a href="#" :class="{
+                              'disabled': iframe_working || isDetailingMode(n),
+                               'dn': n.ChapterCount <= n.DownloadedCount
+                              }" @click="downloadUpdateNovel(n)">Download</a>
                           <a href="#" v-if="n == d_novel" class="cr" :class="{'disabled': stop_download_update_novel}"
                             @click="stopDownloadUpdateNovel()">{{
                             stop_download_update_novel ? 'Stopping' : 'Stop' }}</a>
@@ -309,7 +313,7 @@
             {{ getSelectedChapterName }}
           </div>
           <div class="f1 pr w-100">
-            <div class="fdc jcc aic f1 pa oya w-100 h-100 p-4"
+            <div id="novel-reader" class="fdc jcc aic f1 pa oya w-100 h-100 p-4"
               :class="{'dib': r_chapterIndex_loaded.length > r_chapter_index, 'df': r_chapterIndex_loaded.length <= r_chapter_index}"
               v-html="getSelectedChapterContent"></div>
           </div>

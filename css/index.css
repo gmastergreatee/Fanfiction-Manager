@@ -307,3 +307,14 @@ div.chapter-active {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+#novel-reader,
+#novel-reader * {
+  font-family: "Lucida Sans", "Lucida Sans Regular", "Lucida Grande",
+    "Lucida Sans Unicode", Geneva, Verdana, sans-serif;
+  font-size: 24px;
+}
+
+#novel-reader {
+  padding: 30px 50px;
+}

@@ -75,7 +75,7 @@ const createWindow = () => {
   });
 
   mainWindow.on("ready-to-show", () => {
-    mainWindow.show();
+    mainWindow.showInactive();
 
     session.defaultSession.webRequest.onBeforeRequest(
       // { urls: ["*://*./*"] },
