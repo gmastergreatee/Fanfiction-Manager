@@ -249,6 +249,7 @@ app = new Vue({
       loading_chapters: false,
       r_chapters: [],
       r_chapter_index: 0,
+      r_chapterIndex_loaded: [],
 
       //......... Main variables
       mainWebView: null,
@@ -1060,30 +1061,55 @@ app = new Vue({
     },
     async loadChapters() {
       this.loading_chapters = true;
-      this.r_chapters = [];
+      this.r_chapters = Array.apply(
+        null,
+        Array(this.r_novel.ChapterURLs.length)
+      ).fill(null);
+
       let chapter_urls = this.r_novel.ChapterURLs;
       let novel_directory =
         rootDirectory + novelDirectoryPath + this.r_novel.GUID + "/";
+      this.r_chapterIndex_loaded = [];
+
       for (let i = 0; i < chapter_urls.length; i++) {
-        let chapter_file_name = novel_directory + (i + 1) + ".json";
-        let chapter_file_exist = await pathExists(chapter_file_name);
-        if (chapter_file_exist) {
-          let data = await readFile(chapter_file_name);
-          this.r_chapters.push(JSON.parse(data));
-        } else {
-          this.r_chapters.push(null);
+        if (
+          this.r_chapter_index > i &&
+          !this.r_chapterIndex_loaded.includes(this.r_chapter_index)
+        ) {
+          if (this.r_chapters[this.r_chapter_index] == null) {
+            let chapter_file_name =
+              novel_directory + (this.r_chapter_index + 1) + ".json";
+            let chapter_file_exist = await pathExists(chapter_file_name);
+            if (chapter_file_exist) {
+              let data = await readFile(chapter_file_name);
+              this.r_chapters[this.r_chapter_index] = JSON.parse(data);
+            }
+            this.r_chapterIndex_loaded.push(this.r_chapter_index);
+          }
+        }
+        if (this.r_chapters[i] == null) {
+          let chapter_file_name = novel_directory + (i + 1) + ".json";
+          let chapter_file_exist = await pathExists(chapter_file_name);
+          if (chapter_file_exist) {
+            let data = await readFile(chapter_file_name);
+            Vue.set(this.r_chapters, i, JSON.parse(data));
+            this.r_chapterIndex_loaded.push(i);
+          }
         }
       }
       this.loading_chapters = false;
     },
     getChapterName(index = 0) {
-      return this.r_chapters.length < index + 1
-        ? (index + 1).toString() +
-            ". " +
-            (this.loading_chapters ? "Loading" : "Not Downloaded")
-        : this.r_chapters[index].title
-        ? this.r_chapters[index].title
-        : "Chapter " + (index + 1).toString();
+      let chapter = this.r_chapters[index];
+      if (!chapter) {
+        return this.loading_chapters ? "Loading" : "Not Downloaded";
+      }
+
+      if (chapter.title) {
+        return chapter.title;
+      }
+
+      return "Chapter " + (index + 1).toString();
     },
     setReadingChapterIndex(index = 0) {
       this.r_chapter_index = index;
@@ -1120,23 +1146,30 @@ app = new Vue({
     //#endregion
     //#region Reader
     getSelectedChapterName() {
-      let index = this.r_chapter_index;
-      return this.r_chapters.length < index + 1
-        ? (index + 1).toString() +
-            ". " +
-            (this.loading_chapters ? "Loading" : "Not Downloaded")
-        : this.r_chapters[index].title
-        ? this.r_chapters[index].title
-        : "Chapter " + (index + 1).toString();
+      let chapter = this.r_chapters[this.r_chapter_index];
+      if (!chapter) {
+        return this.loading_chapters ? "Loading" : "Not Downloaded";
+      }
+
+      if (chapter.title) {
+        return chapter.title;
+      }
+
+      return "Chapter " + (this.r_chapter_index + 1).toString();
     },
     getSelectedChapterContent() {
-      if (this.r_chapters.length > this.r_chapter_index) {
-        return this.r_chapters[this.r_chapter_index].content;
-      } else if (this.loading_chapters) {
-        return "!~~~ Loading Chapter ~~~!";
-      } else {
-        return "!~~~ Page not downloaded yet ~~~!";
+      let chapter = this.r_chapters[this.r_chapter_index];
+      if (!chapter) {
+        return this.loading_chapters
+          ? "!~~~ Loading Chapter ~~~!"
+          : "!~~~ Page not downloaded yet ~~~!";
       }
+
+      if (chapter.content) {
+        return chapter.content;
+      }
+
+      return "Oops! You shouldn't view this message. Report if you do. Submit the 'data' and 'config' folder too.";
     },
     //#endregion
   },

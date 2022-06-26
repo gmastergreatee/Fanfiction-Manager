@@ -284,7 +284,7 @@
     <div v-if="r_novel" class="fdc f1 w-100" :class="{'df': reading_mode, 'dn': !reading_mode}">
       <div class="df fdr fwb p-4 bb">
         <div class="f1">{{ r_novel.Title }}</div>
-        <div v-if="loading_chapters" class="mx-4">Loading...[{{ r_chapters.length }}/{{ r_novel.ChapterURLs.length }}]
+        <div v-if="loading_chapters" class="mx-4">Loading...[{{ r_chapterIndex_loaded.length }}/{{ r_novel.ChapterURLs.length }}]
         </div>
         <a href="#" class="mx-4" @click="toggleDarkMode()">SwitchTo{{ darkMode ? 'LightMode' : 'DarkMode' }}</a>
         <a href="#" class="ml-4" @click="exitReadingMode()">Back</a>
@@ -305,7 +305,7 @@
           </div>
           <div class="f1 pr w-100">
             <div class="fdc jcc aic f1 pa oya w-100 h-100 p-4"
-              :class="{'dib': r_chapters.length > r_chapter_index, 'df': r_chapters.length <= r_chapter_index}"
+              :class="{'dib': r_chapterIndex_loaded.length > r_chapter_index, 'df': r_chapterIndex_loaded.length <= r_chapter_index}"
               v-html="getSelectedChapterContent"></div>
           </div>
         </div>
