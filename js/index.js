@@ -1,5 +1,5 @@
 let appName = "Novel Downloader v3";
-let verboseMode = false;
+let verboseMode = true;
 let debugTestMode = false;
 let debugTestIndex = 0;
 let debugTestVals = [
@@ -221,14 +221,20 @@ app = new Vue({
 
     this.mainWebView.addEventListener("did-start-loading", () => {
       if (!this.iframe_url.endsWith(dummyPageUrl)) {
-        logVerbose("Loading url", this.iframe_url);
+        if (this.isTabActive("Tester")) {
+          log("Loading url", this.iframe_url);
+        } else logVerbose("Loading url", this.iframe_url);
       }
     });
-    this.mainWebView.addEventListener("did-stop-loading", () => {
+    this.mainWebView.addEventListener("dom-ready", () => {
+      this.mainWebView.stop();
       if (!this.mainWebView.getURL().endsWith(dummyPageUrl)) {
         let curr_url = this.mainWebView.getURL();
-        if (!curr_url.endsWith("dummy.html"))
-          logVerbose("Url loaded", this.mainWebView.getURL());
+        if (!curr_url.endsWith("dummy.html")) {
+          if (this.isTabActive("Tester")) {
+            log("Url loaded", this.mainWebView.getURL());
+          } else logVerbose("Url loaded", this.mainWebView.getURL());
+        }
       }
       onMainWebViewLoadedEvent.trigger();
     });
@@ -266,6 +272,7 @@ app = new Vue({
       showNewOnly: false,
       showCheckUpdatedOnly: false,
       showGridLayout: false,
+      summaryExpandedGUID: "",
 
       //......... Add Novel
 
@@ -346,7 +353,9 @@ app = new Vue({
       this.showConsole = !this.showConsole;
     },
     getEvaluateJavascriptCode(script = "") {
-      return "(function(){" + script + "})()";
+      let sleepCode =
+        "function sleep(ms) {return new Promise((resolve) => {setTimeout(resolve, ms);});}\n";
+      return "(async function(){" + sleepCode + script + "})()";
     },
     //#region Rules Related
     toggleTestResults() {
@@ -684,11 +693,11 @@ app = new Vue({
             this.novels.unshift(data);
             saveConfigData("novels");
             logVerbose("TOC data retrieved");
-            logVerbose("Added novel -> " + data.Title);
+            log("Added novel -> " + data.Title);
             this.add_novel_url = "";
             this.iframe_url = dummyPageUrl;
           } else log("Error");
-        } catch {
+        } catch (ex) {
           log("Error");
         }
         this.iframe_working = false;
@@ -821,6 +830,13 @@ app = new Vue({
     },
     toggleCheckUpdatedOnly() {
       this.showCheckUpdatedOnly = !this.showCheckUpdatedOnly;
+    },
+    setSummaryGUID(guid) {
+      if (this.summaryExpandedGUID != guid) {
+        this.summaryExpandedGUID = guid;
+      } else {
+        this.summaryExpandedGUID = "";
+      }
     },
     //#endregion
     //#region Downloader related
@@ -957,6 +973,7 @@ app = new Vue({
           );
           let t_c_url = urls_to_download[curr_url_index];
           if (data && data.length > 0) {
+            let next_url = '';
             for (let i = 0; i < data.length; i++) {
               let chapter_file_path =
                 rootDirectory +
@@ -966,8 +983,13 @@ app = new Vue({
                 ".json";
               await writeFile(
                 chapter_file_path,
-                JSON.stringify(data[i], null, 2)
+                JSON.stringify(
+                  { title: data[i].title, content: data[i].content },
+                  null,
+                  2
+                )
               );
+              next_url = data[i].nextURL;
             }
             curr_url_index += data.length;
             t_novel.DownloadedCount =
@@ -982,7 +1004,7 @@ app = new Vue({
                     t_novel.ChapterCount +
                     "] Downloading chapter..."
                 );
-                t_url = urls_to_download[curr_url_index].url;
+                t_url = next_url ? next_url : urls_to_download[curr_url_index].url;
                 if (t_url != this.iframe_url) {
                   this.iframe_url = t_url;
                 } else {
@@ -1019,7 +1041,7 @@ app = new Vue({
             this.d_novel = null;
             this.iframe_working = false;
           }
-        } catch {
+        } catch (ex) {
           log("File API Error");
           onMainWebViewLoadedEvent.clearAllListeners();
           this.d_novel = null;

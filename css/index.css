@@ -300,3 +300,10 @@ div.chapter-active {
   box-shadow: 0 0 20px 1px greenyellow;
   background-color: greenyellow;
 }
+
+.summary-shrunk {
+  max-height: 42px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

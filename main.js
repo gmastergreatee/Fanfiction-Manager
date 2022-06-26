@@ -1,7 +1,14 @@
 // main.js
 
 // Modules to control application life and create native browser window
-const { app, BrowserWindow, ipcMain, dialog, session } = require("electron");
+const {
+  app,
+  BrowserWindow,
+  ipcMain,
+  dialog,
+  session,
+  Menu,
+} = require("electron");
 const path = require("path");
 var https = require("https");
 var http = require("http");
@@ -10,6 +17,7 @@ const fs = require("fs");
 let mainWindow;
 
 process.env["ELECTRON_DISABLE_SECURITY_WARNINGS"] = "true";
+app.commandLine.appendSwitch('enable-features','SharedArrayBuffer');
 
 const createWindow = () => {
   // Create the browser window.
@@ -41,8 +49,35 @@ const createWindow = () => {
     }
   );
 
+  let selectionMenu = Menu.buildFromTemplate([
+    { role: "copy" },
+    { type: "separator" },
+    { role: "selectall" },
+  ]);
+
+  let inputMenu = Menu.buildFromTemplate([
+    // { role: "undo" },
+    // { role: "redo" },
+    // { type: "separator" },
+    { role: "cut" },
+    { role: "copy" },
+    { role: "paste" },
+    { type: "separator" },
+    { role: "selectall" },
+  ]);
+
+  mainWindow.webContents.on("context-menu", (e, props) => {
+    const { selectionText, isEditable } = props;
+    if (isEditable) {
+      inputMenu.popup();
+    } else if (selectionText && selectionText.trim() !== "") {
+      selectionMenu.popup();
+    }
+  });
+
   mainWindow.on("ready-to-show", () => {
     mainWindow.show();
+
     session.defaultSession.webRequest.onBeforeRequest(
       // { urls: ["*://*./*"] },
       function (details, callback) {
@@ -56,7 +91,7 @@ const createWindow = () => {
 
   // and load the index.html of the app.
   // mainWindow.loadURL("http://localhost:5500/index.html");
-  mainWindow.loadFile(path.join(__dirname, 'index.html'));
+  mainWindow.loadFile(path.join(__dirname, "index.html"));
 
   // Open the DevTools.
   // mainWindow.webContents.openDevTools();

@@ -50,23 +50,26 @@
                       <div class="f1">
                         {{ n.Title }} ({{ n.DownloadedCount }}/{{ n.ChapterCount }})
                       </div>
-                      <div class="bt mt-4 pt-4" :class="{'dn': !n.Summary}">
-                        {{ n.Summary }}
-                      </div>
-                      <div class="bt mt-4 pt-4 df fdr jce">
-                        <a href="#" class="mx-4" @click="enterReadingMode(n)">Read</a>
-                        <a href="#" class="mx-4" :class="{'disabled': iframe_working}"
-                          @click="viewNovelDetails(n)">Details</a>
-                        <a href="#" class="mx-4"
-                          :class="{'disabled': iframe_working || isDetailingMode(n)}">UpdateInfo</a>
-                        <a href="#" class="mx-4"
-                          :class="{'disabled': iframe_working || isDetailingMode(n), 'dn': n.ChapterCount <= n.DownloadedCount}"
-                          @click="downloadUpdateNovel(n)">Download</a>
-                        <a href="#" v-if="n == d_novel" class="mx-4 cr"
-                          :class="{'disabled': stop_download_update_novel}" @click="stopDownloadUpdateNovel()">{{
-                          stop_download_update_novel ? 'Stopping' : 'Stop' }}</a>
-                        <a href="#" class="ml-4" :class="{'disabled': iframe_working || isDetailingMode(n)}"
-                          @click="deleteNovel($event,n)">Delete</a>
+                      <div class="bt mt-4 pt-4"
+                        :class="{'dn': !n.Summary, 'summary-shrunk': summaryExpandedGUID != n.GUID}"
+                        v-html="n.Summary"></div>
+                      <div class="bt mt-4 pt-4 df fdr">
+                        <div class="f1">
+                          <a href="#" @click="setSummaryGUID(n.GUID)">{{ summaryExpandedGUID == n.GUID ? 'Shrink' : 'Expand' }}</a>
+                        </div>
+                        <div>
+                          <a href="#" @click="enterReadingMode(n)">Read</a>
+                          <a href="#" :class="{'disabled': iframe_working}" @click="viewNovelDetails(n)">Details</a>
+                          <a href="#" :class="{'disabled': iframe_working || isDetailingMode(n)}">UpdateInfo</a>
+                          <a href="#"
+                            :class="{'disabled': iframe_working || isDetailingMode(n), 'dn': n.ChapterCount <= n.DownloadedCount}"
+                            @click="downloadUpdateNovel(n)">Download</a>
+                          <a href="#" v-if="n == d_novel" class="cr" :class="{'disabled': stop_download_update_novel}"
+                            @click="stopDownloadUpdateNovel()">{{
+                            stop_download_update_novel ? 'Stopping' : 'Stop' }}</a>
+                          <a href="#" :class="{'disabled': iframe_working || isDetailingMode(n)}"
+                            @click="deleteNovel($event,n)">Delete</a>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -284,7 +287,8 @@
     <div v-if="r_novel" class="fdc f1 w-100" :class="{'df': reading_mode, 'dn': !reading_mode}">
       <div class="df fdr fwb p-4 bb">
         <div class="f1">{{ r_novel.Title }}</div>
-        <div v-if="loading_chapters" class="mx-4">Loading...[{{ r_chapterIndex_loaded.length }}/{{ r_novel.ChapterURLs.length }}]
+        <div v-if="loading_chapters" class="mx-4">Loading...[{{ r_chapterIndex_loaded.length }}/{{
+          r_novel.ChapterURLs.length }}]
         </div>
         <a href="#" class="mx-4" @click="toggleDarkMode()">SwitchTo{{ darkMode ? 'LightMode' : 'DarkMode' }}</a>
         <a href="#" class="ml-4" @click="exitReadingMode()">Back</a>
@@ -292,7 +296,8 @@
       <div class="df fdr f1">
         <div class="wp-200 h-100 pr">
           <div class="pa w-100 h-100 df fdc oya br">
-            <div v-for="(url,i) in r_novel.ChapterURLs" class="df fdr bt bb bl br m-4" :class="{'chapter-active': i == r_chapter_index}">
+            <div v-for="(url,i) in r_novel.ChapterURLs" class="df fdr bt bb bl br m-4"
+              :class="{'chapter-active': i == r_chapter_index}">
               <a :href="'#' + i" class="dib tdn toe wsn oh w-100 p-4" @click="setReadingChapterIndex(i)">
                 {{ getChapterName(i) }}
               </a>
