@@ -46,7 +46,7 @@
                 <div class="df f1 fdc pr">
                   <div class="df f1 fdc pa w-100 h-100 oya p-4">
                     <div v-for="n in getNovels" class="m-4 bt bb bl br df fdc p-4"
-                      :class="{'detailing': isDetailingMode(n), 'new-updates': n.ChapterCount > n.DownloadedCount}">
+                      :class="{'detailing': isDetailingMode(n), 'new-updates': n.ChapterCount > n.DownloadedCount, 'downloading': n == d_novel}">
                       <div class="f1">
                         {{ n.Title }} ({{ n.DownloadedCount }}/{{ n.ChapterCount }})
                       </div>
@@ -62,6 +62,9 @@
                         <a href="#" class="mx-4"
                           :class="{'disabled': iframe_working || isDetailingMode(n), 'dn': n.ChapterCount <= n.DownloadedCount}"
                           @click="downloadUpdateNovel(n)">Download</a>
+                        <a href="#" v-if="n == d_novel" class="mx-4 cr"
+                          :class="{'disabled': stop_download_update_novel}" @click="stopDownloadUpdateNovel()">{{
+                          stop_download_update_novel ? 'Stopping' : 'Stop' }}</a>
                         <a href="#" class="ml-4" :class="{'disabled': iframe_working || isDetailingMode(n)}"
                           @click="deleteNovel($event,n)">Delete</a>
                       </div>

@@ -1,4 +1,5 @@
 let appName = "Novel Downloader v3";
+let verboseMode = false;
 let debugTestMode = false;
 let debugTestIndex = 0;
 let debugTestVals = [
@@ -193,16 +194,14 @@ app = new Vue({
 
     this.mainWebView.addEventListener("did-start-loading", () => {
       if (!this.iframe_url.endsWith(dummyPageUrl)) {
-        this.iframe_working = true;
-        log("Loading url", this.iframe_url);
+        logVerbose("Loading url", this.iframe_url);
       }
     });
     this.mainWebView.addEventListener("did-stop-loading", () => {
       if (!this.mainWebView.getURL().endsWith(dummyPageUrl)) {
-        this.iframe_working = false;
         let curr_url = this.mainWebView.getURL();
         if (!curr_url.endsWith("dummy.html"))
-          log("Url loaded", this.mainWebView.getURL());
+          logVerbose("Url loaded", this.mainWebView.getURL());
       }
       onMainWebViewLoadedEvent.trigger();
     });
@@ -241,7 +240,8 @@ app = new Vue({
 
       //......... downloader
 
-      chapter_page_found_on_download_novel: false,
+      d_novel: null,
+      stop_download_update_novel: false,
 
       //......... tester related
 
@@ -595,8 +595,9 @@ app = new Vue({
         return;
       }
 
+      let t_url_origin = "";
       try {
-        new URL(t_url);
+        t_url_origin = new URL(t_url).origin;
       } catch {
         msgBox("Please enter a valid URL");
         this.iframe_working = false;
@@ -622,7 +623,7 @@ app = new Vue({
 
       let onTOCPageConfirmed = async () => {
         try {
-          log("Running TOC Script...");
+          logVerbose("Running TOC Script...");
           let data = await this.mainWebView.executeJavaScript(
             this.getEvaluateJavascriptCode(t_rule.toc_code)
           );
@@ -647,8 +648,8 @@ app = new Vue({
             data["CheckUpdates"] = true;
             this.novels.unshift(data);
             saveConfigData("novels");
-            log("TOC data retrieved");
-            log("Added novel -> " + data.Title);
+            logVerbose("TOC data retrieved");
+            logVerbose("Added novel -> " + data.Title);
             this.add_novel_url = "";
             this.iframe_url = dummyPageUrl;
           } else log("Error");
@@ -661,7 +662,7 @@ app = new Vue({
       let onLoadCallback = async () => {
         try {
           let curr_url = this.mainWebView.getURL();
-          if (!curr_url.includes(t_url)) {
+          if (!curr_url.includes(t_url_origin)) {
             log("URL changed, probably redirection");
             log("Re-matching rule");
             let t_rule_2 = null;
@@ -678,9 +679,10 @@ app = new Vue({
               t_rule = t_rule_2;
               log("Rule applied -> " + t_rule.rule_name);
             }
+            t_url_origin = new URL(curr_url).origin;
           }
 
-          log("Checking page-type...");
+          logVerbose("Checking page-type...");
           let data = await this.mainWebView.executeJavaScript(
             this.getEvaluateJavascriptCode(t_rule.pagetype_code)
           );
@@ -688,7 +690,7 @@ app = new Vue({
             switch (data) {
               case 0:
                 onMainWebViewLoadedEvent.clearAllListeners();
-                log("TOC page found");
+                logVerbose("TOC page found");
                 await onTOCPageConfirmed();
                 break;
               case -1:
@@ -853,6 +855,7 @@ app = new Vue({
         return;
       }
 
+      this.d_novel = t_novel;
       let curr_url_index = 0;
 
       let onLoadCallback = async () => {
@@ -878,7 +881,7 @@ app = new Vue({
             t_url_origin = new URL(curr_url).origin;
           }
 
-          log("Checking page-type...");
+          logVerbose("Checking page-type...");
           let data = await this.mainWebView.executeJavaScript(
             this.getEvaluateJavascriptCode(t_rule.pagetype_code)
           );
@@ -886,7 +889,7 @@ app = new Vue({
             let skipDownload = true;
             switch (data) {
               case 0:
-                log("TOC page found");
+                logVerbose("TOC page found");
                 skipDownload = false;
                 break;
               case -1:
@@ -897,6 +900,7 @@ app = new Vue({
               default:
                 log("Unknown page-type");
                 onMainWebViewLoadedEvent.clearAllListeners();
+                this.d_novel = null;
                 this.iframe_working = false;
             }
             if (skipDownload) {
@@ -905,11 +909,12 @@ app = new Vue({
           } else {
             log("Unknown page-type");
             onMainWebViewLoadedEvent.clearAllListeners();
+            this.d_novel = null;
             this.iframe_working = false;
             return;
           }
 
-          log("Running Chapter Script...");
+          logVerbose("Running Chapter Script...");
           data = await this.mainWebView.executeJavaScript(
             this.getEvaluateJavascriptCode(t_rule.chapter_code)
           );
@@ -928,22 +933,41 @@ app = new Vue({
               );
             }
             curr_url_index += data.length;
-            t_novel.DownloadedCount += data.length;
+            t_novel.DownloadedCount =
+              t_novel.ChapterCount - urls_to_download.length + curr_url_index;
             if (curr_url_index < urls_to_download.length) {
-              t_url = urls_to_download[curr_url_index].url;
-              if (t_url != this.iframe_url) {
-                this.iframe_url = t_url;
-              } else {
-                try {
-                  this.mainWebView.loadURL(t_url);
-                } catch {
-                  this.mainWebView.reload();
+              if (!this.stop_download_update_novel) {
+                log(
+                  "[" +
+                    (t_novel.ChapterCount -
+                      (urls_to_download.length - curr_url_index - 1)) +
+                    "/" +
+                    t_novel.ChapterCount +
+                    "] Downloading chapter..."
+                );
+                t_url = urls_to_download[curr_url_index].url;
+                if (t_url != this.iframe_url) {
+                  this.iframe_url = t_url;
+                } else {
+                  try {
+                    this.mainWebView.loadURL(t_url);
+                  } catch {
+                    this.mainWebView.reload();
+                  }
                 }
+              } else {
+                this.stop_download_update_novel = false;
+                saveConfigData("novels");
+                log("Downloading stopped");
+                onMainWebViewLoadedEvent.clearAllListeners();
+                this.d_novel = null;
+                this.iframe_working = false;
               }
             } else {
               saveConfigData("novels");
               log("All chapters downloaded");
               onMainWebViewLoadedEvent.clearAllListeners();
+              this.d_novel = null;
               this.iframe_working = false;
             }
           } else {
@@ -955,11 +979,13 @@ app = new Vue({
               data
             );
             onMainWebViewLoadedEvent.clearAllListeners();
+            this.d_novel = null;
             this.iframe_working = false;
           }
         } catch {
           log("File API Error");
           onMainWebViewLoadedEvent.clearAllListeners();
+          this.d_novel = null;
           this.iframe_working = false;
         }
       };
@@ -967,6 +993,14 @@ app = new Vue({
       t_url = urls_to_download[curr_url_index].url;
       onMainWebViewLoadedEvent.clearAllListeners();
       onMainWebViewLoadedEvent.addListener(onLoadCallback);
+      log(
+        "[" +
+          (t_novel.ChapterCount -
+            (urls_to_download.length - curr_url_index - 1)) +
+          "/" +
+          t_novel.ChapterCount +
+          "] Downloading chapter..."
+      );
       if (t_url != this.iframe_url) {
         this.iframe_url = t_url;
       } else {
@@ -976,6 +1010,9 @@ app = new Vue({
           this.mainWebView.reload();
         }
       }
+    },
+    stopDownloadUpdateNovel() {
+      this.stop_download_update_novel = true;
     },
     //#endregion
   },
@@ -1018,6 +1055,28 @@ function log(text = "", more_text = "") {
     app.console.textContent = app.console.textContent + text + "\r\n";
   }
   app.console.scrollTo(0, app.console.scrollHeight);
+}
+
+/**
+ * Changes the status text and logs to console when `verboseMode` is set to `true`
+ * @param {string} text The text to log
+ * @param {*} more_text Extra text to be displayed in the console only
+ */
+function logVerbose(text = "", more_text = "") {
+  if (verboseMode) {
+    if (app.status) {
+      app.status = text.trim();
+    }
+    if (more_text.trim().length > 0) {
+      console.log(text, "->", more_text);
+      app.console.textContent =
+        app.console.textContent + text + " -> " + more_text + "\r\n";
+    } else {
+      console.log(text);
+      app.console.textContent = app.console.textContent + text + "\r\n";
+    }
+    app.console.scrollTo(0, app.console.scrollHeight);
+  }
 }
 
 async function loadAllConfigs() {
