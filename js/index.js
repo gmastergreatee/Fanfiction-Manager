@@ -84,7 +84,7 @@ let default_Chapter_Code = `let retMe = [
 
 return retMe;`;
 
-let debugReadingMode = true;
+let debugReadingMode = false;
 
 // --------------------------------------------------------------------------------------------------------------------
 
