@@ -44,6 +44,11 @@ body {
   height: 100%;
 }
 
+.hwp20 {
+  height: 20px;
+  width: 20px;
+}
+
 .bl {
   border-left: 1px solid black;
 }

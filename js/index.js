@@ -227,6 +227,9 @@ app = new Vue({
       showTestResults: true,
       showConsole: true,
 
+      showNewOnly: false,
+      showCheckUpdatedOnly: false,
+
       //......... Add Novel
 
       toc_page_found_on_add_novel: false,
@@ -711,7 +714,8 @@ app = new Vue({
         }
       }
     },
-    async deleteNovel(event, index = -1) {
+    async deleteNovel(event, t_novel) {
+      let index = this.rules.indexOf(t_novel);
       if (index >= 0) {
         let targ = event.target;
         if (!targ.classList.contains("cr")) {
@@ -729,7 +733,6 @@ app = new Vue({
             targ.innerHTML = "Delete";
             targ.classList.remove("cr");
           } catch {}
-          let t_novel = this.novels[index];
           let cover_url_from_root_path = t_novel.CoverURL.replace(/^\.+/, "");
           if (cover_url_from_root_path) {
             pathExists(rootDirectory + cover_url_from_root_path).then(
@@ -758,8 +761,10 @@ app = new Vue({
     discardNovelDetailsChanges() {
       let novel_index = this.novels.indexOf(this.detailing_novel);
       this.detailing_novel = null;
-      this.novels[novel_index] = JSON.parse(
-        JSON.stringify(this.temp_detailing_novel)
+      Vue.set(
+        this.novels,
+        novel_index,
+        JSON.parse(JSON.stringify(this.temp_detailing_novel))
       );
       this.temp_detailing_novel = null;
     },
@@ -767,6 +772,12 @@ app = new Vue({
       this.detailing_novel = null;
       this.temp_detailing_novel = null;
       await saveConfigData("novels");
+    },
+    toggleNewOnly() {
+      this.showNewOnly = !this.showNewOnly;
+    },
+    toggleCheckUpdatedOnly() {
+      this.showCheckUpdatedOnly = !this.showCheckUpdatedOnly;
     },
     //#endregion
     //#region Downloader related
@@ -782,6 +793,14 @@ app = new Vue({
     },
     showSideBar() {
       return this.test_rule_guid.length <= 0;
+    },
+    getNovels() {
+      return this.novels.filter(
+        (i) =>
+          (this.showNewOnly
+            ? i.DownloadedCount < i.ChapterCount || i.ChapterCount <= 0
+            : true) && (this.showCheckUpdatedOnly ? i.CheckUpdates : true)
+      );
     },
   },
 });
