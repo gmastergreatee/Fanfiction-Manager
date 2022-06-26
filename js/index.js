@@ -88,6 +88,7 @@ let dummyPageUrl = "./dummy.html";
 let configDirectoryPath = "/config/";
 let dataDirectoryPath = "/data/";
 let coverDirectoryPath = dataDirectoryPath + "covers/";
+let novelDirectoryPath = dataDirectoryPath + "novels/";
 
 let globalCallbacks = {};
 
@@ -767,6 +768,9 @@ app = new Vue({
       this.temp_detailing_novel = null;
       await saveConfigData("novels");
     },
+    //#endregion
+    //#region Downloader related
+
     //#endregion
   },
   computed: {
