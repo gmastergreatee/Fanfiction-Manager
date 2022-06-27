@@ -737,6 +737,15 @@ app = new Vue({
       return false;
     },
     viewNovelDetails(t_novel) {
+      if (this.detailing_novel == t_novel) return;
+      if (this.detailing_novel && this.temp_detailing_novel) {
+        let novel_index = this.novels.indexOf(this.detailing_novel);
+        Vue.set(
+          this.novels,
+          novel_index,
+          JSON.parse(JSON.stringify(this.temp_detailing_novel))
+        );
+      }
       this.detailing_novel = t_novel;
       this.temp_detailing_novel = JSON.parse(JSON.stringify(t_novel));
     },
