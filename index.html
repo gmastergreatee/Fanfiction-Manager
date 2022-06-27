@@ -208,20 +208,26 @@
                       </div>
                       <div class="df fdr mb-4">
                         <label class="mr-4 mt-4">Page Type :</label>
-                        <textarea class="p-2 f1 hp-200 rn wsn" v-model="test_pagetype_code"
+                        <textarea class="p-2 f1 hp-200 wsn oyh rn" v-model="test_pagetype_code"
                           placeholder="JavaScript code to determine is the page is TOC or Chapter page&#10;&#10;Return type should be number(int) -&#10;&#10;-2 for Manual-Captcha&#10;-1 for Auto-Captcha&#10; 0 for TOC&#10;&#10;Returning anything else will be treated as UNKNOWN"
+                          onfocus="this.style.height = '';this.style.height = this.scrollHeight + 15 + 'px';"
+                          oninput="this.style.height = '';this.style.height = this.scrollHeight + 15 + 'px';"
                           spellcheck="false"></textarea>
                       </div>
                       <div class="df fdr mb-4">
                         <label class="mr-4 mt-4">TOCScript :</label>
-                        <textarea class="p-2 f1 hp-200 rn wsn" v-model="test_toc_code"
+                        <textarea class="p-2 f1 hp-200 wsn oyh rn" v-model="test_toc_code"
                           placeholder="JavaScript code to get content from TOC page&#10;&#10;Return type should be JSON & must contain the following JSON nodes -&#10;&#10;{&#10;    'CoverURL': ''              // may be empty&#10;    'Title': 'novel name here',&#10;    'Summary': '',              // may be empty&#10;    'ChapterCount': 1,          // chapter count here&#10;    'ChapterURLs': [            // list of chapter-URLs&#10;        '', // must contain atleast the first chapter URL&#10;        '',&#10;    ],&#10;}&#10;&#10;This object will be passed as 'ndata' to the Ch-Script"
+                          onfocus="this.style.height = '';this.style.height = this.scrollHeight + 15 + 'px';"
+                          oninput="this.style.height = '';this.style.height = this.scrollHeight + 15 + 'px';"
                           spellcheck="false"></textarea>
                       </div>
                       <div class="df fdr mb-4">
                         <label class="mr-4 mt-4">Ch-Script :</label>
-                        <textarea class="p-2 f1 hp-200 rn wsn" v-model="test_chapter_code"
+                        <textarea class="p-2 f1 hp-200 wsn oyh rn" v-model="test_chapter_code"
                           placeholder="JavaScript code to get content from Chapter page.&#10;Can be one or multiple chapters at once.&#10;&#10;Return type should be JSON in the following format -&#10;&#10;[&#10;    {&#10;        'title': '',&#10;        'content': '',&#10;        'nextURL': ''&#10;    },&#10;]&#10;&#10;'nextURL' will be used in case it is non-empty"
+                          onfocus="this.style.height = '';this.style.height = this.scrollHeight + 15 + 'px';"
+                          oninput="this.style.height = '';this.style.height = this.scrollHeight + 15 + 'px';"
                           spellcheck="false"></textarea>
                       </div>
                       <div class="df fdr jce fwb fww">

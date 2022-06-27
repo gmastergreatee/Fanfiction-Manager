@@ -161,6 +161,10 @@ body {
   overflow-y: auto;
 }
 
+.oyh {
+  overflow-y: hidden;
+}
+
 .ccr {
   cursor: col-resize;
 }
