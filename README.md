@@ -20,9 +20,9 @@ Current Status: __APLHA__
 
 ---
 
-### Known Issues / Not Implemented Yet
+### Known Issues
 - [WIP] No `Update Novel` option yet
-- [NYI] Multiple utility `buttons`'s do not work -> NYI
+- [NYI] Multiple utility `buttons`'s do not work
 - [NYI] Download next `Chapter` using `nextURL` when `ChapterCount` is <= 0
   - Although, the case is possible, but currently, no known website requires this.
     - Further testing required.
@@ -56,7 +56,7 @@ Current Status: __APLHA__
   - Table Of Contents
   - gets `Novel` info from page
   - for return-type, check in-app hints
-- ChapterSipt
+- ChapterScript
   - gets the `Chapter` data from page
   - for return-type, check in-app hints
 #### Tips
