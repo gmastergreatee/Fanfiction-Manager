@@ -50,7 +50,9 @@
                         'new-updates': n.ChapterCount > n.DownloadedCount,
                         'downloading': n == d_novel}">
                       <div class="df pr-4 br pr cover-image">
-                        <img :src="n.CoverURL" alt="No image found">
+                        <div class="df fdc">
+                          <img class="bb bt bl br" :src="n.CoverURL" alt="No image found">
+                        </div>
                       </div>
                       <div class="f1 df fdc w-100 pl-4">
                         <div>
@@ -63,7 +65,8 @@
                         </div>
                         <div class="bt mt-4 pt-4 df fdr">
                           <div class="f1">
-                            <a v-if="n.Summary" href="#" @click="setSummaryGUID(n.GUID)">{{ summaryExpandedGUID == n.GUID ? 'Shrink' :
+                            <a v-if="n.Summary" href="#" @click="setSummaryGUID(n.GUID)">{{ summaryExpandedGUID ==
+                              n.GUID ? 'Shrink' :
                               'Expand' }}</a>
                           </div>
                           <div>
