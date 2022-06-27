@@ -1192,7 +1192,7 @@ app = new Vue({
     async saveReaderOptions() {
       if (!this.r_reader_options.r_chapter_styles) {
         this.r_reader_options.r_chapter_styles =
-          "<style>\n    #novel-reader * {\n\n        font-size: 20px;\n\n    }\n</style>";
+          "<style>#novel-reader {\n\nbackground-color: #111;\n\n}\n#novel-reader * {\n\nfont-size: 20px;\ncolor: #bbb;\n\n}\n</style>";
       }
       await saveConfigData("r_reader_options");
       this.r_show_options = false;
