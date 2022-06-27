@@ -164,7 +164,6 @@ app = new Vue({
       }
     });
     this.mainWebView.addEventListener("dom-ready", () => {
-      this.mainWebView.stop();
       if (!this.mainWebView.getURL().endsWith(dummyPageUrl)) {
         let curr_url = this.mainWebView.getURL();
         if (!curr_url.endsWith("dummy.html")) {
@@ -593,6 +592,7 @@ app = new Vue({
       }
 
       log("Rule applied -> " + t_rule.rule_name);
+      log("Downloading Novel Metadata...");
 
       let onTOCPageConfirmed = async () => {
         try {
@@ -662,6 +662,7 @@ app = new Vue({
           if (data || data == 0) {
             switch (data) {
               case 0:
+                this.mainWebView.stop();
                 onMainWebViewLoadedEvent.clearAllListeners();
                 logVerbose("TOC page found");
                 await onTOCPageConfirmed();
@@ -871,6 +872,7 @@ app = new Vue({
             let skipDownload = true;
             switch (data) {
               case 0:
+                this.mainWebView.stop();
                 logVerbose("TOC page found");
                 skipDownload = false;
                 break;
@@ -954,6 +956,7 @@ app = new Vue({
                 this.iframe_working = false;
               }
             } else {
+              this.iframe_url = dummyPageUrl;
               saveConfigData("novels");
               log("All chapters downloaded");
               onMainWebViewLoadedEvent.clearAllListeners();
