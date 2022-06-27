@@ -1258,15 +1258,39 @@ app = new Vue({
 
 //#region Reading mode
 
+// To keep track of current reading position if user resizes window
+let novelReaderResizeObserver;
+let firstVisibleEl = null;
+let firstOffsetClientTop = 0;
+
 function activateReadingHotkeys() {
   document.addEventListener("wheel", mouseEventFunc);
   document.addEventListener("keydown", keyboardEventFunc);
+  novelReaderResizeObserver = new ResizeObserver(resizeEventFunc);
+  setTimeout(() => {
+    let reader = document.getElementById("novel-reader");
+    firstVisibleEl = Array.from(reader.children).find(
+      (i) => i.offsetTop > reader.scrollTop
+    );
+    if (firstVisibleEl) {
+      firstOffsetClientTop = reader.scrollTop - firstVisibleEl.offsetTop;
+    }
+    novelReaderResizeObserver.observe(reader);
+  }, 10);
 }
 
 function deactivateReadingHotkeys() {
   document.removeEventListener("wheel", mouseEventFunc);
   document.removeEventListener("keydown", keyboardEventFunc);
+  novelReaderResizeObserver.disconnect();
 }
+
+let resizeEventFunc = function (observer) {
+  if (firstVisibleEl) {
+    firstVisibleEl.scrollIntoView();
+    observer[0].target.scrollBy(0, firstOffsetClientTop);
+  }
+};
 
 let keyboardEventFunc = function (event) {
   if (app && app.r_novel) {
@@ -1316,6 +1340,15 @@ let keyboardEventFunc = function (event) {
             app.loadPreviousChapter(reader);
             event.preventDefault();
           }
+          setTimeout(() => {
+            firstVisibleEl = Array.from(reader.children).find(
+              (i) => i.offsetTop > reader.scrollTop
+            );
+            if (firstVisibleEl) {
+              firstOffsetClientTop =
+                reader.scrollTop - firstVisibleEl.offsetTop;
+            }
+          }, 10);
         } else if (direction > 0) {
           // wanna go down ?
           let actualScrollHeight = reader.scrollHeight - reader.clientHeight;
@@ -1329,6 +1362,15 @@ let keyboardEventFunc = function (event) {
             app.loadNextChapter(reader);
             event.preventDefault();
           }
+          setTimeout(() => {
+            firstVisibleEl = Array.from(reader.children).find(
+              (i) => i.offsetTop > reader.scrollTop
+            );
+            if (firstVisibleEl) {
+              firstOffsetClientTop =
+                reader.scrollTop - firstVisibleEl.offsetTop;
+            }
+          }, 10);
         }
       }
     }
@@ -1347,6 +1389,17 @@ let mouseEventFunc = function (event) {
       if (reader.scrollTop + 10 >= actualScrollHeight) {
         app.loadNextChapter(reader);
       }
+    }
+
+    if (event.deltaY != 0) {
+      setTimeout(() => {
+        firstVisibleEl = Array.from(reader.children).find(
+          (i) => i.offsetTop > reader.scrollTop
+        );
+        if (firstVisibleEl) {
+          firstOffsetClientTop = reader.scrollTop - firstVisibleEl.offsetTop;
+        }
+      }, 10);
     }
   }
 };
