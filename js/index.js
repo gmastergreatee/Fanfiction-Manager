@@ -948,6 +948,7 @@ app = new Vue({
                   }
                 }
               } else {
+                this.iframe_url = dummyPageUrl;
                 this.stop_download_update_novel = false;
                 saveConfigData("novels");
                 log("Downloading stopped");
