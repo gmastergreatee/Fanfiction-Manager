@@ -327,8 +327,27 @@ div.chapter-active {
 }
 
 .cover-image img {
+  position: relative;
   width: 100px;
   aspect-ratio: 3/4;
   object-fit: contain;
   object-position: top;
+}
+
+.cover-image img[alt]:after {
+  display: flex;
+  flex-flow: row;
+  align-items: center;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #fff;
+  text-align: center;
+  content: attr(alt);
+}
+
+.zi-1 {
+  z-index: -1;
 }

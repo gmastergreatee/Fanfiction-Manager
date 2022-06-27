@@ -91,3 +91,7 @@ div.chapter-active {
   box-shadow: 0 0 20px 1px greenyellow;
   background-color: black;
 }
+
+.cover-image img[alt]:after {
+  background-color: #333;
+}
