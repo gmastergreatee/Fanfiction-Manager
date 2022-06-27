@@ -624,7 +624,6 @@ app = new Vue({
             logVerbose("TOC data retrieved");
             log("Added novel -> " + data.Title);
             this.add_novel_url = "";
-            this.iframe_url = dummyPageUrl;
           } else log("Error");
         } catch (ex) {
           log("Error");
@@ -662,10 +661,11 @@ app = new Vue({
           if (data || data == 0) {
             switch (data) {
               case 0:
-                this.mainWebView.stop();
                 onMainWebViewLoadedEvent.clearAllListeners();
                 logVerbose("TOC page found");
                 await onTOCPageConfirmed();
+                this.mainWebView.stop();
+                this.iframe_url = dummyPageUrl;
                 break;
               case -1:
               case -2:
@@ -673,6 +673,9 @@ app = new Vue({
               default:
                 onMainWebViewLoadedEvent.clearAllListeners();
                 this.iframe_working = false;
+                this.mainWebView.stop();
+                break;
+                this.iframe_url = dummyPageUrl;
                 break;
             }
             return;
@@ -680,6 +683,7 @@ app = new Vue({
         } catch {
           log("Error");
           onMainWebViewLoadedEvent.clearAllListeners();
+          this.mainWebView.stop();
           this.iframe_working = false;
         }
       };
@@ -881,7 +885,6 @@ app = new Vue({
             let skipDownload = true;
             switch (data) {
               case 0:
-                this.mainWebView.stop();
                 logVerbose("TOC page found");
                 skipDownload = false;
                 break;
@@ -891,6 +894,7 @@ app = new Vue({
                 log("Manual-Captcha page");
                 break;
               default:
+                this.mainWebView.stop();
                 log("Unknown page-type");
                 onMainWebViewLoadedEvent.clearAllListeners();
                 this.d_novel = null;
@@ -911,6 +915,7 @@ app = new Vue({
           data = await this.mainWebView.executeJavaScript(
             this.getEvaluateJavascriptCode(t_rule.chapter_code)
           );
+          this.mainWebView.stop();
           let t_c_url = urls_to_download[curr_url_index];
           if (data && data.length > 0) {
             let next_url = "";
