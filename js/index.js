@@ -297,8 +297,12 @@ app = new Vue({
     },
     getEvaluateJavascriptCode(script = "") {
       let sleepCode =
-        "function sleep(ms) {return new Promise((resolve) => {setTimeout(resolve, ms);});}\n";
-      return "(async function(){" + sleepCode + script + "})()";
+        "function sleep(ms) { return new Promise((resolve) => {setTimeout(resolve, ms);}); }\n";
+      let htmlDecodeCode =
+        "function htmlDecode(input) { var doc = new DOMParser().parseFromString(input, 'text/html'); return doc.documentElement.textContent; }\n";
+      return (
+        "(async function() {" + sleepCode + htmlDecodeCode + script + "})()"
+      );
     },
     //#region Rules Related
     toggleTestResults() {
