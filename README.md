@@ -70,7 +70,7 @@ Current Status: __APLHA__
 
 ---
 
-\* persons with somewhat javascript & DOM knowledge
+\* persons with javascript & DOM knowledge
 
 \*\* persons with no programming knowledge whatsoever
 
