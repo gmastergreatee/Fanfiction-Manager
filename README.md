@@ -12,11 +12,15 @@ Current Status: APLHA
 - Novel `Reading Mode`
 - Novel details editor
 
-### Known Issues
+### Known Issues / Not Implemented Yet
 
-- No `Update Novel` option
-- Multiple utility `buttons`'s functionality not implemented
-- More testing required for downloading from other websites
+- No `Update Novel` option yet -> WIP
+- Multiple utility `buttons`'s functionality not implemented.
+- Download next `Chapter` using `nextURL` when `ChapterCount` is <= 0. -> STALE
+  - Although, the case is possible, but currently, no known website requires this.
+    - Further testing required.
+  - Possibility of infinite loop, in-case `nextURL` always comes up non-empty.
+- More testing required for downloading from other websites.
 
 ### Download Steps
 
