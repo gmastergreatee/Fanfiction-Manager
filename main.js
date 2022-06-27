@@ -32,6 +32,7 @@ const createWindow = () => {
       webviewTag: true,
     },
     show: false,
+    autoHideMenuBar: true,
   });
 
   mainWindow.webContents.session.webRequest.onHeadersReceived(

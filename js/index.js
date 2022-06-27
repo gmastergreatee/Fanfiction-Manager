@@ -192,7 +192,7 @@ app = new Vue({
       novels: [],
       loading_novels: true,
 
-      //......... Reader
+      //#region Reader
       reading_mode: false,
       r_novel: null,
       loading_chapters: false,
@@ -200,7 +200,17 @@ app = new Vue({
       r_chapter_index: 0,
       r_chapterIndex_loaded: [],
 
-      //......... Main variables
+      r_show_sidebar: true,
+      r_show_options: false,
+      r_reader_options: {
+        r_chapter_styles:
+          "<style>\n    #novel-reader * {\n\n        font-size: 20px;\n\n    }\n</style>",
+        displayChapterNumbers: false,
+      },
+      r_temp_reader_options: null,
+      //#endregion
+
+      //#region Main variables
       mainWebView: null,
       console: null,
       tabs: ["Library", "Rules", "Tester"],
@@ -209,26 +219,33 @@ app = new Vue({
       showWebPage: false,
       showTestResults: false,
       showConsole: false,
+      //#endregion
 
-      //......... Library
+      //#region Library
 
       showNewOnly: false,
       showCheckUpdatedOnly: false,
       showGridLayout: false,
       summaryExpandedGUID: "",
 
-      //......... Add Novel
+      //#endregion
+
+      //#region Add Novel
 
       add_novel_url: "",
       temp_detailing_novel: null,
       detailing_novel: null,
 
-      //......... downloader
+      //#endregion
+
+      //#region downloader
 
       d_novel: null,
       stop_download_update_novel: false,
 
-      //......... tester related
+      //#endregion
+
+      //#region tester related
 
       test_rule_guid: "",
       test_url: "",
@@ -242,7 +259,7 @@ app = new Vue({
       test_result_page_type: "UNKNOWN",
       test_result_content: "",
 
-      //.........
+      //#endregion
 
       iframe_working: false,
       iframe_url: dummyPageUrl,
@@ -508,7 +525,7 @@ app = new Vue({
           chapter_code: this.test_chapter_code,
         });
       }
-      saveConfigData("rules");
+      saveConfigArrayData("rules");
       this.goBackFromEditRule();
     },
     editRule(t_rule) {
@@ -547,7 +564,7 @@ app = new Vue({
         let t_rule_index = this.rules.indexOf(t_rule);
         if (t_rule_index >= 0) {
           this.rules.splice(t_rule_index, 1);
-          saveConfigData("rules");
+          saveConfigArrayData("rules");
         }
       }
     },
@@ -624,7 +641,7 @@ app = new Vue({
                 data.CoverURL = "";
                 downloader.download("_cover_image_callback", () => {
                   data.CoverURL = "." + coverDirectoryPath + cover_file_name;
-                  saveConfigData("novels");
+                  saveConfigArrayData("novels");
                 });
               } catch {
                 data.CoverURL = "";
@@ -634,7 +651,7 @@ app = new Vue({
             data["DownloadedCount"] = 0;
             data["CheckUpdates"] = true;
             this.novels.unshift(data);
-            saveConfigData("novels");
+            saveConfigArrayData("novels");
             logVerbose("TOC data retrieved");
             log("Added novel -> " + data.Title);
             this.add_novel_url = "";
@@ -751,7 +768,7 @@ app = new Vue({
             );
           }
           if (this.novels.splice(index, 1).length > 0) {
-            saveConfigData("novels");
+            saveConfigArrayData("novels");
           }
         }
       }
@@ -787,7 +804,7 @@ app = new Vue({
     async saveCloseNovelDetails() {
       this.detailing_novel = null;
       this.temp_detailing_novel = null;
-      await saveConfigData("novels");
+      await saveConfigArrayData("novels");
     },
     toggleNewOnly() {
       this.showNewOnly = !this.showNewOnly;
@@ -867,7 +884,7 @@ app = new Vue({
       if (urls_to_download.length <= 0) {
         log("Already up to date");
         t_novel.DownloadedCount = t_novel.ChapterCount;
-        saveConfigData("novels");
+        saveConfigArrayData("novels");
         this.iframe_working = false;
         return;
       }
@@ -987,7 +1004,7 @@ app = new Vue({
               } else {
                 this.iframe_url = dummyPageUrl;
                 this.stop_download_update_novel = false;
-                saveConfigData("novels");
+                saveConfigArrayData("novels");
                 log("Downloading stopped");
                 onMainWebViewLoadedEvent.clearAllListeners();
                 this.d_novel = null;
@@ -995,7 +1012,7 @@ app = new Vue({
               }
             } else {
               this.iframe_url = dummyPageUrl;
-              saveConfigData("novels");
+              saveConfigArrayData("novels");
               log("All chapters downloaded");
               onMainWebViewLoadedEvent.clearAllListeners();
               this.d_novel = null;
@@ -1054,6 +1071,7 @@ app = new Vue({
       this.r_novel = t_novel;
       this.loadChapters();
       document.title = this.r_novel.Title;
+      hotkeys.setScope("reading_mode");
     },
     async loadChapters() {
       this.loading_chapters = true;
@@ -1102,14 +1120,39 @@ app = new Vue({
       }
 
       if (chapter.title) {
-        return chapter.title;
+        return (
+          (this.r_reader_options.displayChapterNumbers
+            ? index + 1 + ". "
+            : "") + chapter.title
+        );
       }
 
-      return "Chapter " + (index + 1).toString();
+      return (
+        (this.r_reader_options.displayChapterNumbers ? index + 1 + ". " : "") +
+        "Chapter " +
+        (index + 1).toString()
+      );
     },
     setReadingChapterIndex(index = 0) {
       this.r_chapter_index = index;
       document.getElementById("novel-reader").scrollTo(0, 0);
+    },
+    loadPreviousChapter(reader) {
+      if (this.r_chapter_index != 0) {
+        this.r_chapter_index--;
+        setTimeout(() => {
+          let actualScrollHeight = reader.scrollHeight - reader.clientHeight;
+          reader.scrollTo(0, actualScrollHeight);
+        }, 1);
+      }
+    },
+    loadNextChapter(reader) {
+      if (this.r_chapters && this.r_chapters[this.r_chapter_index + 1]) {
+        this.r_chapter_index++;
+        setTimeout(() => {
+          reader.scrollTo(0, 0);
+        }, 1);
+      }
     },
     exitReadingMode() {
       this.reading_mode = false;
@@ -1118,6 +1161,27 @@ app = new Vue({
       this.r_chapters = [];
       this.r_chapter_index = 0;
       document.title = appName;
+      hotkeys.deleteScope("reading_mode");
+    },
+    toggleReaderOptions() {
+      if (this.r_show_options) {
+        this.r_reader_options = JSON.parse(this.r_temp_reader_options);
+        this.r_temp_reader_options = null;
+      } else {
+        this.r_temp_reader_options = JSON.stringify(this.r_reader_options);
+      }
+      this.r_show_options = !this.r_show_options;
+    },
+    toggleReadingModeSidebar() {
+      this.r_show_sidebar = !this.r_show_sidebar;
+    },
+    async saveReaderOptions() {
+      if (!this.r_reader_options.r_chapter_styles) {
+        this.r_reader_options.r_chapter_styles =
+          "<style>\n    #novel-reader * {\n\n        font-size: 20px;\n\n    }\n</style>";
+      }
+      await saveConfigData("r_reader_options");
+      this.r_show_options = false;
     },
     //#endregion
   },
@@ -1149,7 +1213,11 @@ app = new Vue({
       }
 
       if (chapter.title) {
-        return chapter.title;
+        return (
+          (this.r_reader_options.displayChapterNumbers
+            ? this.r_chapter_index + 1 + ". "
+            : "") + chapter.title
+        );
       }
 
       return "Chapter " + (this.r_chapter_index + 1).toString();
@@ -1166,11 +1234,73 @@ app = new Vue({
         return chapter.content;
       }
 
-      return "Oops! You shouldn't view this message. Report if you do. Submit the 'data' and 'config' folder too.";
+      return "Oops! You shouldn't view this message. Reporting this would be very helpful. For that immediately close the app, then zip & submit the 'data' and 'config' folder & create a new github issue.";
     },
     //#endregion
   },
 });
+
+//#region Keyboard shortcuts
+hotkeys("*", "reading_mode", function (event, handler) {
+  if (app && app.r_novel) {
+    let reader = document.getElementById("novel-reader");
+    if (document.activeElement == reader) {
+      let key = event.keyCode;
+      if (key == 32 || key == 37 || key == 38 || key == 39 || key == 40) {
+        let shift = event.shiftKey;
+        let direction = 0;
+        let power = 0;
+
+        let max_power = 500;
+
+        // left or right
+        if (key == 37 || key == 39) power = max_power / 4;
+        // up or down
+        if (key == 38 || key == 40) power = max_power / 2;
+
+        // left or up
+        if (key == 37 || key == 38) direction--;
+        // right or down
+        if (key == 39 || key == 40) direction++;
+
+        if (key == 32) {
+          // space
+          power = max_power;
+          if (shift) direction--;
+          else direction++;
+        }
+
+        // wanna go up ?
+        if (direction < 0) {
+          if (reader.scrollTop > 0) {
+            if (power < max_power) {
+              reader.scrollBy(0, power * direction);
+              event.preventDefault();
+            }
+          } else {
+            app.loadPreviousChapter(reader);
+            event.preventDefault();
+          }
+        } else if (direction > 0) { // wanna go down ?
+          let actualScrollHeight = reader.scrollHeight - reader.clientHeight;
+          // freaking 10 px scrollHeight hack here, took me quite some time faaaaaak
+          if (reader.scrollTop + 10 < actualScrollHeight) {
+            if (power < max_power) {
+              reader.scrollBy(0, power * direction);
+              event.preventDefault();
+            }
+          } else {
+            app.loadNextChapter(reader);
+            event.preventDefault();
+          }
+        }
+      }
+    }
+  }
+});
+
+function scrollHelper(event, reader, actualScrollHeight) {}
+//#endregion
 
 /**
  * Changes the status text and logs to console
@@ -1225,10 +1355,16 @@ async function loadAllConfigs() {
   if (!configDirPresent) {
     await createDir(configDirPath);
   }
-  await loadConfigData("rules");
+  loadConfigData("r_reader_options", {
+    r_chapter_styles:
+      "<style>\n    #novel-reader * {\n\n        font-size: 20px;\n\n    }\n</style>",
+    displayChapterNumbers: false,
+  });
+
+  await loadConfigArrayData("rules");
   app.loading_rules = false;
 
-  await loadConfigData("novels");
+  await loadConfigArrayData("novels");
   app.loading_novels = false;
 }
 
@@ -1245,37 +1381,46 @@ function guid() {
   );
 }
 
-async function loadConfigData(configFileName = "") {
-  if (configFileName.trim()) {
+//#region Save Configs
+
+async function loadConfigArrayData(configName = "") {
+  await loadConfigData(configName, []);
+}
+
+async function saveConfigArrayData(configName = "", callback = null) {
+  await saveConfigData(configName, callback);
+}
+
+async function loadConfigData(configName = "", defaultValue = {}) {
+  if (configName.trim()) {
     let root = rootDirectory;
-    let configFilePath = root + configDirectoryPath + configFileName + ".json";
+    let configFilePath = root + configDirectoryPath + configName + ".json";
     let configFilePresent = await pathExists(configFilePath);
     if (configFilePresent) {
       let fileData = await readFile(configFilePath);
-      if (app[configFileName]) {
-        app[configFileName] = JSON.parse(fileData);
+      if (app[configName]) {
+        app[configName] = JSON.parse(fileData);
       }
     } else {
-      if (app[configFileName]) {
-        app[configFileName] = [];
+      if (app[configName]) {
+        app[configName] = defaultValue;
       }
     }
   }
 }
 
-async function saveConfigData(configFileName = "", callback = null) {
-  if (configFileName.trim()) {
+async function saveConfigData(configName = "", callback = null) {
+  if (configName.trim()) {
     let root = rootDirectory;
-    let configFilePath = root + configDirectoryPath + configFileName + ".json";
-    if (app[configFileName] != null) {
-      await writeFile(
-        configFilePath,
-        JSON.stringify(app[configFileName], null, 2)
-      );
+    let configFilePath = root + configDirectoryPath + configName + ".json";
+    if (app[configName] != null) {
+      await writeFile(configFilePath, JSON.stringify(app[configName], null, 2));
       if (callback) callback();
     }
   }
 }
+
+//#endregion
 
 // -------- main to renderer
 

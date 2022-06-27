@@ -8,6 +8,7 @@
   <title>Novel Downloader v3</title>
   <link rel="stylesheet" href="./css/index.css" />
   <script src="./js/vue.min.js"></script>
+  <script src="./js/hotkeys.min.js"></script>
   <script src="./js/index.js" defer></script>
 </head>
 
@@ -314,9 +315,9 @@
         <a href="#" class="ml-4" @click="exitReadingMode()">Back</a>
       </div>
       <div class="df fdr f1">
-        <div class="wp-200 h-100 pr">
-          <div class="pa w-100 h-100 df fdc oya br">
-            <div v-for="(url,i) in r_novel.ChapterURLs" class="df fdr bt bb bl br m-4"
+        <div class="wp-200 h-100 pr" :class="{'dn': !r_show_sidebar}">
+          <div class="pa w-100 h-100 df fdc oya br pt-4 pl-4 pr-4">
+            <div v-for="(url,i) in r_novel.ChapterURLs" class="df fdr bt bb bl br mb-4"
               :class="{'chapter-active': i == r_chapter_index}">
               <a :href="'#' + i" class="dib tdn toe wsn oh w-100 p-4" @click="setReadingChapterIndex(i)">
                 {{ getChapterName(i) }}
@@ -325,13 +326,32 @@
           </div>
         </div>
         <div class="df fdc f1">
-          <div class="p-4 bb">
-            {{ getSelectedChapterName }}
+          <div class="df fdr p-4 bb">
+            <div class="df fdc f1">
+              <a href="#" class="dib tdn toe wsn oh w-100" @click="toggleReadingModeSidebar()">{{ getSelectedChapterName }}</a>
+            </div>
+            <div>
+              <a href="#" v-if="r_show_options" @click="saveReaderOptions()">Save Options</a>
+              <a href="#" @click="toggleReaderOptions()">{{ r_show_options ? 'Discard' : 'Show' }} Options</a>
+            </div>
           </div>
-          <div class="f1 pr w-100">
-            <div id="novel-reader" class="fdc jcc aic f1 pa oya w-100 h-100 p-4"
-              :class="{'dib': r_chapterIndex_loaded.length > r_chapter_index, 'df': r_chapterIndex_loaded.length <= r_chapter_index}"
-              v-html="getSelectedChapterContent"></div>
+          <div class="df fdc f1 w-100">
+            <div class="df fdc bb" :class="{'dn': !r_show_options}">
+              <div class="df fdr p-4">
+                <div class="fwb mr-4">Styles :</div>
+                <textarea class="f1 hp-200 rn" placeholder="Enter design code here for chapter view"
+                  v-model="r_reader_options.r_chapter_styles"></textarea>
+              </div>
+              <div class="df fdr p-4 aic">
+                <div class="fwb mr-4">Show Chapter Numbers :</div>
+                <input type="checkbox" class="hwp20" v-model="r_reader_options.displayChapterNumbers">
+              </div>
+            </div>
+            <div class="f1 pr w-100">
+              <div id="novel-reader" class="fdc jcc aic f1 pa oya w-100 h-100 p-4" tabindex="0"
+                :class="{'dib': r_chapterIndex_loaded.length > r_chapter_index, 'df': r_chapterIndex_loaded.length <= r_chapter_index}"
+                v-html="r_reader_options.r_chapter_styles + getSelectedChapterContent"></div>
+            </div>
           </div>
         </div>
       </div>
