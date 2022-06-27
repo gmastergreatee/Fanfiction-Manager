@@ -72,6 +72,7 @@ const fileDownloader = function (context) {
   }
   var urlFileMaps = [];
   var callBackName = null;
+  var finalCallback = null;
   return {
     addEntry: function (url, filePath) {
       urlFileMaps.push({
@@ -80,7 +81,7 @@ const fileDownloader = function (context) {
         done: false,
       });
     },
-    download: function (_callbackName = "file_0") {
+    download: function (_callbackName = "file_0", cb = null) {
       if (urlFileMaps.length > 0) {
         callBackName = _callbackName;
         globalCallbacks[callBackName] = this.recurse;
@@ -88,6 +89,9 @@ const fileDownloader = function (context) {
           "[1/" + urlFileMaps.length + "] File Downloading",
           urlFileMaps[0].url
         );
+        if (cb) {
+          finalCallback = cb;
+        }
         downloadFile(urlFileMaps[0].url, urlFileMaps[0].path, 0, callBackName);
       }
     },
@@ -115,6 +119,9 @@ const fileDownloader = function (context) {
         } else {
           globalCallbacks[callBackName] = null;
           log("All Files Downloaded");
+          if (finalCallback) {
+            finalCallback();
+          }
         }
       }
     },
@@ -201,7 +208,7 @@ app = new Vue({
 
       showWebPage: false,
       showTestResults: false,
-      showConsole: true,
+      showConsole: false,
 
       //......... Library
 
@@ -610,8 +617,11 @@ app = new Vue({
                   rootDirectory + coverDirectoryPath + cover_file_name;
                 let downloader = fileDownloader();
                 downloader.addEntry(data.CoverURL, cover_file_path);
-                downloader.download();
-                data.CoverURL = "." + coverDirectoryPath + cover_file_name;
+                data.CoverURL = "";
+                downloader.download("_cover_image_callback", () => {
+                  data.CoverURL = "." + coverDirectoryPath + cover_file_name;
+                  saveConfigData("novels");
+                });
               } catch {
                 data.CoverURL = "";
               }
