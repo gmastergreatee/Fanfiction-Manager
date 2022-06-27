@@ -1,6 +1,8 @@
 # LightNovel-Manager
 Light-novel manager/downloader/reader
 
+<img src="https://github.com/gmastergreatee/LightNovel-Manager/raw/master/pic1.png">
+
 Provides extreme flexibility with the help of `Rule` system to `power-users`* in downloading, tracking-status & reading novels from any site they want from.
 
 `Novice-users`** may only download `Novels` from site whose `Rule` is included.
