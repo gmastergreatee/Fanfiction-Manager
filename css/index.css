@@ -184,6 +184,10 @@ body {
   margin-right: 4px;
 }
 
+.mr-8 {
+  margin-right: 8px;
+}
+
 .m-4,
 .mx-4,
 .ml-4 {
@@ -302,10 +306,13 @@ div.chapter-active {
 }
 
 .summary-shrunk {
-  max-height: 42px;
+  position: absolute;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  top: 4px;
+  bottom: 4px;
+  width: 100%;
 }
 
 #novel-reader,
@@ -317,4 +324,11 @@ div.chapter-active {
 
 #novel-reader {
   padding: 30px 50px;
+}
+
+.cover-image img {
+  width: 100px;
+  aspect-ratio: 3/4;
+  object-fit: contain;
+  object-position: top;
 }
