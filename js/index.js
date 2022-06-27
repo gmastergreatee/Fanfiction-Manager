@@ -1071,7 +1071,7 @@ app = new Vue({
       this.r_novel = t_novel;
       this.loadChapters();
       document.title = this.r_novel.Title;
-      hotkeys.setScope("reading_mode");
+      activateReadingHotkeys();
     },
     async loadChapters() {
       this.loading_chapters = true;
@@ -1136,6 +1136,9 @@ app = new Vue({
     setReadingChapterIndex(index = 0) {
       this.r_chapter_index = index;
       document.getElementById("novel-reader").scrollTo(0, 0);
+      document
+        .querySelector('[href="#' + this.r_chapter_index + '"]')
+        .scrollIntoViewIfNeeded(false);
     },
     loadPreviousChapter(reader) {
       if (this.r_chapter_index != 0) {
@@ -1144,6 +1147,9 @@ app = new Vue({
           let actualScrollHeight = reader.scrollHeight - reader.clientHeight;
           reader.scrollTo(0, actualScrollHeight);
         }, 1);
+        document
+          .querySelector('[href="#' + this.r_chapter_index + '"]')
+          .scrollIntoViewIfNeeded(false);
       }
     },
     loadNextChapter(reader) {
@@ -1152,6 +1158,9 @@ app = new Vue({
         setTimeout(() => {
           reader.scrollTo(0, 0);
         }, 1);
+        document
+          .querySelector('[href="#' + this.r_chapter_index + '"]')
+          .scrollIntoViewIfNeeded(false);
       }
     },
     exitReadingMode() {
@@ -1160,8 +1169,13 @@ app = new Vue({
       this.loading_chapters = false;
       this.r_chapters = [];
       this.r_chapter_index = 0;
+      this.r_show_sidebar = true;
+      this.r_show_options = false;
+      if (this.r_temp_reader_options) {
+        this.r_reader_options = JSON.parse(this.r_temp_reader_options);
+      }
       document.title = appName;
-      hotkeys.deleteScope("reading_mode");
+      deactivateReadingHotkeys();
     },
     toggleReaderOptions() {
       if (this.r_show_options) {
@@ -1240,18 +1254,39 @@ app = new Vue({
   },
 });
 
-//#region Keyboard shortcuts
-hotkeys("*", "reading_mode", function (event, handler) {
+//#region Hotkeys + Mouse events
+
+//#region Reading mode
+
+function activateReadingHotkeys() {
+  hotkeys.setScope("reading_mode");
+  document.addEventListener("wheel", mouseEventFunc);
+}
+
+function deactivateReadingHotkeys() {
+  hotkeys.deleteScope("reading_mode");
+  document.removeEventListener("wheel", mouseEventFunc);
+}
+
+hotkeys("*", "reading_mode", function (event) {
   if (app && app.r_novel) {
     let reader = document.getElementById("novel-reader");
     if (document.activeElement == reader) {
       let key = event.keyCode;
-      if (key == 32 || key == 37 || key == 38 || key == 39 || key == 40) {
+      if (
+        key == 32 || // space
+        key == 33 || // pageUp
+        key == 34 || // pageDown
+        key == 37 || // leftArrow
+        key == 38 || // upArrow
+        key == 39 || // rightArrow
+        key == 40 // downArrow
+      ) {
         let shift = event.shiftKey;
         let direction = 0;
         let power = 0;
 
-        let max_power = 500;
+        let max_power = 100;
 
         // left or right
         if (key == 37 || key == 39) power = max_power / 4;
@@ -1263,10 +1298,10 @@ hotkeys("*", "reading_mode", function (event, handler) {
         // right or down
         if (key == 39 || key == 40) direction++;
 
-        if (key == 32) {
-          // space
+        if (key == 32 || key == 33 || key == 34) {
+          // space or pageUp or pageDown
           power = max_power;
-          if (shift) direction--;
+          if (shift || key == 33) direction--;
           else direction++;
         }
 
@@ -1281,7 +1316,8 @@ hotkeys("*", "reading_mode", function (event, handler) {
             app.loadPreviousChapter(reader);
             event.preventDefault();
           }
-        } else if (direction > 0) { // wanna go down ?
+        } else if (direction > 0) {
+          // wanna go down ?
           let actualScrollHeight = reader.scrollHeight - reader.clientHeight;
           // freaking 10 px scrollHeight hack here, took me quite some time faaaaaak
           if (reader.scrollTop + 10 < actualScrollHeight) {
@@ -1299,7 +1335,24 @@ hotkeys("*", "reading_mode", function (event, handler) {
   }
 });
 
-function scrollHelper(event, reader, actualScrollHeight) {}
+let mouseEventFunc = function (event) {
+  if (app && app.r_novel) {
+    let reader = document.getElementById("novel-reader");
+    if (event.deltaY < 0) {
+      if (reader.scrollTop <= 0) {
+        app.loadPreviousChapter(reader);
+      }
+    } else if (event.deltaY > 0) {
+      let actualScrollHeight = reader.scrollHeight - reader.clientHeight;
+      if (reader.scrollTop + 10 >= actualScrollHeight) {
+        app.loadNextChapter(reader);
+      }
+    }
+  }
+};
+
+//#endregion
+
 //#endregion
 
 /**
