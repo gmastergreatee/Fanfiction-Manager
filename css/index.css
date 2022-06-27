@@ -241,8 +241,8 @@ pre {
 }
 
 ::-webkit-scrollbar {
-  height: 12px;
-  width: 12px;
+  height: 6px;
+  width: 6px;
   background: #e0e0e0;
 }
 

@@ -53,8 +53,6 @@ textarea {
 }
 
 ::-webkit-scrollbar {
-  height: 12px;
-  width: 12px;
   background: #000;
 }
 

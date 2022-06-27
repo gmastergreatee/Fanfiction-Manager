@@ -1259,16 +1259,16 @@ app = new Vue({
 //#region Reading mode
 
 function activateReadingHotkeys() {
-  hotkeys.setScope("reading_mode");
   document.addEventListener("wheel", mouseEventFunc);
+  document.addEventListener("keydown", keyboardEventFunc);
 }
 
 function deactivateReadingHotkeys() {
-  hotkeys.deleteScope("reading_mode");
   document.removeEventListener("wheel", mouseEventFunc);
+  document.removeEventListener("keydown", keyboardEventFunc);
 }
 
-hotkeys("*", "reading_mode", function (event) {
+let keyboardEventFunc = function (event) {
   if (app && app.r_novel) {
     let reader = document.getElementById("novel-reader");
     if (document.activeElement == reader) {
@@ -1333,7 +1333,7 @@ hotkeys("*", "reading_mode", function (event) {
       }
     }
   }
-});
+};
 
 let mouseEventFunc = function (event) {
   if (app && app.r_novel) {
