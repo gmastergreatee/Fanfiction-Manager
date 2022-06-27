@@ -624,8 +624,12 @@ app = new Vue({
             logVerbose("TOC data retrieved");
             log("Added novel -> " + data.Title);
             this.add_novel_url = "";
-          } else log("Error");
+          } else {
+            this.test_url = this.mainWebView.getURL();
+            log("Error");
+          }
         } catch (ex) {
+          this.test_url = this.mainWebView.getURL();
           log("Error");
         }
         this.iframe_working = false;
@@ -674,17 +678,20 @@ app = new Vue({
                 onMainWebViewLoadedEvent.clearAllListeners();
                 this.iframe_working = false;
                 this.mainWebView.stop();
-                break;
                 this.iframe_url = dummyPageUrl;
                 break;
             }
             return;
-          } else log("Error");
+          } else {
+            this.test_url = this.mainWebView.getURL();
+            log("Error");
+          }
         } catch {
-          log("Error");
+          this.test_url = this.mainWebView.getURL();
           onMainWebViewLoadedEvent.clearAllListeners();
           this.mainWebView.stop();
           this.iframe_working = false;
+          log("Error");
         }
       };
 
@@ -894,6 +901,7 @@ app = new Vue({
                 log("Manual-Captcha page");
                 break;
               default:
+                this.test_url = this.mainWebView.getURL();
                 this.mainWebView.stop();
                 log("Unknown page-type");
                 onMainWebViewLoadedEvent.clearAllListeners();
@@ -904,6 +912,7 @@ app = new Vue({
               return;
             }
           } else {
+            this.test_url = this.mainWebView.getURL();
             log("Unknown page-type");
             onMainWebViewLoadedEvent.clearAllListeners();
             this.d_novel = null;
@@ -979,6 +988,7 @@ app = new Vue({
               this.iframe_working = false;
             }
           } else {
+            this.test_url = this.mainWebView.getURL();
             log(
               "Error downloading chapter (" +
                 (t_c_url.index + 1) +
@@ -991,7 +1001,8 @@ app = new Vue({
             this.iframe_working = false;
           }
         } catch (ex) {
-          log("File API Error");
+          this.test_url = this.mainWebView.getURL();
+          log("Error");
           onMainWebViewLoadedEvent.clearAllListeners();
           this.d_novel = null;
           this.iframe_working = false;
@@ -1158,11 +1169,15 @@ function log(text = "", more_text = "") {
   }
   if (more_text.trim().length > 0) {
     console.log(text, "->", more_text);
-    app.console.textContent =
-      app.console.textContent + text + " -> " + more_text + "\r\n";
+    if ((app.showRenderer && app.showConsole) || verboseMode) {
+      app.console.textContent =
+        app.console.textContent + text + " -> " + more_text + "\r\n";
+    }
   } else {
     console.log(text);
-    app.console.textContent = app.console.textContent + text + "\r\n";
+    if ((app.showRenderer && app.showConsole) || verboseMode) {
+      app.console.textContent = app.console.textContent + text + "\r\n";
+    }
   }
   app.console.scrollTo(0, app.console.scrollHeight);
 }
