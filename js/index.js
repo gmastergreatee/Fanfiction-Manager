@@ -479,7 +479,7 @@ app = new Vue({
           t_rule.toc_code = this.test_toc_code;
           t_rule.chapter_code = this.test_chapter_code;
         } else {
-          this.rules.push({
+          this.rules.unshift({
             guid: guid(),
             rule_name: this.test_rule_name,
             url_regex: this.test_url_regex,
@@ -489,7 +489,7 @@ app = new Vue({
           });
         }
       } else {
-        this.rules.push({
+        this.rules.unshift({
           guid: guid(),
           rule_name: this.test_rule_name,
           url_regex: this.test_url_regex,
