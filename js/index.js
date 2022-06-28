@@ -213,6 +213,8 @@ app = new Vue({
         r_chapter_styles: chapter_default_styles,
         displayChapterNumbers: false,
         r_chapter_index: 0,
+        r_chapter_top_element_index: 0,
+        r_chapter_scroll_top_offset: 0,
       },
       r_temp_reader_options: null,
 
@@ -1072,6 +1074,8 @@ app = new Vue({
         r_chapter_styles: chapter_default_styles,
         displayChapterNumbers: false,
         r_chapter_index: 0,
+        r_chapter_top_element_index: 0,
+        r_chapter_scroll_top_offset: 0,
       });
       this.r_chapter_index = 0;
       this.reading_mode = true;
@@ -1108,6 +1112,22 @@ app = new Vue({
               this.r_chapters[this.r_chapter_index] = JSON.parse(data);
             }
             this.r_chapterIndex_loaded.push(this.r_chapter_index);
+            setTimeout(() => {
+              let reader = document.getElementById("novel-reader");
+              let topElIndex =
+                this.r_reader_options.r_chapter_top_element_index;
+              let scrollOffset =
+                this.r_reader_options.r_chapter_scroll_top_offset;
+              if (topElIndex) {
+                let firstEl = reader.children[topElIndex];
+                if (reader && firstEl) {
+                  firstEl.scrollIntoView();
+                  if (scrollOffset) {
+                    reader.scrollBy(0, scrollOffset);
+                  }
+                }
+              }
+            }, 100);
           }
         }
         if (this.r_chapters[i] == null) {
@@ -1494,15 +1514,6 @@ let keyboardEventFunc = function (event) {
               app.loadPreviousChapter(reader);
               event.preventDefault();
             }
-            setTimeout(() => {
-              firstVisibleEl = Array.from(reader.children).find(
-                (i) => i.offsetTop > reader.scrollTop
-              );
-              if (firstVisibleEl) {
-                firstOffsetClientTop =
-                  reader.scrollTop - firstVisibleEl.offsetTop;
-              }
-            }, 10);
           } else if (direction > 0) {
             // wanna go down ?
             let actualScrollHeight = reader.scrollHeight - reader.clientHeight;
@@ -1518,13 +1529,25 @@ let keyboardEventFunc = function (event) {
               app.loadNextChapter(reader);
               event.preventDefault();
             }
+          }
+
+          if (direction != 0) {
             setTimeout(() => {
-              firstVisibleEl = Array.from(reader.children).find(
+              let childArray = Array.from(reader.children);
+              firstVisibleEl = childArray.find(
                 (i) => i.offsetTop > reader.scrollTop
               );
               if (firstVisibleEl) {
                 firstOffsetClientTop =
                   reader.scrollTop - firstVisibleEl.offsetTop;
+
+                app.r_reader_options.r_chapter_scroll_top_offset =
+                  firstOffsetClientTop;
+
+                app.r_reader_options.r_chapter_top_element_index =
+                  childArray.indexOf(firstVisibleEl);
+
+                novelOptionsChanged = true;
               }
             }, 10);
           }
@@ -1562,11 +1585,20 @@ let mouseEventFunc = function (event) {
 
       if (event.deltaY != 0) {
         setTimeout(() => {
-          firstVisibleEl = Array.from(reader.children).find(
+          let childArray = Array.from(reader.children);
+          firstVisibleEl = childArray.find(
             (i) => i.offsetTop > reader.scrollTop
           );
           if (firstVisibleEl) {
             firstOffsetClientTop = reader.scrollTop - firstVisibleEl.offsetTop;
+
+            app.r_reader_options.r_chapter_scroll_top_offset =
+              firstOffsetClientTop;
+
+            app.r_reader_options.r_chapter_top_element_index =
+              childArray.indexOf(firstVisibleEl);
+
+            novelOptionsChanged = true;
           }
         }, 10);
       }
