@@ -383,7 +383,7 @@
 
     <!-- reading mode tab end -->
 
-    <div class="df fdr p-4 bt">
+    <div class="fdr p-4 bt" :class="{'df': r_show_sidebar, 'dn': !r_show_sidebar}">
       <div class="fwb wsn">Status :</div>
       <div class="wsn pl-4 toe oh">{{ status }}</div>
     </div>

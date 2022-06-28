@@ -1397,6 +1397,12 @@ let keyboardEventFunc = function (event) {
         return;
       }
 
+      // Ctrl+H key
+      if (event.keyCode == 72 && event.ctrlKey) {
+        app.toggleReadingModeSidebar();
+        return;
+      }
+
       if (document.activeElement == reader) {
         let key = event.keyCode;
         if (
