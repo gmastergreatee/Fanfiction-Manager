@@ -1086,7 +1086,7 @@ app = new Vue({
           this.r_novel = t_novel;
           this.loadChapters();
           document.title = this.r_novel.Title;
-          activateReadingHotkeys();
+          activateReadingModeEventListeners();
           setTimeout(() => {
             this.setReadingChapterIndex(this.r_reader_options.r_chapter_index);
           }, 1);
@@ -1259,7 +1259,7 @@ app = new Vue({
         this.r_reader_options = JSON.parse(this.r_temp_reader_options);
       }
       document.title = appName;
-      deactivateReadingHotkeys();
+      deactivateReadingModeEventListeners();
     },
     toggleReaderOptions() {
       if (this.r_show_options) {
@@ -1376,7 +1376,7 @@ app = new Vue({
   },
 });
 
-//#region Hotkeys + Mouse events
+//#region Keyboard + Mouse events
 
 //#region Reading mode
 
@@ -1400,10 +1400,30 @@ let stylechangeEventFunc = function () {
   }
 };
 
+let cursorHideFunc = function (e) {
+  let _el = e.target;
+
+  // clear the timer if it is set when the mouse move
+  const timer = _el.getAttribute("timer");
+  if (timer) {
+    clearTimeout(timer);
+    _el.setAttribute("timer", "");
+  }
+
+  // set timeout to wait of idle time
+  const t = setTimeout(() => {
+    _el.setAttribute("timer", "");
+    _el.classList.add("cn");
+  }, 3500);
+  _el.setAttribute("timer", t);
+
+  _el.classList.remove("cn");
+};
+
 let novelReaderResizeObserver = new ResizeObserver(resizeEventFunc);
 let novelStyleChangeObserver = new MutationObserver(stylechangeEventFunc);
 
-function activateReadingHotkeys() {
+function activateReadingModeEventListeners() {
   document.addEventListener("wheel", mouseEventFunc);
   document.addEventListener("keydown", keyboardEventFunc);
   setTimeout(() => {
@@ -1416,6 +1436,8 @@ function activateReadingHotkeys() {
       firstOffsetClientTop = reader.scrollTop - firstVisibleEl.offsetTop;
     }
 
+    reader.addEventListener("mousemove", cursorHideFunc);
+
     // set observers
     novelReaderResizeObserver.observe(reader);
     novelStyleChangeObserver.observe(
@@ -1427,9 +1449,13 @@ function activateReadingHotkeys() {
   }, 10);
 }
 
-function deactivateReadingHotkeys() {
+function deactivateReadingModeEventListeners() {
   document.removeEventListener("wheel", mouseEventFunc);
   document.removeEventListener("keydown", keyboardEventFunc);
+
+  let reader = document.getElementById("novel-reader");
+  reader.removeEventListener("mousemove", cursorHideFunc);
+  
   novelReaderResizeObserver.disconnect();
   novelStyleChangeObserver.disconnect();
 }

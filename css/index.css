@@ -177,6 +177,10 @@ body {
   cursor: pointer;
 }
 
+.cn {
+  cursor: none;
+}
+
 .m-4,
 .mt-4 {
   margin-top: 4px;
