@@ -310,11 +310,11 @@
 
     <div v-if="r_novel" class="fdc f1 w-100" :class="{'df': reading_mode, 'dn': !reading_mode}">
       <div class="df fdr fwb p-4 bb">
-        <div class="f1">{{ r_novel.Title }}</div>
-        <div v-if="loading_chapters" class="mx-4">Loading...[{{ r_chapterIndex_loaded.length }}/{{
+        <div class="f1" @click="focusOnReader()">{{ r_novel.Title }}</div>
+        <div v-if="loading_chapters" class="mx-4" :click="focusOnReader()">Loading...[{{ r_chapterIndex_loaded.length }}/{{
           r_novel.ChapterURLs.length }}]
         </div>
-        <a href="#" class="mx-4" @click="toggleDarkMode()">SwitchTo{{ app_options.darkMode ? 'LightMode' : 'DarkMode'
+        <a href="#" class="mx-4" @click="toggleDarkMode();focusOnReader()">SwitchTo{{ app_options.darkMode ? 'LightMode' : 'DarkMode'
           }}</a>
         <a href="#" class="ml-4" @click="exitReadingMode()">Back</a>
       </div>
@@ -338,12 +338,12 @@
         <div class="df fdc f1">
           <div class="df fdr p-4 bb">
             <div class="df fdc f1">
-              <a href="#" class="dib tdn toe wsn oh w-100" @click="toggleReadingModeSidebar()">{{ getSelectedChapterName
+              <a href="#" class="dib tdn toe wsn oh w-100" @click="toggleReadingModeSidebar();focusOnReader()">{{ getSelectedChapterName
                 }}</a>
             </div>
             <div>
-              <a href="#" v-if="r_show_options" @click="saveReaderOptions()">Save Options</a>
-              <a href="#" @click="toggleReaderOptions()">{{ r_show_options ? 'Discard' : 'Show' }} Options</a>
+              <a href="#" v-if="r_show_options" @click="saveReaderOptions();focusOnReader()">Save Options</a>
+              <a href="#" @click="toggleReaderOptions();focusOnReader()">{{ r_show_options ? 'Discard' : 'Show' }} Options</a>
             </div>
           </div>
           <div class="df fdc f1 w-100">

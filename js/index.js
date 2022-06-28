@@ -1129,10 +1129,14 @@ app = new Vue({
     },
     setReadingChapterIndex(index = 0) {
       this.r_chapter_index = index;
-      document.getElementById("novel-reader").scrollTo(0, 0);
+      let reader = document.getElementById("novel-reader");
+      reader.scrollTo(0, 0);
       document
         .querySelector('[href="#' + this.r_chapter_index + '"]')
         .scrollIntoViewIfNeeded(false);
+      setTimeout(() => {
+        reader.focus();
+      }, 1);
     },
     loadPreviousChapter(reader, offset = 1, scrollDown = true) {
       if (!chapterChangeLock) {
@@ -1227,6 +1231,11 @@ app = new Vue({
       }
       await saveConfigData("r_reader_options");
       this.r_show_options = false;
+    },
+    focusOnReader() {
+      setTimeout(() => {
+        document.getElementById("novel-reader").focus();
+      }, 1);
     },
     //#endregion
   },
