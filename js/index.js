@@ -37,6 +37,8 @@ let coverDirectoryPath = dataDirectoryPath + "covers/";
 let novelDirectoryPath = dataDirectoryPath + "novels/";
 
 let globalCallbacks = {};
+let chapterChangeLock = false;
+let chapterChangeLockTimeout = 200;
 
 const simpleEvent = function (context) {
   if (context === void 0) {
@@ -1141,26 +1143,42 @@ app = new Vue({
         .scrollIntoViewIfNeeded(false);
     },
     loadPreviousChapter(reader) {
-      if (this.r_chapter_index != 0) {
-        this.r_chapter_index--;
-        setTimeout(() => {
-          let actualScrollHeight = reader.scrollHeight - reader.clientHeight;
-          reader.scrollTo(0, actualScrollHeight);
-        }, 1);
-        document
-          .querySelector('[href="#' + this.r_chapter_index + '"]')
-          .scrollIntoViewIfNeeded(false);
+      if (!chapterChangeLock) {
+        if (this.r_chapter_index != 0) {
+          chapterChangeLock = true;
+          this.r_chapter_index--;
+          setTimeout(() => {
+            let actualScrollHeight = reader.scrollHeight - reader.clientHeight;
+            reader.scrollTo(0, actualScrollHeight);
+          }, 1);
+          document
+            .querySelector('[href="#' + this.r_chapter_index + '"]')
+            .scrollIntoViewIfNeeded(false);
+          // lil bit of delay before allowing chapter change,
+          // to disallow repeated triggers resulting in chapter skips
+          setTimeout(() => {
+            chapterChangeLock = false;
+          }, chapterChangeLockTimeout);
+        }
       }
     },
     loadNextChapter(reader) {
-      if (this.r_chapters && this.r_chapters[this.r_chapter_index + 1]) {
-        this.r_chapter_index++;
-        setTimeout(() => {
-          reader.scrollTo(0, 0);
-        }, 1);
-        document
-          .querySelector('[href="#' + this.r_chapter_index + '"]')
-          .scrollIntoViewIfNeeded(false);
+      if (!chapterChangeLock) {
+        if (this.r_chapters && this.r_chapters[this.r_chapter_index + 1]) {
+          chapterChangeLock = true;
+          this.r_chapter_index++;
+          setTimeout(() => {
+            reader.scrollTo(0, 0);
+          }, 1);
+          document
+            .querySelector('[href="#' + this.r_chapter_index + '"]')
+            .scrollIntoViewIfNeeded(false);
+          // lil bit of delay before allowing chapter change,
+          // to disallow repeated triggers resulting in chapter skips
+          setTimeout(() => {
+            chapterChangeLock = false;
+          }, chapterChangeLockTimeout);
+        }
       }
     },
     exitReadingMode() {
@@ -1372,7 +1390,9 @@ let keyboardEventFunc = function (event) {
         } else if (direction > 0) {
           // wanna go down ?
           let actualScrollHeight = reader.scrollHeight - reader.clientHeight;
-          // freaking 10 px scrollHeight hack here, took me quite some time faaaaaak
+          // freaking 10 px scrollHeight hack here,
+          // coz apparently the scroll sometimes never reaches the bottom before stopping scroll
+          // took me quite some time faaaaaak
           if (reader.scrollTop + 10 < actualScrollHeight) {
             if (power < max_power) {
               reader.scrollBy(0, power * direction);
