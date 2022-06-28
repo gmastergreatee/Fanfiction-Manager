@@ -166,15 +166,20 @@ app = new Vue({
   },
   data() {
     return {
-      darkMode: true,
+      //#region Main variables
+      mainWebView: null,
+      console: null,
+      tabs: ["Library", "Rules", "Tester"],
 
       rules: [],
       loading_rules: true,
 
       novels: [],
       loading_novels: true,
+      //#endregion
 
       app_options: {
+        darkMode: true,
         showNewOnly: false,
         showCheckUpdatedOnly: false,
         showGridLayout: false,
@@ -184,7 +189,7 @@ app = new Vue({
         showConsole: false,
       },
 
-      //#region Reader
+      //#region Reader Mode
       reading_mode: false,
       r_novel: null,
       loading_chapters: false,
@@ -200,12 +205,6 @@ app = new Vue({
         displayChapterNumbers: false,
       },
       r_temp_reader_options: null,
-      //#endregion
-
-      //#region Main variables
-      mainWebView: null,
-      console: null,
-      tabs: ["Library", "Rules", "Tester"],
       //#endregion
 
       //#region Library
@@ -252,7 +251,8 @@ app = new Vue({
   },
   methods: {
     toggleDarkMode() {
-      this.darkMode = !this.darkMode;
+      appOptionsChanged = true;
+      this.app_options.darkMode = !this.app_options.darkMode;
     },
     isTabActive(tabName = "") {
       return this.tabs[this.app_options.activeTab] == tabName;
@@ -1131,11 +1131,14 @@ app = new Vue({
         .querySelector('[href="#' + this.r_chapter_index + '"]')
         .scrollIntoViewIfNeeded(false);
     },
-    loadPreviousChapter(reader) {
+    loadPreviousChapter(reader, offset = 1) {
       if (!chapterChangeLock) {
-        if (this.r_chapter_index != 0) {
+        if (offset > 0 && this.r_chapter_index > 0) {
           chapterChangeLock = true;
-          this.r_chapter_index--;
+          if (this.r_chapter_index - offset < 0) {
+            offset = this.r_chapter_index;
+          }
+          this.r_chapter_index -= offset;
           setTimeout(() => {
             let actualScrollHeight = reader.scrollHeight - reader.clientHeight;
             reader.scrollTo(0, actualScrollHeight);
@@ -1151,11 +1154,18 @@ app = new Vue({
         }
       }
     },
-    loadNextChapter(reader) {
+    loadNextChapter(reader, offset = 1) {
       if (!chapterChangeLock) {
-        if (this.r_chapters && this.r_chapters[this.r_chapter_index + 1]) {
+        if (
+          offset > 0 &&
+          this.r_chapters &&
+          this.r_chapter_index + 1 < this.r_chapters.length
+        ) {
           chapterChangeLock = true;
-          this.r_chapter_index++;
+          if (this.r_chapter_index + offset + 1 > this.r_chapters.length) {
+            offset = this.r_chapters.length - this.r_chapter_index;
+          }
+          this.r_chapter_index += offset;
           setTimeout(() => {
             reader.scrollTo(0, 0);
           }, 1);
@@ -1660,6 +1670,7 @@ async function loadAllConfigs() {
   });
 
   loadConfigData("app_options", {
+    darkMode: true,
     showNewOnly: false,
     showCheckUpdatedOnly: false,
     showGridLayout: false,

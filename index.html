@@ -13,7 +13,7 @@
 
 <body>
   <div id="main" class="df h-100 w-100 fdc" v-cloak>
-    <link v-if="darkMode" rel="stylesheet" href="./css/dark.css" />
+    <link v-if="app_options.darkMode" rel="stylesheet" href="./css/dark.css" />
     <div class="f1 w-100" :class="{'df': !reading_mode, 'dn': reading_mode}">
       <div class="fdc br wp-200" :class="{ 'df': showSideBar, 'dn': !showSideBar }">
         <div class="dib bb tac fwb p-4">ND_v3</div>
@@ -28,7 +28,7 @@
         <div class="df bb fwb p-4">
           <div class="f1">{{ tabs[app_options.activeTab] }} -</div>
           <div>
-            <a href="#" class="mx-4" @click="toggleDarkMode()">SwitchTo{{ darkMode ? 'LightMode' : 'DarkMode' }}</a>
+            <a href="#" class="mx-4" @click="toggleDarkMode()">SwitchTo{{ app_options.darkMode ? 'LightMode' : 'DarkMode' }}</a>
             <a v-if="tabs[app_options.activeTab] != 'Rules'" class="ml-4" href="#" @click="toggleRenderer()">{{ showRenderer ?
               'Hide'
               : 'Show' }} Renderer</a>
@@ -310,7 +310,7 @@
         <div v-if="loading_chapters" class="mx-4">Loading...[{{ r_chapterIndex_loaded.length }}/{{
           r_novel.ChapterURLs.length }}]
         </div>
-        <a href="#" class="mx-4" @click="toggleDarkMode()">SwitchTo{{ darkMode ? 'LightMode' : 'DarkMode' }}</a>
+        <a href="#" class="mx-4" @click="toggleDarkMode()">SwitchTo{{ app_options.darkMode ? 'LightMode' : 'DarkMode' }}</a>
         <a href="#" class="ml-4" @click="exitReadingMode()">Back</a>
       </div>
       <div class="df fdr f1">
