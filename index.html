@@ -328,7 +328,8 @@
           </div>
         </div>
         <div class="wp-200 h-100 pr" :class="{'dn': !r_show_sidebar}">
-          <div class="pa w-100 h-100 df fdc oya br pt-4 pl-4 pr-4">
+          <div class="pa w-100 h-100 df fdc oya br pt-4 pl-4 pr-4" @mouseover="mouseOverChapterList($event)"
+            @mouseleave="mouseLeaveChapterList()" tabindex="1">
             <div v-for="(url,i) in r_novel.ChapterURLs" class="df fdr bt bb bl br mb-4"
               :class="{'chapter-active': i == r_chapter_index}">
               <a :href="'#' + i" class="dib tdn toe wsn oh w-100 p-4" @click="setReadingChapterIndex(i)">
@@ -340,9 +341,9 @@
         <div class="df fdc f1">
           <div class="df fdr p-4 bb">
             <div class="df fdc f1 novel-chapters">
-              <a href="#" class="dib tdn toe wsn oh w-100" @click="toggleReadingModeSidebar();focusOnReader()">{{
-                getSelectedChapterName
-                }}</a>
+              <a href="#" class="dib tdn toe wsn oh w-100" @click="toggleReadingModeSidebar();focusOnReader()">
+                {{ getSelectedChapterName }}
+              </a>
             </div>
             <div>
               <a href="#" v-if="r_show_options" @click="saveReaderOptions();focusOnReader()">Save Options</a>
@@ -354,7 +355,8 @@
             <div class="df fdc bb" :class="{'dn': !r_show_options}">
               <div class="df fdr p-4">
                 <div class="fwb mr-4">Styles :</div>
-                <textarea id="novel-styles-text" class="f1 hp-200 rn" placeholder="Enter design code here for chapter view"
+                <textarea id="novel-styles-text" class="f1 hp-200 rn"
+                  placeholder="Enter design code here for chapter view"
                   v-model="r_reader_options.r_chapter_styles"></textarea>
               </div>
               <div class="df fdr p-4 aic">
@@ -365,8 +367,8 @@
             <div id="novel-reader-styles" class="dn" v-html="r_reader_options.r_chapter_styles"></div>
             <div id="reader-styles" class="f1 pr w-100">
               <div id="novel-reader" class="fdc jcc aic f1 pa oya w-100 h-100 p-4" tabindex="0"
-                :class="{'dib': r_chapterIndex_loaded.length > r_chapter_index, 'df': r_chapterIndex_loaded.length <= r_chapter_index}"
-                v-html="getSelectedChapterContent"></div>
+                :class="{'dib': r_chapterIndex_loaded.includes(r_chapter_index), 'df': !r_chapterIndex_loaded.includes(r_chapter_index)}"
+                v-html="getSelectedChapterContent" @mouseover="focusOnReader()"></div>
               <div class="pa l-0 t-0 h-100 cp df fdc jcc bgct c-invert hover" id="btn-back"
                 @click="readerPageUpKeyDown()">
                 &lt;-
