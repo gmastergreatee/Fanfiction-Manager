@@ -130,9 +130,10 @@ function handleComs() {
   ipcMain.handle("file-download", downloadFile);
   ipcMain.handle("path-exists", pathExists);
   ipcMain.handle("path-delete", deletePath);
+  ipcMain.handle("send-input", sendInput);
 }
 
-//#region
+//#region APIS
 function showMessageBox(e, text = "", caption = "") {
   if (text.trim() && caption.trim()) {
     dialog.showMessageBoxSync(mainWindow, {
@@ -188,6 +189,10 @@ async function readFile(e, filePath) {
 
 async function rootDir() {
   return __dirname;
+}
+
+async function sendInput(e, type, accelerator) {
+  mainWindow.webContents.sendInputEvent({ type: type, keyCode: accelerator });
 }
 
 async function downloadFile(e, url, filePath, index, callBackName) {

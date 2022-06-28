@@ -18,6 +18,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
     ipcRenderer.invoke("file-download", url, filePath, index, cb),
   pathExists: (somePath) => ipcRenderer.invoke("path-exists", somePath),
   deletePath: (somePath) => ipcRenderer.invoke("path-delete", somePath),
+  sendInput: (type, accelerator) =>
+    ipcRenderer.invoke("send-input", type, accelerator),
 
   // --- main to renderer
   log: (callback) => ipcRenderer.on("log-message", callback),

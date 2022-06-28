@@ -99,3 +99,11 @@ div.chapter-active {
 .goto-box {
   background-color: #3339;
 }
+
+.c-invert {
+  color: #333;
+}
+
+.c-invert.hover:hover {
+  color: #fff;
+}

@@ -1,4 +1,4 @@
 {
-  "r_chapter_styles": "<style>\n#novel-reader {\n\n\n\n}\n#novel-reader * {\n\nfont-size: 20px;\n\n}\n</style>",
+  "r_chapter_styles": "<style>\n#novel-reader {\n\n\n\n}\n#novel-reader * {\n\nfont-size: 20px;\n\n}\n#btn-back {\n\n\n\n}\n#btn-forward {\n\n\n\n}\n#novel-chapters {\n\n\n\n}\n#novel-chapters a {\n\n\n\n}\n</style>",
   "displayChapterNumbers": true
 }

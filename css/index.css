@@ -329,6 +329,7 @@ div.chapter-active {
 
 #novel-reader {
   padding: 30px 50px;
+  outline: none;
 }
 
 .cover-image img {
@@ -369,4 +370,42 @@ div.chapter-active {
   align-items: center;
   flex-flow: row;
   background-color: #fff9;
+}
+
+.l-0 {
+  left: 0;
+}
+
+.t-0 {
+  top: 0;
+}
+
+.r-0 {
+  right: 0;
+}
+
+div.bgct {
+  background-color: transparent;
+}
+
+.c-invert {
+  color: #fff;
+}
+
+.c-invert.hover:hover {
+  color: #000;
+}
+
+#btn-back,
+#btn-forward {
+  width: 40px;
+  align-items: center;
+}
+
+#btn-back {
+  padding-left: 10px;
+}
+
+#btn-forward {
+  padding-right: 10px;
 }

@@ -1216,8 +1216,14 @@ app = new Vue({
       if (this.r_show_options) {
         this.r_reader_options = JSON.parse(this.r_temp_reader_options);
         this.r_temp_reader_options = null;
+        this.focusOnReader();
       } else {
         this.r_temp_reader_options = JSON.stringify(this.r_reader_options);
+        setTimeout(() => {
+          let stylesEl = document.getElementById("novel-styles-text");
+          stylesEl.focus();
+          stylesEl.scrollTo(0, 0);
+        }, 2);
       }
       this.r_show_options = !this.r_show_options;
     },
@@ -1227,14 +1233,28 @@ app = new Vue({
     async saveReaderOptions() {
       if (!this.r_reader_options.r_chapter_styles) {
         this.r_reader_options.r_chapter_styles =
-          "<style>\n#novel-reader {\n\n\n\n}\n#novel-reader * {\n\nfont-size: 20px;\n\n}\n</style>";
+          "<style>\n#novel-reader {\n\n\n\n}\n#novel-reader * {\n\nfont-size: 20px;\n\n}\n#btn-back {\n\n\n\n}\n#btn-forward {\n\n\n\n}\n#novel-chapters {\n\n\n\n}\n#novel-chapters a {\n\n\n\n}\n</style>";
       }
       await saveConfigData("r_reader_options");
       this.r_show_options = false;
     },
     focusOnReader() {
       setTimeout(() => {
-        document.getElementById("novel-reader").focus();
+        if (!this.r_show_options) {
+          document.getElementById("novel-reader").focus();
+        }
+      }, 1);
+    },
+    readerPageUpKeyDown() {
+      document.getElementById("novel-reader").focus();
+      setTimeout(() => {
+        sendInput("keyDown", "PageUp");
+      }, 1);
+    },
+    readerPageDownKeyDown() {
+      document.getElementById("novel-reader").focus();
+      setTimeout(() => {
+        sendInput("keyDown", "PageDown");
       }, 1);
     },
     //#endregion
@@ -1683,6 +1703,15 @@ async function pathExists(somePath) {
  */
 async function deletePath(somePath) {
   await window.electronAPI.deletePath(somePath);
+}
+
+/**
+ * Simulate Input events to AppWindow
+ * @param {string} type Event type
+ * @param {*} accelerator The button to be sent
+ */
+async function sendInput(type = "keyDown", accelerator) {
+  await window.electronAPI.sendInput(type, accelerator);
 }
 
 //#endregion
