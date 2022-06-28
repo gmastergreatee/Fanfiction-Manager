@@ -1375,12 +1375,12 @@ function deactivateReadingHotkeys() {
 
 let keyboardEventFunc = function (event) {
   if (app) {
+    let key = event.keyCode;
     if (app.r_novel) {
       let reader = document.getElementById("novel-reader");
 
       // Enter key
-      if (event.keyCode == 13 && app.r_show_goto_mode) {
-        let index = app.r_chapter_index;
+      if (key == 13 && app.r_show_goto_mode) {
         let nextChapterIndex = document.getElementById("goto-input").value - 1;
         let offset = nextChapterIndex - app.r_chapter_index;
         if (offset < 0) {
@@ -1392,21 +1392,32 @@ let keyboardEventFunc = function (event) {
       }
 
       // Ctrl+G key
-      if (event.keyCode == 71 && event.ctrlKey) {
+      if (key == 71 && event.ctrlKey) {
         app.enterGoToChapterMode();
         return;
       }
 
       // Ctrl+H key
-      if (event.keyCode == 72 && event.ctrlKey) {
+      if (key == 72 && event.ctrlKey) {
         app.toggleReadingModeSidebar();
         return;
       }
 
+      // Ctrl+Home or Ctrl+End
+      if ((key == 36 || key == 35) && event.ctrlKey) {
+        if (key == 36) {
+          app.setReadingChapterIndex(0);
+        } else if (key == 35) {
+          app.setReadingChapterIndex(app.r_chapters.length - 1);
+        }
+        return;
+      }
+
       if (document.activeElement == reader) {
-        let key = event.keyCode;
         if (
           key == 32 || // space
+          key == 35 || // end
+          key == 36 || // home
           key == 33 || // pageUp
           key == 34 || // pageDown
           key == 37 || // leftArrow
@@ -1430,10 +1441,11 @@ let keyboardEventFunc = function (event) {
           // right or down
           if (key == 39 || key == 40) direction++;
 
-          if (key == 32 || key == 33 || key == 34) {
-            // space or pageUp or pageDown
+          if (key == 32 || key == 33 || key == 34 || key == 35 || key == 36) {
+            // space or pageUp or pageDown or end or home
             power = max_power;
-            if (shift || key == 33) direction--;
+            // shift+space pr pageUp or home
+            if ((shift && key == 32) || key == 33 || key == 36) direction--;
             else direction++;
           }
 
@@ -1487,9 +1499,11 @@ let keyboardEventFunc = function (event) {
     }
 
     // Escape key
-    if (event.keyCode == 27) {
+    if (key == 27) {
       if (app.r_show_goto_mode) {
         app.exitGoToChapterMode();
+      } else if (app.r_show_options) {
+        app.toggleReaderOptions();
       } else if (app.r_novel) {
         app.exitReadingMode();
       }
