@@ -28,8 +28,10 @@
         <div class="df bb fwb p-4">
           <div class="f1">{{ tabs[app_options.activeTab] }} -</div>
           <div>
-            <a href="#" class="mx-4" @click="toggleDarkMode()">SwitchTo{{ app_options.darkMode ? 'LightMode' : 'DarkMode' }}</a>
-            <a v-if="tabs[app_options.activeTab] != 'Rules'" class="ml-4" href="#" @click="toggleRenderer()">{{ showRenderer ?
+            <a href="#" class="mx-4" @click="toggleDarkMode()">SwitchTo{{ app_options.darkMode ? 'LightMode' :
+              'DarkMode' }}</a>
+            <a v-if="tabs[app_options.activeTab] != 'Rules'" class="ml-4" href="#" @click="toggleRenderer()">{{
+              showRenderer ?
               'Hide'
               : 'Show' }} Renderer</a>
           </div>
@@ -145,7 +147,8 @@
                   <div class="f1">
                     <a href="#">GridLayout</a>
                     <a href="#" @click="toggleNewOnly()">{{ app_options.showNewOnly ? 'NewOnlyOff' : 'NewOnlyOn'}}</a>
-                    <a href="#" @click="toggleCheckUpdatedOnly()">{{ app_options.showCheckUpdatedOnly ? 'CheckUpdatedOnlyOff' :
+                    <a href="#" @click="toggleCheckUpdatedOnly()">{{ app_options.showCheckUpdatedOnly ?
+                      'CheckUpdatedOnlyOff' :
                       'CheckUpdatedOnlyOn'}}</a>
                   </div>
                   <div>
@@ -253,7 +256,8 @@
                     <div class="f1">Test Results -</div>
                     <a href="#" @click="toggleTestResults">{{ app_options.showTestResults ? 'Collapse' : 'Expand' }}</a>
                   </div>
-                  <div class="hp-300 pr bt" :class="{'dib': app_options.showTestResults, 'dn': !app_options.showTestResults}">
+                  <div class="hp-300 pr bt"
+                    :class="{'dib': app_options.showTestResults, 'dn': !app_options.showTestResults}">
                     <div class="df fdc w-100 h-100">
                       <div class="bb p-4">
                         Page Type : {{ test_result_page_type }}
@@ -310,10 +314,17 @@
         <div v-if="loading_chapters" class="mx-4">Loading...[{{ r_chapterIndex_loaded.length }}/{{
           r_novel.ChapterURLs.length }}]
         </div>
-        <a href="#" class="mx-4" @click="toggleDarkMode()">SwitchTo{{ app_options.darkMode ? 'LightMode' : 'DarkMode' }}</a>
+        <a href="#" class="mx-4" @click="toggleDarkMode()">SwitchTo{{ app_options.darkMode ? 'LightMode' : 'DarkMode'
+          }}</a>
         <a href="#" class="ml-4" @click="exitReadingMode()">Back</a>
       </div>
       <div class="df fdr f1">
+        <div v-if="r_show_goto_mode" class="goto-box">
+          <div class="df fdr p-4 bb bt bl br aic">
+            <div class="ml-4">Goto Chapter :</div>
+            <input class="mx-4" id="goto-input" type="number" min="1" :max="r_chapters.length" v-model="r_goto_offset">
+          </div>
+        </div>
         <div class="wp-200 h-100 pr" :class="{'dn': !r_show_sidebar}">
           <div class="pa w-100 h-100 df fdc oya br pt-4 pl-4 pr-4">
             <div v-for="(url,i) in r_novel.ChapterURLs" class="df fdr bt bb bl br mb-4"
@@ -327,7 +338,8 @@
         <div class="df fdc f1">
           <div class="df fdr p-4 bb">
             <div class="df fdc f1">
-              <a href="#" class="dib tdn toe wsn oh w-100" @click="toggleReadingModeSidebar()">{{ getSelectedChapterName }}</a>
+              <a href="#" class="dib tdn toe wsn oh w-100" @click="toggleReadingModeSidebar()">{{ getSelectedChapterName
+                }}</a>
             </div>
             <div>
               <a href="#" v-if="r_show_options" @click="saveReaderOptions()">Save Options</a>

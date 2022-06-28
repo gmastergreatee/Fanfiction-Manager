@@ -4,6 +4,7 @@ body {
 
 div {
   color: white;
+  background-color: #333333;
 }
 
 a {
@@ -19,6 +20,7 @@ a.disabled {
 }
 
 input[type="text"],
+input[type="number"],
 textarea {
   background-color: #4b4b4b;
   color: white;
@@ -92,4 +94,8 @@ div.chapter-active {
 
 .cover-image img[alt]:after {
   background-color: #333;
+}
+
+.goto-box {
+  background-color: #3339;
 }

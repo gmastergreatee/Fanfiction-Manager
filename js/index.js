@@ -176,7 +176,6 @@ app = new Vue({
 
       novels: [],
       loading_novels: true,
-      //#endregion
 
       app_options: {
         darkMode: true,
@@ -188,6 +187,11 @@ app = new Vue({
         showTestResults: false,
         showConsole: false,
       },
+
+      iframe_working: false,
+      iframe_url: dummyPageUrl,
+      status: "NA",
+      //#endregion
 
       //#region Reader Mode
       reading_mode: false,
@@ -205,6 +209,9 @@ app = new Vue({
         displayChapterNumbers: false,
       },
       r_temp_reader_options: null,
+
+      r_show_goto_mode: false,
+      r_goto_offset: 0,
       //#endregion
 
       //#region Library
@@ -243,10 +250,6 @@ app = new Vue({
       test_result_content: "",
 
       //#endregion
-
-      iframe_working: false,
-      iframe_url: dummyPageUrl,
-      status: "NA",
     };
   },
   methods: {
@@ -1131,7 +1134,7 @@ app = new Vue({
         .querySelector('[href="#' + this.r_chapter_index + '"]')
         .scrollIntoViewIfNeeded(false);
     },
-    loadPreviousChapter(reader, offset = 1) {
+    loadPreviousChapter(reader, offset = 1, scrollDown = true) {
       if (!chapterChangeLock) {
         if (offset > 0 && this.r_chapter_index > 0) {
           chapterChangeLock = true;
@@ -1139,10 +1142,13 @@ app = new Vue({
             offset = this.r_chapter_index;
           }
           this.r_chapter_index -= offset;
-          setTimeout(() => {
-            let actualScrollHeight = reader.scrollHeight - reader.clientHeight;
-            reader.scrollTo(0, actualScrollHeight);
-          }, 1);
+          if (scrollDown) {
+            setTimeout(() => {
+              let actualScrollHeight =
+                reader.scrollHeight - reader.clientHeight;
+              reader.scrollTo(0, actualScrollHeight);
+            }, 1);
+          }
           document
             .querySelector('[href="#' + this.r_chapter_index + '"]')
             .scrollIntoViewIfNeeded(false);
@@ -1156,14 +1162,10 @@ app = new Vue({
     },
     loadNextChapter(reader, offset = 1) {
       if (!chapterChangeLock) {
-        if (
-          offset > 0 &&
-          this.r_chapters &&
-          this.r_chapter_index + 1 < this.r_chapters.length
-        ) {
+        if (offset > 0 && this.r_chapters) {
           chapterChangeLock = true;
           if (this.r_chapter_index + offset + 1 > this.r_chapters.length) {
-            offset = this.r_chapters.length - this.r_chapter_index;
+            offset = this.r_chapters.length - this.r_chapter_index - 1;
           }
           this.r_chapter_index += offset;
           setTimeout(() => {
@@ -1179,6 +1181,18 @@ app = new Vue({
           }, chapterChangeLockTimeout);
         }
       }
+    },
+    enterGoToChapterMode() {
+      this.r_goto_offset = this.r_chapter_index + 1;
+      this.r_show_goto_mode = true;
+      setTimeout(() => {
+        document.getElementById("goto-input").select();
+      }, 1);
+    },
+    exitGoToChapterMode() {
+      this.r_goto_offset = 0;
+      this.r_show_goto_mode = false;
+      document.getElementById("novel-reader").focus();
     },
     exitReadingMode() {
       this.reading_mode = false;
@@ -1209,7 +1223,7 @@ app = new Vue({
     async saveReaderOptions() {
       if (!this.r_reader_options.r_chapter_styles) {
         this.r_reader_options.r_chapter_styles =
-          "<style>\n#novel-reader {\n\nbackground-color: #111;\n\n}\n#novel-reader * {\n\nfont-size: 20px;\ncolor: #bbb;\n\n}\n</style>";
+          "<style>\n#novel-reader {\n\n\n\n}\n#novel-reader * {\n\nfont-size: 20px;\n\n}\n</style>";
       }
       await saveConfigData("r_reader_options");
       this.r_show_options = false;
@@ -1331,87 +1345,118 @@ function deactivateReadingHotkeys() {
 }
 
 let keyboardEventFunc = function (event) {
-  if (app && app.r_novel) {
-    let reader = document.getElementById("novel-reader");
-    if (document.activeElement == reader) {
-      let key = event.keyCode;
-      if (
-        key == 32 || // space
-        key == 33 || // pageUp
-        key == 34 || // pageDown
-        key == 37 || // leftArrow
-        key == 38 || // upArrow
-        key == 39 || // rightArrow
-        key == 40 // downArrow
-      ) {
-        let shift = event.shiftKey;
-        let direction = 0;
-        let power = 0;
+  if (app) {
+    if (app.r_novel) {
+      let reader = document.getElementById("novel-reader");
 
-        let max_power = 100;
-
-        // left or right
-        if (key == 37 || key == 39) power = max_power / 4;
-        // up or down
-        if (key == 38 || key == 40) power = max_power / 2;
-
-        // left or up
-        if (key == 37 || key == 38) direction--;
-        // right or down
-        if (key == 39 || key == 40) direction++;
-
-        if (key == 32 || key == 33 || key == 34) {
-          // space or pageUp or pageDown
-          power = max_power;
-          if (shift || key == 33) direction--;
-          else direction++;
+      // Enter key
+      if (event.keyCode == 13 && app.r_show_goto_mode) {
+        let index = app.r_chapter_index;
+        let nextChapterIndex = document.getElementById("goto-input").value - 1;
+        let offset = nextChapterIndex - app.r_chapter_index;
+        if (offset < 0) {
+          app.loadPreviousChapter(reader, -offset, false);
+        } else if (offset > 0) {
+          app.loadNextChapter(reader, offset);
         }
+        app.exitGoToChapterMode();
+      }
 
-        // wanna go up ?
-        if (direction < 0) {
-          if (reader.scrollTop > 0) {
-            if (power < max_power) {
-              reader.scrollBy(0, power * direction);
+      // Ctrl+G key
+      if (event.keyCode == 71 && event.ctrlKey) {
+        app.enterGoToChapterMode();
+        return;
+      }
+
+      if (document.activeElement == reader) {
+        let key = event.keyCode;
+        if (
+          key == 32 || // space
+          key == 33 || // pageUp
+          key == 34 || // pageDown
+          key == 37 || // leftArrow
+          key == 38 || // upArrow
+          key == 39 || // rightArrow
+          key == 40 // downArrow
+        ) {
+          let shift = event.shiftKey;
+          let direction = 0;
+          let power = 0;
+
+          let max_power = 100;
+
+          // left or right
+          if (key == 37 || key == 39) power = max_power / 4;
+          // up or down
+          if (key == 38 || key == 40) power = max_power / 2;
+
+          // left or up
+          if (key == 37 || key == 38) direction--;
+          // right or down
+          if (key == 39 || key == 40) direction++;
+
+          if (key == 32 || key == 33 || key == 34) {
+            // space or pageUp or pageDown
+            power = max_power;
+            if (shift || key == 33) direction--;
+            else direction++;
+          }
+
+          // wanna go up ?
+          if (direction < 0) {
+            if (reader.scrollTop > 0) {
+              if (power < max_power) {
+                reader.scrollBy(0, power * direction);
+                event.preventDefault();
+              }
+            } else {
+              app.loadPreviousChapter(reader);
               event.preventDefault();
             }
-          } else {
-            app.loadPreviousChapter(reader);
-            event.preventDefault();
-          }
-          setTimeout(() => {
-            firstVisibleEl = Array.from(reader.children).find(
-              (i) => i.offsetTop > reader.scrollTop
-            );
-            if (firstVisibleEl) {
-              firstOffsetClientTop =
-                reader.scrollTop - firstVisibleEl.offsetTop;
-            }
-          }, 10);
-        } else if (direction > 0) {
-          // wanna go down ?
-          let actualScrollHeight = reader.scrollHeight - reader.clientHeight;
-          // freaking 10 px scrollHeight hack here,
-          // coz apparently the scroll sometimes never reaches the bottom before stopping scroll
-          // took me quite some time faaaaaak
-          if (reader.scrollTop + 10 < actualScrollHeight) {
-            if (power < max_power) {
-              reader.scrollBy(0, power * direction);
+            setTimeout(() => {
+              firstVisibleEl = Array.from(reader.children).find(
+                (i) => i.offsetTop > reader.scrollTop
+              );
+              if (firstVisibleEl) {
+                firstOffsetClientTop =
+                  reader.scrollTop - firstVisibleEl.offsetTop;
+              }
+            }, 10);
+          } else if (direction > 0) {
+            // wanna go down ?
+            let actualScrollHeight = reader.scrollHeight - reader.clientHeight;
+            // freaking 10 px scrollHeight hack here,
+            // coz apparently the scroll sometimes never reaches the bottom before stopping scroll
+            // took me quite some time faaaaaak
+            if (reader.scrollTop + 10 < actualScrollHeight) {
+              if (power < max_power) {
+                reader.scrollBy(0, power * direction);
+                event.preventDefault();
+              }
+            } else {
+              app.loadNextChapter(reader);
               event.preventDefault();
             }
-          } else {
-            app.loadNextChapter(reader);
-            event.preventDefault();
+            setTimeout(() => {
+              firstVisibleEl = Array.from(reader.children).find(
+                (i) => i.offsetTop > reader.scrollTop
+              );
+              if (firstVisibleEl) {
+                firstOffsetClientTop =
+                  reader.scrollTop - firstVisibleEl.offsetTop;
+              }
+            }, 10);
           }
-          setTimeout(() => {
-            firstVisibleEl = Array.from(reader.children).find(
-              (i) => i.offsetTop > reader.scrollTop
-            );
-            if (firstVisibleEl) {
-              firstOffsetClientTop =
-                reader.scrollTop - firstVisibleEl.offsetTop;
-            }
-          }, 10);
         }
+      }
+    }
+
+    // Escape key
+    if (event.keyCode == 27) {
+      if (app.r_show_goto_mode) {
+        app.exitGoToChapterMode();
+      } else if (app.r_novel) {
+        app.exitReadingMode();
       }
     }
   }
@@ -1706,6 +1751,6 @@ setInterval(() => {
     saveConfigData("app_options");
     appOptionsChanged = false;
   }
-}, 5000);
+}, 3000);
 
 //#endregion
