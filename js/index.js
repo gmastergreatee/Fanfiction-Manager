@@ -25,8 +25,6 @@ let default_Chapter_Code = `let retMe = [
 
 return retMe;`;
 
-let debugReadingMode = false;
-
 // --------------------------------------------------------------------------------------------------------------------
 
 let dummyPageUrl = "./dummy.html";
@@ -137,29 +135,6 @@ app = new Vue({
   el: "#main",
   async mounted() {
     rootDirectory = await rootDir();
-
-    if (debugReadingMode) {
-      this.reading_mode = true;
-      this.r_novel = {
-        CoverURL: "./data/covers/7d466fe2-210a-4ce7-bd08-86ab4955e728.png",
-        Title: "Reincarnation Of Overlord",
-        Summary:
-          "What if Suzuki Satoru gets reincarnated in the new world. What will happen ? Will he take the path of Overlord ? Or will he create his own path ? (Being rewritten)",
-        ChapterCount: 5,
-        ChapterURLs: [
-          "https://www.fanfiction.net/s/13861458/1/Reincarnation-Of-Overlord",
-          "https://www.fanfiction.net/s/13861458/2/Reincarnation-Of-Overlord",
-          "https://www.fanfiction.net/s/13861458/3/Reincarnation-Of-Overlord",
-          "https://www.fanfiction.net/s/13861458/4/Reincarnation-Of-Overlord",
-          "https://www.fanfiction.net/s/13861458/5/Reincarnation-Of-Overlord",
-        ],
-        GUID: "7d466fe2-210a-4ce7-bd08-86ab4955e728",
-        URL: "https://www.fanfiction.net/s/13861458/1/Reincarnation-Of-Overlord",
-        DownloadedCount: 5,
-        CheckUpdates: true,
-      };
-      this.loadChapters();
-    }
 
     loadAllConfigs();
     this.mainWebView = document.getElementById("mainWebView");
@@ -1272,6 +1247,8 @@ app = new Vue({
   },
 });
 
+
+
 //#region Hotkeys + Mouse events
 
 //#region Reading mode
@@ -1448,6 +1425,8 @@ let mouseEventFunc = function (event) {
 
 //#endregion
 
+//#region Logging
+
 /**
  * Changes the status text and logs to console
  * @param {string} text The text to log
@@ -1493,6 +1472,8 @@ function logVerbose(text = "", more_text = "") {
     app.console.scrollTo(0, app.console.scrollHeight);
   }
 }
+
+//#endregion
 
 async function loadAllConfigs() {
   let root = rootDirectory;
@@ -1568,7 +1549,7 @@ async function saveConfigData(configName = "", callback = null) {
 
 //#endregion
 
-// -------- main to renderer
+//#region Electron to Browser
 
 window.electronAPI.log((event, text, more_text = "") => {
   if (text) {
@@ -1582,6 +1563,8 @@ window.electronAPI.callGlobalCallBack((event, callBackName, data) => {
     cb(data);
   }
 });
+
+//#endregion
 
 //#region Electron API wrappers
 
