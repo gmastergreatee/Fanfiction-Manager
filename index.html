@@ -20,16 +20,16 @@
         <div class="df fdc">
           <div v-for="(t, i) in tabs" @click="setActiveTab(i)" class="df fdr bb cp p-4">
             <div class="f1"><a href="#">{{ t }}</a></div>
-            <div v-if="activeTab == i">-></div>
+            <div v-if="app_options.activeTab == i">-></div>
           </div>
         </div>
       </div>
       <div class="df fdc f1">
         <div class="df bb fwb p-4">
-          <div class="f1">{{ tabs[activeTab] }} -</div>
+          <div class="f1">{{ tabs[app_options.activeTab] }} -</div>
           <div>
             <a href="#" class="mx-4" @click="toggleDarkMode()">SwitchTo{{ darkMode ? 'LightMode' : 'DarkMode' }}</a>
-            <a v-if="tabs[activeTab] != 'Rules'" class="ml-4" href="#" @click="toggleRenderer()">{{ showRenderer ?
+            <a v-if="tabs[app_options.activeTab] != 'Rules'" class="ml-4" href="#" @click="toggleRenderer()">{{ showRenderer ?
               'Hide'
               : 'Show' }} Renderer</a>
           </div>
@@ -144,8 +144,8 @@
                 <div class="df fdr p-4 bt">
                   <div class="f1">
                     <a href="#">GridLayout</a>
-                    <a href="#" @click="toggleNewOnly()">{{ showNewOnly ? 'NewOnlyOff' : 'NewOnlyOn'}}</a>
-                    <a href="#" @click="toggleCheckUpdatedOnly()">{{ showCheckUpdatedOnly ? 'CheckUpdatedOnlyOff' :
+                    <a href="#" @click="toggleNewOnly()">{{ app_options.showNewOnly ? 'NewOnlyOff' : 'NewOnlyOn'}}</a>
+                    <a href="#" @click="toggleCheckUpdatedOnly()">{{ app_options.showCheckUpdatedOnly ? 'CheckUpdatedOnlyOff' :
                       'CheckUpdatedOnlyOn'}}</a>
                   </div>
                   <div>
@@ -251,9 +251,9 @@
                 <div class="df fdc">
                   <div class="df fdr p-4 bt fwb">
                     <div class="f1">Test Results -</div>
-                    <a href="#" @click="toggleTestResults">{{ showTestResults ? 'Collapse' : 'Expand' }}</a>
+                    <a href="#" @click="toggleTestResults">{{ app_options.showTestResults ? 'Collapse' : 'Expand' }}</a>
                   </div>
-                  <div class="hp-300 pr bt" :class="{'dib': showTestResults, 'dn': !showTestResults}">
+                  <div class="hp-300 pr bt" :class="{'dib': app_options.showTestResults, 'dn': !app_options.showTestResults}">
                     <div class="df fdc w-100 h-100">
                       <div class="bb p-4">
                         Page Type : {{ test_result_page_type }}
@@ -289,10 +289,10 @@
             </div>
             <div class="df fdr p-4 bt">
               <div class="f1">Console</div>
-              <a v-if="showConsole" href="#" class="mr-4 pr-4" @click="clearWebConsole()">Clear</a>
-              <a href="#" @click="toggleWebConsole()">{{ showConsole ? 'Hide' : 'Show' }}</a>
+              <a v-if="app_options.showConsole" href="#" class="mr-4 pr-4" @click="clearWebConsole()">Clear</a>
+              <a href="#" @click="toggleWebConsole()">{{ app_options.showConsole ? 'Hide' : 'Show' }}</a>
             </div>
-            <div class="bt hp-300 pr" :class="{ 'dn': !showConsole }">
+            <div class="bt hp-300 pr" :class="{ 'dn': !app_options.showConsole }">
               <textarea id="web-console" class="w-100 h-100 rn wsp p-4" readonly></textarea>
             </div>
           </div>

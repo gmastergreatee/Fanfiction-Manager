@@ -29,14 +29,15 @@ return retMe;`;
 
 let dummyPageUrl = "./dummy.html";
 
-let configDirectoryPath = "/config/";
-let dataDirectoryPath = "/data/";
-let coverDirectoryPath = dataDirectoryPath + "covers/";
-let novelDirectoryPath = dataDirectoryPath + "novels/";
+let configDirectoryRelativePath = "/config/";
+let dataDirectoryRelativePath = "/data/";
+let coverDirectoryRelativePath = dataDirectoryRelativePath + "covers/";
+let novelDirectoryRelativePath = dataDirectoryRelativePath + "novels/";
 
 let globalCallbacks = {};
 let chapterChangeLock = false;
 let chapterChangeLockTimeout = 200;
+let appOptionsChanged = false;
 
 const simpleEvent = function (context) {
   if (context === void 0) {
@@ -129,12 +130,12 @@ const fileDownloader = function (context) {
 };
 
 let onMainWebViewLoadedEvent = simpleEvent();
-let rootDirectory = "";
+let rootDirectoryAbsolutePath = "";
 
 app = new Vue({
   el: "#main",
   async mounted() {
-    rootDirectory = await rootDir();
+    rootDirectoryAbsolutePath = await rootDir();
 
     loadAllConfigs();
     this.mainWebView = document.getElementById("mainWebView");
@@ -144,7 +145,9 @@ app = new Vue({
       if (!this.iframe_url.endsWith(dummyPageUrl)) {
         if (this.isTabActive("Tester")) {
           log("Loading url", this.iframe_url);
-        } else logVerbose("Loading url", this.iframe_url);
+        } else {
+          logVerbose("Loading url", this.iframe_url);
+        }
       }
     });
     this.mainWebView.addEventListener("dom-ready", () => {
@@ -153,7 +156,9 @@ app = new Vue({
         if (!curr_url.endsWith("dummy.html")) {
           if (this.isTabActive("Tester")) {
             log("Url loaded", this.mainWebView.getURL());
-          } else logVerbose("Url loaded", this.mainWebView.getURL());
+          } else {
+            logVerbose("Url loaded", this.mainWebView.getURL());
+          }
         }
       }
       onMainWebViewLoadedEvent.trigger();
@@ -168,6 +173,16 @@ app = new Vue({
 
       novels: [],
       loading_novels: true,
+
+      app_options: {
+        showNewOnly: false,
+        showCheckUpdatedOnly: false,
+        showGridLayout: false,
+        activeTab: 0,
+        showWebPage: false,
+        showTestResults: false,
+        showConsole: false,
+      },
 
       //#region Reader
       reading_mode: false,
@@ -191,18 +206,10 @@ app = new Vue({
       mainWebView: null,
       console: null,
       tabs: ["Library", "Rules", "Tester"],
-      activeTab: 0,
-
-      showWebPage: false,
-      showTestResults: false,
-      showConsole: false,
       //#endregion
 
       //#region Library
 
-      showNewOnly: false,
-      showCheckUpdatedOnly: false,
-      showGridLayout: false,
       summaryExpandedGUID: "",
 
       //#endregion
@@ -248,18 +255,19 @@ app = new Vue({
       this.darkMode = !this.darkMode;
     },
     isTabActive(tabName = "") {
-      return this.tabs[this.activeTab] == tabName;
+      return this.tabs[this.app_options.activeTab] == tabName;
     },
     setActiveTab(tabIndex = 0) {
-      if (this.activeTab != tabIndex) {
-        this.activeTab = tabIndex;
-        switch (this.activeTab) {
+      if (this.app_options.activeTab != tabIndex) {
+        appOptionsChanged = true;
+        this.app_options.activeTab = tabIndex;
+        switch (this.app_options.activeTab) {
           case 0:
-            this.showWebPage = false;
+            this.app_options.showWebPage = false;
             break;
           case 2:
-            this.showWebPage = true;
-            this.showTestResults = true;
+            this.app_options.showWebPage = true;
+            this.app_options.showTestResults = true;
             break;
           default:
             break;
@@ -267,7 +275,8 @@ app = new Vue({
       }
     },
     toggleRenderer() {
-      this.showWebPage = !this.showWebPage;
+      appOptionsChanged = true;
+      this.app_options.showWebPage = !this.app_options.showWebPage;
     },
     clearWebConsole() {
       this.console.textContent = "";
@@ -287,7 +296,8 @@ app = new Vue({
       }
     },
     toggleWebConsole() {
-      this.showConsole = !this.showConsole;
+      appOptionsChanged = true;
+      this.app_options.showConsole = !this.app_options.showConsole;
     },
     getEvaluateJavascriptCode(script = "") {
       let sleepCode =
@@ -300,7 +310,8 @@ app = new Vue({
     },
     //#region Rules Related
     toggleTestResults() {
-      this.showTestResults = !this.showTestResults;
+      appOptionsChanged = true;
+      this.app_options.showTestResults = !this.app_options.showTestResults;
     },
     resetTestFields(clearGUID = false) {
       if (clearGUID) {
@@ -612,12 +623,15 @@ app = new Vue({
                 new URL(data.CoverURL);
                 let cover_file_name = data["GUID"] + ".png";
                 let cover_file_path =
-                  rootDirectory + coverDirectoryPath + cover_file_name;
+                  rootDirectoryAbsolutePath +
+                  coverDirectoryRelativePath +
+                  cover_file_name;
                 let downloader = fileDownloader();
                 downloader.addEntry(data.CoverURL, cover_file_path);
                 data.CoverURL = "";
                 downloader.download("_cover_image_callback", () => {
-                  data.CoverURL = "." + coverDirectoryPath + cover_file_name;
+                  data.CoverURL =
+                    "." + coverDirectoryRelativePath + cover_file_name;
                   saveConfigArrayData("novels");
                 });
               } catch {
@@ -736,13 +750,15 @@ app = new Vue({
           } catch {}
           let cover_url_from_root_path = t_novel.CoverURL.replace(/^\.+/, "");
           if (cover_url_from_root_path) {
-            pathExists(rootDirectory + cover_url_from_root_path).then(
-              async (e) => {
-                if (e) {
-                  await deletePath(rootDirectory + cover_url_from_root_path);
-                }
+            pathExists(
+              rootDirectoryAbsolutePath + cover_url_from_root_path
+            ).then(async (e) => {
+              if (e) {
+                await deletePath(
+                  rootDirectoryAbsolutePath + cover_url_from_root_path
+                );
               }
-            );
+            });
           }
           if (this.novels.splice(index, 1).length > 0) {
             saveConfigArrayData("novels");
@@ -784,10 +800,13 @@ app = new Vue({
       await saveConfigArrayData("novels");
     },
     toggleNewOnly() {
-      this.showNewOnly = !this.showNewOnly;
+      appOptionsChanged = true;
+      this.app_options.showNewOnly = !this.app_options.showNewOnly;
     },
     toggleCheckUpdatedOnly() {
-      this.showCheckUpdatedOnly = !this.showCheckUpdatedOnly;
+      appOptionsChanged = true;
+      this.app_options.showCheckUpdatedOnly =
+        !this.app_options.showCheckUpdatedOnly;
     },
     setSummaryGUID(guid) {
       if (this.summaryExpandedGUID != guid) {
@@ -846,12 +865,12 @@ app = new Vue({
 
       log("Rule applied -> " + t_rule.rule_name);
 
-      let novel_folder = t_novel.GUID + "/";
+      let novel_full_path = novelDirectoryAbsolutePath(t_novel.GUID);
       let chapter_urls = t_novel.ChapterURLs;
       let urls_to_download = [];
       for (let i = 0; i < chapter_urls.length; i++) {
         let doesChapterFileExist = await pathExists(
-          rootDirectory + novelDirectoryPath + novel_folder + (i + 1) + ".json"
+          novel_full_path + (i + 1) + ".json"
         );
         if (!doesChapterFileExist) {
           urls_to_download.push({ index: i, url: chapter_urls[i] });
@@ -938,11 +957,7 @@ app = new Vue({
             let next_url = "";
             for (let i = 0; i < data.length; i++) {
               let chapter_file_path =
-                rootDirectory +
-                novelDirectoryPath +
-                novel_folder +
-                (t_c_url.index + i + 1) +
-                ".json";
+                novel_full_path + (t_c_url.index + i + 1) + ".json";
               await writeFile(
                 chapter_file_path,
                 JSON.stringify(
@@ -1058,8 +1073,7 @@ app = new Vue({
       ).fill(null);
 
       let chapter_urls = this.r_novel.ChapterURLs;
-      let novel_directory =
-        rootDirectory + novelDirectoryPath + this.r_novel.GUID + "/";
+      let novel_directory = novelDirectoryAbsolutePath(this.r_novel.GUID);
       this.r_chapterIndex_loaded = [];
 
       for (let i = 0; i < chapter_urls.length; i++) {
@@ -1194,10 +1208,10 @@ app = new Vue({
   },
   computed: {
     showRenderer() {
-      return this.showWebPage && this.activeTabStr != "Rules";
+      return this.app_options.showWebPage && this.activeTabStr != "Rules";
     },
     activeTabStr() {
-      return this.tabs[this.activeTab];
+      return this.tabs[this.app_options.activeTab];
     },
     showSideBar() {
       return this.test_rule_guid.length <= 0;
@@ -1206,9 +1220,10 @@ app = new Vue({
     getNovels() {
       return this.novels.filter(
         (i) =>
-          (this.showNewOnly
+          (this.app_options.showNewOnly
             ? i.DownloadedCount < i.ChapterCount || i.ChapterCount <= 0
-            : true) && (this.showCheckUpdatedOnly ? i.CheckUpdates : true)
+            : true) &&
+          (this.app_options.showCheckUpdatedOnly ? i.CheckUpdates : true)
       );
     },
     //#endregion
@@ -1246,8 +1261,6 @@ app = new Vue({
     //#endregion
   },
 });
-
-
 
 //#region Hotkeys + Mouse events
 
@@ -1438,13 +1451,13 @@ function log(text = "", more_text = "") {
   }
   if (more_text.trim().length > 0) {
     console.log(text, "->", more_text);
-    if ((app.showRenderer && app.showConsole) || verboseMode) {
+    if ((app.showRenderer && app.app_options.showConsole) || verboseMode) {
       app.console.textContent =
         app.console.textContent + text + " -> " + more_text + "\r\n";
     }
   } else {
     console.log(text);
-    if ((app.showRenderer && app.showConsole) || verboseMode) {
+    if ((app.showRenderer && app.app_options.showConsole) || verboseMode) {
       app.console.textContent = app.console.textContent + text + "\r\n";
     }
   }
@@ -1475,39 +1488,6 @@ function logVerbose(text = "", more_text = "") {
 
 //#endregion
 
-async function loadAllConfigs() {
-  let root = rootDirectory;
-  let configDirPath = root + "/config";
-  let configDirPresent = await pathExists(configDirPath);
-  if (!configDirPresent) {
-    await createDir(configDirPath);
-  }
-  loadConfigData("r_reader_options", {
-    r_chapter_styles:
-      "<style>\n    #novel-reader * {\n\n        font-size: 20px;\n\n    }\n</style>",
-    displayChapterNumbers: false,
-  });
-
-  await loadConfigArrayData("rules");
-  app.loading_rules = false;
-
-  await loadConfigArrayData("novels");
-  app.loading_novels = false;
-}
-
-/**
- * Generates and returns a GUID `string`
- * @returns {string} GUID
- */
-function guid() {
-  return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, (c) =>
-    (
-      c ^
-      (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))
-    ).toString(16)
-  );
-}
-
 //#region Save Configs
 
 async function loadConfigArrayData(configName = "") {
@@ -1520,8 +1500,7 @@ async function saveConfigArrayData(configName = "", callback = null) {
 
 async function loadConfigData(configName = "", defaultValue = {}) {
   if (configName.trim()) {
-    let root = rootDirectory;
-    let configFilePath = root + configDirectoryPath + configName + ".json";
+    let configFilePath = configDirectoryAbsolutePath() + configName + ".json";
     let configFilePresent = await pathExists(configFilePath);
     if (configFilePresent) {
       let fileData = await readFile(configFilePath);
@@ -1538,8 +1517,7 @@ async function loadConfigData(configName = "", defaultValue = {}) {
 
 async function saveConfigData(configName = "", callback = null) {
   if (configName.trim()) {
-    let root = rootDirectory;
-    let configFilePath = root + configDirectoryPath + configName + ".json";
+    let configFilePath = configDirectoryAbsolutePath() + configName + ".json";
     if (app[configName] != null) {
       await writeFile(configFilePath, JSON.stringify(app[configName], null, 2));
       if (callback) callback();
@@ -1642,5 +1620,81 @@ async function pathExists(somePath) {
 async function deletePath(somePath) {
   await window.electronAPI.deletePath(somePath);
 }
+
+//#endregion
+
+//#region Utility Functions
+
+function configDirectoryAbsolutePath() {
+  return rootDirectoryAbsolutePath + configDirectoryRelativePath;
+}
+
+function dataDirectoryAbsolutePath() {
+  return rootDirectoryAbsolutePath + dataDirectoryRelativePath;
+}
+
+function coverDirectoryAbsolutePath() {
+  return rootDirectoryAbsolutePath + coverDirectoryRelativePath;
+}
+
+function novelDirectoryAbsolutePath(guid = "") {
+  if (guid) {
+    return (
+      rootDirectoryAbsolutePath + novelDirectoryRelativePath + "/" + guid + "/"
+    );
+  }
+  return "";
+}
+
+async function loadAllConfigs() {
+  let configDirPath = configDirectoryAbsolutePath();
+  let configDirPresent = await pathExists(configDirPath);
+  if (!configDirPresent) {
+    await createDir(configDirPath);
+  }
+
+  loadConfigData("r_reader_options", {
+    r_chapter_styles:
+      "<style>\n    #novel-reader * {\n\n        font-size: 20px;\n\n    }\n</style>",
+    displayChapterNumbers: false,
+  });
+
+  loadConfigData("app_options", {
+    showNewOnly: false,
+    showCheckUpdatedOnly: false,
+    showGridLayout: false,
+    activeTab: 0,
+    showWebPage: false,
+    showTestResults: false,
+    showConsole: false,
+  });
+
+  await loadConfigArrayData("rules");
+  app.loading_rules = false;
+
+  await loadConfigArrayData("novels");
+  app.loading_novels = false;
+}
+
+/**
+ * Generates and returns a GUID `string`
+ * @returns {string} GUID
+ */
+function guid() {
+  return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, (c) =>
+    (
+      c ^
+      (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))
+    ).toString(16)
+  );
+}
+
+// timer for saving app & novel options
+setInterval(() => {
+  if (appOptionsChanged && app) {
+    saveConfigData("app_options");
+    appOptionsChanged = false;
+  }
+}, 5000);
 
 //#endregion
