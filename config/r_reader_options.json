@@ -1,4 +1,4 @@
 {
-  "r_chapter_styles": "<style>#novel-reader {\n\nbackground-color: #111;\n\n}\n#novel-reader * {\n\nfont-size: 20px;\ncolor: #bbb;\n\n}\n</style>",
+  "r_chapter_styles": "<style>\n#novel-reader {\n\n\n\n}\n#novel-reader * {\n\nfont-size: 20px;\n\n}\n</style>",
   "displayChapterNumbers": true
 }
