@@ -1070,22 +1070,28 @@ app = new Vue({
     //#endregion
     //#region Reading Mode
     async enterReadingMode(t_novel) {
-      loadNovelConfigData(t_novel.GUID, "r_reader_options", {
-        r_chapter_styles: chapter_default_styles,
-        displayChapterNumbers: false,
-        r_chapter_index: 0,
-        r_chapter_top_element_index: 0,
-        r_chapter_scroll_top_offset: 0,
-      });
-      this.r_chapter_index = 0;
-      this.reading_mode = true;
-      this.r_novel = t_novel;
-      this.loadChapters();
-      document.title = this.r_novel.Title;
-      activateReadingHotkeys();
-      setTimeout(() => {
-        this.setReadingChapterIndex(this.r_reader_options.r_chapter_index);
-      }, 1);
+      loadNovelConfigData(
+        t_novel.GUID,
+        "r_reader_options",
+        {
+          r_chapter_styles: chapter_default_styles,
+          displayChapterNumbers: false,
+          r_chapter_index: 0,
+          r_chapter_top_element_index: 0,
+          r_chapter_scroll_top_offset: 0,
+        },
+        () => {
+          this.r_chapter_index = 0;
+          this.reading_mode = true;
+          this.r_novel = t_novel;
+          this.loadChapters();
+          document.title = this.r_novel.Title;
+          activateReadingHotkeys();
+          setTimeout(() => {
+            this.setReadingChapterIndex(this.r_reader_options.r_chapter_index);
+          }, 1);
+        }
+      );
     },
     async loadChapters() {
       this.loading_chapters = true;
@@ -1284,7 +1290,8 @@ app = new Vue({
       if (this.auto_reader_focus) {
         setTimeout(() => {
           if (!this.r_show_options) {
-            document.getElementById("novel-reader").focus();
+            let reader = document.getElementById("novel-reader");
+            if (reader) reader.focus();
           }
         }, 1);
       }
