@@ -346,10 +346,11 @@
                 <input type="checkbox" class="hwp20" v-model="r_reader_options.displayChapterNumbers">
               </div>
             </div>
+            <div id="novel-reader-styles" class="dn" v-html="r_reader_options.r_chapter_styles"></div>
             <div class="f1 pr w-100">
               <div id="novel-reader" class="fdc jcc aic f1 pa oya w-100 h-100 p-4" tabindex="0"
                 :class="{'dib': r_chapterIndex_loaded.length > r_chapter_index, 'df': r_chapterIndex_loaded.length <= r_chapter_index}"
-                v-html="r_reader_options.r_chapter_styles + getSelectedChapterContent"></div>
+                v-html="getSelectedChapterContent"></div>
             </div>
           </div>
         </div>

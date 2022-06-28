@@ -1259,31 +1259,9 @@ app = new Vue({
 //#region Reading mode
 
 // To keep track of current reading position if user resizes window
-let novelReaderResizeObserver;
+
 let firstVisibleEl = null;
 let firstOffsetClientTop = 0;
-
-function activateReadingHotkeys() {
-  document.addEventListener("wheel", mouseEventFunc);
-  document.addEventListener("keydown", keyboardEventFunc);
-  novelReaderResizeObserver = new ResizeObserver(resizeEventFunc);
-  setTimeout(() => {
-    let reader = document.getElementById("novel-reader");
-    firstVisibleEl = Array.from(reader.children).find(
-      (i) => i.offsetTop > reader.scrollTop
-    );
-    if (firstVisibleEl) {
-      firstOffsetClientTop = reader.scrollTop - firstVisibleEl.offsetTop;
-    }
-    novelReaderResizeObserver.observe(reader);
-  }, 10);
-}
-
-function deactivateReadingHotkeys() {
-  document.removeEventListener("wheel", mouseEventFunc);
-  document.removeEventListener("keydown", keyboardEventFunc);
-  novelReaderResizeObserver.disconnect();
-}
 
 let resizeEventFunc = function (observer) {
   if (firstVisibleEl) {
@@ -1291,6 +1269,48 @@ let resizeEventFunc = function (observer) {
     observer[0].target.scrollBy(0, firstOffsetClientTop);
   }
 };
+
+let stylechangeEventFunc = function () {
+  let reader = document.getElementById("novel-reader");
+  if (reader && firstVisibleEl) {
+    firstVisibleEl.scrollIntoView();
+    reader.scrollBy(0, firstOffsetClientTop);
+  }
+};
+
+let novelReaderResizeObserver = new ResizeObserver(resizeEventFunc);
+let novelStyleChangeObserver = new MutationObserver(stylechangeEventFunc);
+
+function activateReadingHotkeys() {
+  document.addEventListener("wheel", mouseEventFunc);
+  document.addEventListener("keydown", keyboardEventFunc);
+  setTimeout(() => {
+    // wait for reader to show
+    let reader = document.getElementById("novel-reader");
+    firstVisibleEl = Array.from(reader.children).find(
+      (i) => i.offsetTop > reader.scrollTop
+    );
+    if (firstVisibleEl) {
+      firstOffsetClientTop = reader.scrollTop - firstVisibleEl.offsetTop;
+    }
+
+    // set observers
+    novelReaderResizeObserver.observe(reader);
+    novelStyleChangeObserver.observe(
+      document.getElementById("novel-reader-styles"),
+      {
+        childList: true,
+      }
+    );
+  }, 10);
+}
+
+function deactivateReadingHotkeys() {
+  document.removeEventListener("wheel", mouseEventFunc);
+  document.removeEventListener("keydown", keyboardEventFunc);
+  novelReaderResizeObserver.disconnect();
+  novelStyleChangeObserver.disconnect();
+}
 
 let keyboardEventFunc = function (event) {
   if (app && app.r_novel) {
