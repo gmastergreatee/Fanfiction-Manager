@@ -10,6 +10,12 @@ const {
   Menu,
   globalShortcut,
 } = require("electron");
+
+const gotTheLock = app.requestSingleInstanceLock();
+if (!gotTheLock) {
+  app.quit();
+}
+
 const path = require("path");
 var https = require("https");
 var http = require("http");
@@ -18,6 +24,27 @@ const fs = require("fs");
 let mainWindow;
 
 process.env["ELECTRON_DISABLE_SECURITY_WARNINGS"] = "true";
+
+function registerShortcuts() {
+  globalShortcut.register("CommandOrControl+F", () => {
+    if (mainWindow.isFullScreen()) {
+      mainWindow.setFullScreen(false);
+    } else {
+      mainWindow.setFullScreen(true);
+    }
+  });
+
+  globalShortcut.register("Escape", () => {
+    if (mainWindow.isFullScreen()) {
+      mainWindow.setFullScreen(false);
+    }
+  });
+}
+
+function unregisterShortcuts() {
+  globalShortcut.unregister("CommandOrControl+F");
+  globalShortcut.unregister("Escape");
+}
 
 const createWindow = () => {
   // Create the browser window.
@@ -77,7 +104,7 @@ const createWindow = () => {
   });
 
   mainWindow.on("ready-to-show", () => {
-    mainWindow.showInactive();
+    mainWindow.show();
 
     session.defaultSession.webRequest.onBeforeRequest(
       // { urls: ["*://*./*"] },
@@ -90,19 +117,9 @@ const createWindow = () => {
     );
   });
 
-  globalShortcut.register("CommandOrControl+F", () => {
-    if (mainWindow.isFullScreen()) {
-      mainWindow.setFullScreen(false);
-    } else {
-      mainWindow.setFullScreen(true);
-    }
-  });
-
-  globalShortcut.register("Escape", () => {
-    if (mainWindow.isFullScreen()) {
-      mainWindow.setFullScreen(false);
-    }
-  });
+  registerShortcuts();
+  mainWindow.on("focus", registerShortcuts);
+  mainWindow.on("blur", unregisterShortcuts);
 
   // and load the index.html of the app.
   // mainWindow.loadURL("http://localhost:5500/index.html");
