@@ -8,6 +8,7 @@ const {
   dialog,
   session,
   Menu,
+  globalShortcut,
 } = require("electron");
 const path = require("path");
 var https = require("https");
@@ -87,6 +88,20 @@ const createWindow = () => {
         else callback({ cancel: false });
       }
     );
+  });
+
+  globalShortcut.register("CommandOrControl+F", () => {
+    if (mainWindow.isFullScreen()) {
+      mainWindow.setFullScreen(false);
+    } else {
+      mainWindow.setFullScreen(true);
+    }
+  });
+
+  globalShortcut.register("Escape", () => {
+    if (mainWindow.isFullScreen()) {
+      mainWindow.setFullScreen(false);
+    }
   });
 
   // and load the index.html of the app.
