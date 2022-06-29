@@ -403,6 +403,7 @@ app = new Vue({
               onMainWebViewLoadedEvent.removeListener(
                 this.runTestPageTypeScript
               );
+              this.mainWebView.stop();
               break;
             case -1:
               this.test_result_page_type = "Auto Captcha";
@@ -415,6 +416,7 @@ app = new Vue({
               onMainWebViewLoadedEvent.removeListener(
                 this.runTestPageTypeScript
               );
+              this.mainWebView.stop();
               break;
           }
           return;
@@ -965,61 +967,79 @@ app = new Vue({
           this.mainWebView.stop();
           let t_c_url = urls_to_download[curr_url_index];
           if (data && data.length > 0) {
-            let next_url = "";
-            for (let i = 0; i < data.length; i++) {
-              let chapter_file_path =
-                novel_full_path + (t_c_url.index + i + 1) + ".json";
-              await writeFile(
-                chapter_file_path,
-                JSON.stringify(
-                  { title: data[i].title, content: data[i].content },
-                  null,
-                  2
-                )
-              );
-              next_url = data[i].nextURL;
+            // check for chapter custom redirection
+            // dataFormat -> { retry: 1, nextURL: '' }
+            if (data.retry && data.nextURL) {
+              log("Chapter redirection detected, working...");
+              t_url = data.nextURL;
+              if (t_url != this.iframe_url) {
+                this.iframe_url = t_url;
+              } else {
+                try {
+                  this.mainWebView.loadURL(t_url);
+                } catch {
+                  this.mainWebView.reload();
+                }
+              }
+              return;
             }
-            curr_url_index += data.length;
-            t_novel.DownloadedCount =
-              t_novel.ChapterCount - urls_to_download.length + curr_url_index;
-            if (curr_url_index < urls_to_download.length) {
-              if (!this.stop_download_update_novel) {
-                log(
-                  "[" +
-                    (t_novel.ChapterCount -
-                      (urls_to_download.length - curr_url_index - 1)) +
-                    "/" +
-                    t_novel.ChapterCount +
-                    "] Downloading chapter..."
+            if (data.length > 0) {
+              let next_url = "";
+              for (let i = 0; i < data.length; i++) {
+                let chapter_file_path =
+                  novel_full_path + (t_c_url.index + i + 1) + ".json";
+                await writeFile(
+                  chapter_file_path,
+                  JSON.stringify(
+                    { title: data[i].title, content: data[i].content },
+                    null,
+                    2
+                  )
                 );
-                t_url = next_url
-                  ? next_url
-                  : urls_to_download[curr_url_index].url;
-                if (t_url != this.iframe_url) {
-                  this.iframe_url = t_url;
-                } else {
-                  try {
-                    this.mainWebView.loadURL(t_url);
-                  } catch {
-                    this.mainWebView.reload();
+                next_url = data[i].nextURL;
+              }
+              curr_url_index += data.length;
+              t_novel.DownloadedCount =
+                t_novel.ChapterCount - urls_to_download.length + curr_url_index;
+              if (curr_url_index < urls_to_download.length) {
+                if (!this.stop_download_update_novel) {
+                  log(
+                    "[" +
+                      (t_novel.ChapterCount -
+                        (urls_to_download.length - curr_url_index - 1)) +
+                      "/" +
+                      t_novel.ChapterCount +
+                      "] Downloading chapter..."
+                  );
+                  t_url = next_url
+                    ? next_url
+                    : urls_to_download[curr_url_index].url;
+                  if (t_url != this.iframe_url) {
+                    this.iframe_url = t_url;
+                  } else {
+                    try {
+                      this.mainWebView.loadURL(t_url);
+                    } catch {
+                      this.mainWebView.reload();
+                    }
                   }
+                } else {
+                  this.iframe_url = dummyPageUrl;
+                  this.stop_download_update_novel = false;
+                  saveConfigArrayData("novels");
+                  log("Downloading stopped");
+                  onMainWebViewLoadedEvent.clearAllListeners();
+                  this.d_novel = null;
+                  this.iframe_working = false;
                 }
               } else {
                 this.iframe_url = dummyPageUrl;
-                this.stop_download_update_novel = false;
                 saveConfigArrayData("novels");
-                log("Downloading stopped");
+                log("All chapters downloaded");
                 onMainWebViewLoadedEvent.clearAllListeners();
                 this.d_novel = null;
                 this.iframe_working = false;
               }
-            } else {
-              this.iframe_url = dummyPageUrl;
-              saveConfigArrayData("novels");
-              log("All chapters downloaded");
-              onMainWebViewLoadedEvent.clearAllListeners();
-              this.d_novel = null;
-              this.iframe_working = false;
             }
           } else {
             this.test_url = this.mainWebView.getURL();
@@ -1105,10 +1125,7 @@ app = new Vue({
       this.r_chapterIndex_loaded = [];
 
       for (let i = 0; i < chapter_urls.length; i++) {
-        if (
-          this.r_chapter_index > i &&
-          !this.r_chapterIndex_loaded.includes(this.r_chapter_index)
-        ) {
+        if (!this.r_chapterIndex_loaded.includes(this.r_chapter_index)) {
           if (this.r_chapters[this.r_chapter_index] == null) {
             let chapter_file_name =
               novel_directory + (this.r_chapter_index + 1) + ".json";
@@ -1455,7 +1472,7 @@ function deactivateReadingModeEventListeners() {
 
   let reader = document.getElementById("novel-reader");
   reader.removeEventListener("mousemove", cursorHideFunc);
-  
+
   novelReaderResizeObserver.disconnect();
   novelStyleChangeObserver.disconnect();
 }
@@ -1586,16 +1603,16 @@ let keyboardEventFunc = function (event) {
           }
         }
       }
-    }
 
-    // Escape key
-    if (key == 27) {
-      if (app.r_show_goto_mode) {
-        app.exitGoToChapterMode();
-      } else if (app.r_show_options) {
-        app.toggleReaderOptions();
-      } else if (app.r_novel) {
-        app.exitReadingMode();
+      // Escape key
+      if (key == 27) {
+        if (app.r_show_goto_mode) {
+          app.exitGoToChapterMode();
+        } else if (app.r_show_options) {
+          app.toggleReaderOptions();
+        } else if (app.r_novel) {
+          app.exitReadingMode();
+        }
       }
     }
   }
@@ -1640,6 +1657,19 @@ let mouseEventFunc = function (event) {
 };
 
 //#endregion
+
+let globalKeyboardEventFunction = function (event) {
+  if (app) {
+    let key = event.keyCode;
+    // Ctrl+F key
+    if (key == 70 && event.ctrlKey) {
+      toggleFullScreen();
+      return;
+    }
+  }
+};
+
+document.addEventListener("keydown", globalKeyboardEventFunction);
 
 //#endregion
 
@@ -1788,6 +1818,10 @@ window.electronAPI.callGlobalCallBack((event, callBackName, data) => {
 
 function msgBox(text, caption = appName) {
   window.electronAPI.msgBox(text, caption);
+}
+
+function toggleFullScreen() {
+  window.electronAPI.toggleFullScreen();
 }
 
 /**

@@ -8,7 +8,6 @@ const {
   dialog,
   session,
   Menu,
-  globalShortcut,
 } = require("electron");
 
 const gotTheLock = app.requestSingleInstanceLock();
@@ -24,27 +23,6 @@ const fs = require("fs");
 let mainWindow;
 
 process.env["ELECTRON_DISABLE_SECURITY_WARNINGS"] = "true";
-
-function registerShortcuts() {
-  globalShortcut.register("CommandOrControl+F", () => {
-    if (mainWindow.isFullScreen()) {
-      mainWindow.setFullScreen(false);
-    } else {
-      mainWindow.setFullScreen(true);
-    }
-  });
-
-  globalShortcut.register("Escape", () => {
-    if (mainWindow.isFullScreen()) {
-      mainWindow.setFullScreen(false);
-    }
-  });
-}
-
-function unregisterShortcuts() {
-  globalShortcut.unregister("CommandOrControl+F");
-  globalShortcut.unregister("Escape");
-}
 
 const createWindow = () => {
   // Create the browser window.
@@ -109,17 +87,22 @@ const createWindow = () => {
     session.defaultSession.webRequest.onBeforeRequest(
       // { urls: ["*://*./*"] },
       function (details, callback) {
-        var url = details.url;
-        if (url.includes("adsbygoogle") || url.includes("googleads"))
+        var url = details.url.toLowerCase();
+        if (
+          url.includes("adsbygoogle") ||
+          url.includes("googleads") ||
+          url.includes("wpdiscuz") ||
+          url.includes("amazon") ||
+          url.includes("/ads") ||
+          url.includes("googlesyndication") ||
+          url.includes("adservice") ||
+          url.includes("translate.google")
+        )
           callback({ cancel: true });
         else callback({ cancel: false });
       }
     );
   });
-
-  registerShortcuts();
-  mainWindow.on("focus", registerShortcuts);
-  mainWindow.on("blur", unregisterShortcuts);
 
   // and load the index.html of the app.
   // mainWindow.loadURL("http://localhost:5500/index.html");
@@ -155,6 +138,7 @@ app.on("window-all-closed", () => {
 // code. You can also put them in separate files and require them here.
 function handleComs() {
   ipcMain.on("show-msgbox", showMessageBox);
+  ipcMain.on("toggle-fullscreen", toggleFullScreen);
   ipcMain.handle("dir-create", createDirectory);
   ipcMain.handle("dir-root", rootDir);
   ipcMain.handle("file-read", readFile);
@@ -172,6 +156,14 @@ function showMessageBox(e, text = "", caption = "") {
       message: text,
       title: caption,
     });
+  }
+}
+
+function toggleFullScreen() {
+  if (mainWindow.isFullScreen()) {
+    mainWindow.setFullScreen(false);
+  } else {
+    mainWindow.setFullScreen(true);
   }
 }
 

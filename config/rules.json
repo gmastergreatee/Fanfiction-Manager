@@ -1,5 +1,21 @@
 [
   {
+    "guid": "1456f9af-ab7e-4f5f-b441-77a30ede82b5",
+    "rule_name": "COMRADEMAO",
+    "url_regex": "(?:https://)*(?:www|m)*.comrademao.com/novel/.*",
+    "pagetype_code": "if (jQuery || $) {\n$ = jQuery\n\nif ($('.entry-title').length > 0)\n    return 0;\n\nif ($('#chaptercontent').length > 0)\n    return 0;\n}",
+    "toc_code": "let retMe = {\n  'CoverURL': $('.seriedetailcontent img')[0].src,\n  'Title': $('.infox h1')[0].innerText,\n  'Summary': $('.infox div:last').find('p')[0].innerHTML.replace(/\\n/g,''),\n  'ChapterCount': 1,           // chapter count here\n  'ChapterURLs': Array.from($('#chapterlist li a')).map(i => i.href).reverse(),\n};\n\nretMe.ChapterCount = retMe.ChapterURLs.length;\n\nreturn retMe;",
+    "chapter_code": "if (jQuery || $) {\n    $ = jQuery\n}\n\n$('script,style,iframe').remove();\n\nlet retMe = [\n  {\n    \"title\": $('#chaptercontent .doc_header')[0].innerText,    // title of chapter\n    \"content\": $('#chaptercontent div')[0].innerHTML,  // content\n    \"nextURL\": \"\"   // when \"ChapterCount\" <= 0 & \"nextURL\" always comes non-empty\n                    // will loop infinitely unless something else(javascript) breaks\n  },\n];\n\nreturn retMe;"
+  },
+  {
+    "guid": "16ea8bfb-ab60-4043-a8e8-71a6928d3cd3",
+    "rule_name": "NovelUpdates.com",
+    "url_regex": "(?:https://)*(?:www|m).novelupdates.com/series/.+",
+    "pagetype_code": "if ($('.my_popupreading_open').length >= 1)\n    return 0;",
+    "toc_code": "let retMe = {\n  'CoverURL': '',              // may be empty\n  'Title': 'novel name here',\n  'Summary': '',               // may be empty\n  'ChapterCount': 1,           // chapter count here\n  'ChapterURLs': [             // list of chapter-URLs\n      '',                      // must contain atleast the first chapter URL\n      '',\n  ],\n};\n\nvar secs = 0;\n$('.my_popupreading_open').click();\n\nwhile ($('#my_popupreading a').length <= 0) {\n    await sleep(1000);\n    secs = 1;\n    if (secs >= 10)\n        return null;\n}\n\nretMe.CoverURL = $('.seriesimg img')[0].src;\nretMe.Title = $('.w-blog-content div')[0].innerText;\nretMe.Summary = $('#editdescription').html().replace(/\\n/g,'');\nretMe.ChapterURLs = Array.from($('#my_popupreading a[data-id]')).map(el => el.href).reverse();\nretMe.ChapterCount = retMe.ChapterURLs.length;\n\nreturn retMe;",
+    "chapter_code": "let retMe = [\n  {\n    \"title\": \"\",    // title of chapter\n    \"content\": \"\",  // content\n    \"nextURL\": \"\"   // when \"ChapterCount\" <= 0 & \"nextURL\" always comes non-empty\n                    // will loop infinitely unless something else(javascript) breaks\n  },\n];\n\n//return retMe;\n\n// as novelupdates redirects to externel websites therefore chapter-script won't be run here\nreturn null;"
+  },
+  {
     "guid": "bf04cf84-1bfc-4233-9fa7-19871eaca783",
     "rule_name": "Fanfiction.net",
     "url_regex": "(?:https://)*(?:www|m).fanfiction.net/([a-z]+)/([0-9]+)/([0-9]+)/([a-zA-Z0-9-]+)",
