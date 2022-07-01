@@ -970,7 +970,7 @@ app = new Vue({
             // check for chapter custom redirection
             // dataFormat -> { retry: 1, nextURL: '' }
             if (data.retry && data.nextURL) {
-              log("Chapter redirection detected, working...");
+              log('Chapter redirection detected, working...');
               t_url = data.nextURL;
               if (t_url != this.iframe_url) {
                 this.iframe_url = t_url;
@@ -1101,14 +1101,14 @@ app = new Vue({
           r_chapter_scroll_top_offset: 0,
         },
         () => {
-          this.r_chapter_index = 0;
           this.reading_mode = true;
+          this.r_chapter_index = 0;
           this.r_novel = t_novel;
-          this.loadChapters();
           document.title = this.r_novel.Title;
           activateReadingModeEventListeners();
           setTimeout(() => {
             this.setReadingChapterIndex(this.r_reader_options.r_chapter_index);
+            this.loadChapters();
           }, 1);
         }
       );
@@ -1125,14 +1125,18 @@ app = new Vue({
       this.r_chapterIndex_loaded = [];
 
       for (let i = 0; i < chapter_urls.length; i++) {
-        if (!this.r_chapterIndex_loaded.includes(this.r_chapter_index)) {
+        if (
+          // this.r_chapter_index > i &&
+          !this.r_chapterIndex_loaded.includes(this.r_chapter_index)
+        ) {
           if (this.r_chapters[this.r_chapter_index] == null) {
             let chapter_file_name =
               novel_directory + (this.r_chapter_index + 1) + ".json";
             let chapter_file_exist = await pathExists(chapter_file_name);
             if (chapter_file_exist) {
               let data = await readFile(chapter_file_name);
-              this.r_chapters[this.r_chapter_index] = JSON.parse(data);
+              Vue.set(this.r_chapters, this.r_chapter_index, JSON.parse(data));
+              // this.r_chapters[this.r_chapter_index] = JSON.parse(data);
             }
             this.r_chapterIndex_loaded.push(this.r_chapter_index);
             setTimeout(() => {
