@@ -73,6 +73,10 @@ body {
   border-bottom: 1px solid black;
 }
 
+.wp-150 {
+  width: 150px;
+}
+
 .wp-200 {
   width: 200px;
 }
@@ -318,7 +322,7 @@ div.chapter-active {
   position: absolute;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
+  /* white-space: nowrap; */
   top: 4px;
   bottom: 4px;
   width: 100%;
@@ -360,7 +364,7 @@ div.chapter-active {
 }
 
 .zi-1 {
-  z-index: -1;
+  z-index: 1;
 }
 
 .goto-box {

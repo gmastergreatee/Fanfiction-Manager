@@ -240,6 +240,7 @@ app = new Vue({
 
       d_novel: null,
       stop_download_update_novel: false,
+      u_novel: null,
 
       //#endregion
 
@@ -830,7 +831,7 @@ app = new Vue({
     },
     //#endregion
     //#region Downloader related
-    async downloadUpdateNovel(t_novel) {
+    async downloadNovel(t_novel) {
       if (this.iframe_working) {
         msgBox("Renderer busy, please wait");
         return;
@@ -970,7 +971,7 @@ app = new Vue({
             // check for chapter custom redirection
             // dataFormat -> { retry: 1, nextURL: '' }
             if (data.retry && data.nextURL) {
-              log('Chapter redirection detected, working...');
+              log("Chapter redirection detected, working...");
               t_url = data.nextURL;
               if (t_url != this.iframe_url) {
                 this.iframe_url = t_url;
@@ -1084,8 +1085,171 @@ app = new Vue({
         }
       }
     },
-    stopDownloadUpdateNovel() {
+    stopDownloadNovel() {
       this.stop_download_update_novel = true;
+    },
+    updateNovel(t_novel) {
+      let t_url = t_novel.URL;
+
+      this.iframe_working = true;
+
+      if (!t_url) {
+        msgBox("Please enter the URL");
+        this.iframe_working = false;
+        return;
+      }
+
+      let t_url_origin = "";
+      try {
+        t_url_origin = new URL(t_url).origin;
+      } catch {
+        msgBox("Please enter a valid URL");
+        this.iframe_working = false;
+        return;
+      }
+
+      let t_rule = null;
+      this.rules.every((el) => {
+        if (new RegExp(el.url_regex).test(t_url)) {
+          t_rule = el;
+          return false;
+        }
+        return true;
+      });
+
+      if (!t_rule) {
+        msgBox("No matching rule found for the URL. Please add the rule.");
+        this.iframe_working = false;
+        return;
+      }
+
+      u_novel = t_novel;
+
+      log("Rule applied -> " + t_rule.rule_name);
+      log("Updating Novel Metadata...");
+
+      let onTOCPageConfirmed = async () => {
+        try {
+          logVerbose("Running TOC Script...");
+          let data = await this.mainWebView.executeJavaScript(
+            this.getEvaluateJavascriptCode(t_rule.toc_code)
+          );
+          if (data) {
+            if (!t_novel.CoverURL && data.CoverURL) {
+              try {
+                new URL(data.CoverURL);
+                let cover_file_name = data["GUID"] + ".png";
+                let cover_file_path =
+                  rootDirectoryAbsolutePath +
+                  coverDirectoryRelativePath +
+                  cover_file_name;
+                let downloader = fileDownloader();
+                downloader.addEntry(data.CoverURL, cover_file_path);
+                data.CoverURL = "";
+                downloader.download("_cover_image_callback", () => {
+                  data.CoverURL =
+                    "." + coverDirectoryRelativePath + cover_file_name;
+                  saveConfigArrayData("novels");
+                });
+              } catch {
+                data.CoverURL = "";
+              }
+            }
+            if (
+              (data.ChapterURLs &&
+                data.ChapterURLs.length > t_novel.ChapterURLs.length) ||
+              data.ChapterCount > t_novel.ChapterCount
+            ) {
+              t_novel.ChapterURLs = data.ChapterURLs;
+              t_novel.ChapterCount = t_novel.ChapterURLs.length;
+            }
+            saveConfigArrayData("novels");
+            logVerbose("TOC data retrieved");
+            log("Updated novel -> " + t_novel.Title);
+          } else {
+            this.test_url = this.mainWebView.getURL();
+            log("Error");
+          }
+        } catch (ex) {
+          this.test_url = this.mainWebView.getURL();
+          log("Error");
+        }
+        this.iframe_working = false;
+      };
+
+      let onLoadCallback = async () => {
+        try {
+          let curr_url = this.mainWebView.getURL();
+          if (!curr_url.includes(t_url_origin)) {
+            log("URL changed, probably redirection");
+            log("Re-matching rule");
+            let t_rule_2 = null;
+            this.rules.every((el) => {
+              if (new RegExp(el.url_regex).test(t_url)) {
+                t_rule_2 = el;
+                return false;
+              }
+              return true;
+            });
+            if (!t_rule_2) {
+              log("No rules matched. Keeping original rule.");
+            } else {
+              t_rule = t_rule_2;
+              log("Rule applied -> " + t_rule.rule_name);
+            }
+            t_url_origin = new URL(curr_url).origin;
+          }
+
+          logVerbose("Checking page-type...");
+          let data = await this.mainWebView.executeJavaScript(
+            this.getEvaluateJavascriptCode(t_rule.pagetype_code)
+          );
+          if (data || data == 0) {
+            switch (data) {
+              case 0:
+                onMainWebViewLoadedEvent.clearAllListeners();
+                logVerbose("TOC page found");
+                await onTOCPageConfirmed();
+                this.mainWebView.stop();
+                this.iframe_url = dummyPageUrl;
+                break;
+              case -1:
+              case -2:
+                break;
+              default:
+                onMainWebViewLoadedEvent.clearAllListeners();
+                this.iframe_working = false;
+                this.mainWebView.stop();
+                this.iframe_url = dummyPageUrl;
+                break;
+            }
+            u_novel = null;
+            return;
+          } else {
+            this.test_url = this.mainWebView.getURL();
+            log("Error");
+          }
+        } catch {
+          this.test_url = this.mainWebView.getURL();
+          onMainWebViewLoadedEvent.clearAllListeners();
+          this.mainWebView.stop();
+          this.iframe_working = false;
+          log("Error");
+        }
+        u_novel = null;
+      };
+
+      onMainWebViewLoadedEvent.clearAllListeners();
+      onMainWebViewLoadedEvent.addListener(onLoadCallback);
+      if (t_url != this.iframe_url) {
+        this.iframe_url = t_url;
+      } else {
+        try {
+          this.mainWebView.loadURL(t_url);
+        } catch {
+          this.mainWebView.reload();
+        }
+      }
     },
     //#endregion
     //#region Reading Mode
@@ -1125,10 +1289,7 @@ app = new Vue({
       this.r_chapterIndex_loaded = [];
 
       for (let i = 0; i < chapter_urls.length; i++) {
-        if (
-          // this.r_chapter_index > i &&
-          !this.r_chapterIndex_loaded.includes(this.r_chapter_index)
-        ) {
+        if (!this.r_chapterIndex_loaded.includes(this.r_chapter_index)) {
           if (this.r_chapters[this.r_chapter_index] == null) {
             let chapter_file_name =
               novel_directory + (this.r_chapter_index + 1) + ".json";
@@ -1136,7 +1297,6 @@ app = new Vue({
             if (chapter_file_exist) {
               let data = await readFile(chapter_file_name);
               Vue.set(this.r_chapters, this.r_chapter_index, JSON.parse(data));
-              // this.r_chapters[this.r_chapter_index] = JSON.parse(data);
             }
             this.r_chapterIndex_loaded.push(this.r_chapter_index);
             setTimeout(() => {

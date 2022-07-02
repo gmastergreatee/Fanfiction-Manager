@@ -15,7 +15,7 @@
   <div id="main" class="df h-100 w-100 fdc" v-cloak>
     <link v-if="app_options.darkMode" rel="stylesheet" href="./css/dark.css" />
     <div class="f1 w-100" :class="{'df': !reading_mode, 'dn': reading_mode}">
-      <div class="fdc br wp-200" :class="{ 'df': showSideBar, 'dn': !showSideBar }">
+      <div class="fdc br wp-150" :class="{ 'df': showSideBar, 'dn': !showSideBar }">
         <div class="dib bb tac fwb p-4">ND_v3</div>
         <div class="df fdc">
           <div v-for="(t, i) in tabs" @click="setActiveTab(i)" class="df fdr bb cp p-4">
@@ -28,7 +28,7 @@
         <div class="df bb fwb p-4">
           <div class="f1">{{ tabs[app_options.activeTab] }} -</div>
           <div>
-            <a href="#" class="mx-4" @click="toggleDarkMode()">SwitchTo{{ app_options.darkMode ? 'LightMode' :
+            <a href="#" class="mx-4" @click="toggleDarkMode()">{{ app_options.darkMode ? 'LightMode' :
               'DarkMode' }}</a>
             <a v-if="tabs[app_options.activeTab] != 'Rules'" class="ml-4" href="#" @click="toggleRenderer()">{{
               showRenderer ?
@@ -50,7 +50,8 @@
                     <div v-for="n in getNovels" class="m-4 bt bb bl br df fdr p-4" :class="{
                         'detailing': isDetailingMode(n), 
                         'new-updates': n.ChapterCount > n.DownloadedCount,
-                        'downloading': n == d_novel}">
+                        'downloading': n == d_novel,
+                        'updating': n == u_novel}">
                       <div class="df pr-4 br pr cover-image">
                         <div class="df fdc pr">
                           <img class="bb bt bl br" :src="n.CoverURL" alt="Image Not Found">
@@ -74,13 +75,14 @@
                           <div>
                             <a href="#" @click="enterReadingMode(n)">Read</a>
                             <a href="#" :class="{'disabled': iframe_working}" @click="viewNovelDetails(n)">Details</a>
-                            <a href="#" :class="{'disabled': iframe_working || isDetailingMode(n)}">UpdateInfo</a>
+                            <a href="#" :class="{'disabled': iframe_working || isDetailingMode(n), 'dn': !n.CheckUpdates}"
+                              @click="updateNovel(n)">Update</a>
                             <a href="#" :class="{
                                 'disabled': iframe_working || isDetailingMode(n),
                                  'dn': n.ChapterCount <= n.DownloadedCount
-                                }" @click="downloadUpdateNovel(n)">Download</a>
+                                }" @click="downloadNovel(n)">Download</a>
                             <a href="#" v-if="n == d_novel" class="cr" :class="{'disabled': stop_download_update_novel}"
-                              @click="stopDownloadUpdateNovel()">{{
+                              @click="stopDownloadNovel()">{{
                               stop_download_update_novel ? 'Stopping' : 'Stop' }}</a>
                             <a href="#" :class="{'disabled': iframe_working || isDetailingMode(n)}"
                               @click="deleteNovel($event,n)">Delete</a>
@@ -89,7 +91,7 @@
                       </div>
                     </div>
                   </div>
-                  <div v-if="getNovels.length == 0" class="df fdr h-100 w-100 jcc aic">
+                  <div v-if="getNovels.length == 0" class="df fdr h-100 w-100 jcc aic zi-1">
                     !~~~ {{loading_novels ?
                     'Loading Novels' :
                     (
@@ -145,14 +147,12 @@
                 </div>
                 <div class="df fdr p-4 bt">
                   <div class="f1">
-                    <a href="#">GridLayout</a>
                     <a href="#" @click="toggleNewOnly()">{{ app_options.showNewOnly ? 'NewOnlyOff' : 'NewOnlyOn'}}</a>
                     <a href="#" @click="toggleCheckUpdatedOnly()">{{ app_options.showCheckUpdatedOnly ?
                       'CheckUpdatedOnlyOff' :
                       'CheckUpdatedOnlyOn'}}</a>
                   </div>
                   <div>
-                    <a href="#" :class="{'disabled': iframe_working || detailing_novel}">UpdateAllInfo</a>
                     <a href="#">ImportNovel</a>
                   </div>
                 </div>
@@ -315,8 +315,8 @@
           }}/{{
           r_novel.ChapterURLs.length }}]
         </div>
-        <a href="#" class="mx-4" @click="toggleDarkMode();focusOnReader()">SwitchTo{{ app_options.darkMode ? 'LightMode'
-          : 'DarkMode'
+        <a href="#" class="mx-4" @click="toggleDarkMode();focusOnReader()">{{ app_options.darkMode ? 'LightMode':
+          'DarkMode'
           }}</a>
         <a href="#" class="ml-4" @click="exitReadingMode()">Back</a>
       </div>
