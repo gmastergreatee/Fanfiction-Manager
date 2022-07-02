@@ -7,27 +7,49 @@ Provides extreme flexibility with the help of `Rule` system to `power-users`* in
 
 `Novice-users`** may only download `Novels` from site whose `Rule` is included.
 
-Current Status: __APLHA__
+Current Status: __BETA__
 
 - Add new `Novel`
 - Download `Novel`
+- Update `Novel`
 - Rules included for sites
-  - `Fanfiction.net`
-  - `Webnovel.com`
+  - `fanfiction.net`
+  - `webnovel.com`
+  - `novelupdates.com`
+    - need to add rules related to external linked sites
+    - out of scope
+  - `comrademao.com`
 - `Rules Editor`
 - Novel `Reading Mode`
 - Novel `Details Editor`
 
 ---
 
+### Shortcuts
+
+Global
+
+| Keys     | Function   |
+| -------- | ---------- |
+| Ctrl + F | Fullscreen |
+
+Reading Mode
+
+| Keys     | Function       |
+| -------- | -------------- |
+| Ctrl + G | Go to Chapter  |
+| Ctrl + H | Toggle Sidebar |
+
+---
+
 ### Known Issues
-- [WIP] No `Update Novel` option yet
-- [NYI] Multiple utility `buttons`'s do not work
+- [NYI] Rules export option.
+- [NYI] Novel Export/Import feature.
 - [NYI] Download next `Chapter` using `nextURL` when `ChapterCount` is <= 0
   - Although, the case is possible, but currently, no known website requires this.
     - Further testing required.
   - Possibility of infinite loop, in-case `nextURL` always comes up non-empty.
-- More testing required for downloading from other websites.
+- [WIP] More testing required for downloading from other websites.
 
 ---
 
