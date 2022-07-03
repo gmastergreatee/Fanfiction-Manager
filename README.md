@@ -44,7 +44,6 @@ Reading Mode
 
 ### Known Issues
 - [NYI] Rules export option.
-- [NYI] Novel Export/Import feature.
 - [NYI] Download next `Chapter` using `nextURL` when `ChapterCount` is <= 0
   - Although, the case is possible, but currently, no known website requires this.
     - Further testing required.
