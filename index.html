@@ -233,6 +233,14 @@
                           oninput="this.style.height = '';this.style.height = this.scrollHeight + 15 + 'px';"
                           spellcheck="false"></textarea>
                       </div>
+                      <div class="df fdr mb-4">
+                        <label class="mr-4 mt-4">URLBlocks :</label>
+                        <textarea class="p-2 f1 hp-200 wsn oyh rn" v-model="test_url_blocks"
+                          placeholder="URLs containg these will be blocked.&#10;Need to be one entry per line.&#10;&#10;Example -&#10;&#10;googleads&#10;adsbygoogle"
+                          onfocus="this.style.height = '';this.style.height = this.scrollHeight + 15 + 'px';"
+                          oninput="this.style.height = '';this.style.height = this.scrollHeight + 15 + 'px';"
+                          spellcheck="false"></textarea>
+                      </div>
                       <div class="df fdr jce fwb fww">
                         <a href="#" class="mx-4" :class="{'disabled': iframe_working}"
                           @click="loadTestURL()">LoadURL</a>

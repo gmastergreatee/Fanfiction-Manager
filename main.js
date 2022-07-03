@@ -21,6 +21,16 @@ var http = require("http");
 const fs = require("fs");
 
 let mainWindow;
+let url_includes_to_block = [
+  "adsbygoogle",
+  "googleads",
+  "wpdiscuz",
+  "amazon",
+  "/ads",
+  "googlesyndication",
+  "adservice",
+  "translate.google",
+];
 
 process.env["ELECTRON_DISABLE_SECURITY_WARNINGS"] = "true";
 
@@ -41,19 +51,19 @@ const createWindow = () => {
     autoHideMenuBar: true,
   });
 
-  mainWindow.webContents.session.webRequest.onHeadersReceived(
-    (details, callback) => {
-      callback({
-        responseHeaders: Object.fromEntries(
-          Object.entries(details.responseHeaders).filter(
-            (header) =>
-              !/x-frame-options/i.test(header[0]) &&
-              !/content-security-policy/i.test(header[0])
-          )
-        ),
-      });
-    }
-  );
+  // mainWindow.webContents.session.webRequest.onHeadersReceived(
+  //   (details, callback) => {
+  //     callback({
+  //       responseHeaders: Object.fromEntries(
+  //         Object.entries(details.responseHeaders).filter(
+  //           (header) =>
+  //             !/x-frame-options/i.test(header[0]) &&
+  //             !/content-security-policy/i.test(header[0])
+  //         )
+  //       ),
+  //     });
+  //   }
+  // );
 
   let selectionMenu = Menu.buildFromTemplate([
     { role: "copy" },
@@ -87,19 +97,23 @@ const createWindow = () => {
     session.defaultSession.webRequest.onBeforeRequest(
       // { urls: ["*://*./*"] },
       function (details, callback) {
-        var url = details.url.toLowerCase();
-        if (
-          url.includes("adsbygoogle") ||
-          url.includes("googleads") ||
-          url.includes("wpdiscuz") ||
-          url.includes("amazon") ||
-          url.includes("/ads") ||
-          url.includes("googlesyndication") ||
-          url.includes("adservice") ||
-          url.includes("translate.google")
-        )
-          callback({ cancel: true });
-        else callback({ cancel: false });
+        let blocked = false;
+        let url = details.url.toLowerCase();
+        if (url.startsWith("file://")) {
+          callback({ cancel: false });
+          return;
+        }
+
+        url_includes_to_block.every((x) => {
+          if (url.includes(x.toLowerCase())) {
+            callback({ cancel: true });
+            blocked = true;
+            return false;
+          }
+          return true;
+        });
+
+        if (!blocked) callback({ cancel: false });
       }
     );
   });
@@ -138,6 +152,7 @@ app.on("window-all-closed", () => {
 // code. You can also put them in separate files and require them here.
 function handleComs() {
   ipcMain.on("show-msgbox", showMessageBox);
+  ipcMain.on("block-includes", urlIncludesToBlock);
   ipcMain.on("toggle-fullscreen", toggleFullScreen);
   ipcMain.handle("dir-create", createDirectory);
   ipcMain.handle("dir-root", rootDir);
@@ -157,6 +172,10 @@ function showMessageBox(e, text = "", caption = "") {
       title: caption,
     });
   }
+}
+
+function urlIncludesToBlock(e, includes = []) {
+  url_includes_to_block = includes;
 }
 
 function toggleFullScreen() {

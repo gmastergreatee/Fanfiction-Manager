@@ -7,6 +7,7 @@ const { contextBridge, ipcRenderer } = require("electron");
 contextBridge.exposeInMainWorld("electronAPI", {
   // --- renderer to main - 1 way
   msgBox: (text, caption) => ipcRenderer.send("show-msgbox", text, caption),
+  urlIncludesToBlock: (includes) => ipcRenderer.send("block-includes", includes),
   toggleFullScreen: () => ipcRenderer.send("toggle-fullscreen"),
 
   // --- renderer to main - 2 way

@@ -254,6 +254,7 @@ app = new Vue({
       test_toc_code: default_TOC_Code,
       test_novel_toc_data: null,
       test_chapter_code: default_Chapter_Code,
+      test_url_blocks: "",
 
       test_result_page_type: "UNKNOWN",
       test_result_content: "",
@@ -320,6 +321,19 @@ app = new Vue({
         "(async function() {" + sleepCode + htmlDecodeCode + script + "})()"
       );
     },
+    blockURLIncludes(url_blocks = "") {
+      let blocks = url_blocks.trim();
+      if (blocks.includes("\n")) {
+        blocks = blocks
+          .split("\n")
+          .map((i) => i.trim())
+          .filter((i) => i != "");
+      } else {
+        if (blocks.trim() != "") blocks = [blocks];
+        else blocks = [];
+      }
+      urlIncludesToBlock(blocks);
+    },
     //#region Rules Related
     toggleTestResults() {
       appOptionsChanged = true;
@@ -338,6 +352,7 @@ app = new Vue({
         pagetype_code: "",
         toc_code: default_TOC_Code,
         chapter_code: default_Chapter_Code,
+        url_blocks: "",
       };
 
       if (this.test_rule_guid) {
@@ -349,6 +364,7 @@ app = new Vue({
             pagetype_code: t_rule.pagetype_code,
             toc_code: t_rule.toc_code,
             chapter_code: t_rule.chapter_code,
+            url_blocks: t_rule.url_blocks,
           };
         }
       }
@@ -374,6 +390,8 @@ app = new Vue({
           msgBox("Please enter a valid URL");
           return;
         }
+
+        this.blockURLIncludes(this.test_url_blocks);
 
         onMainWebViewLoadedEvent.clearAllListeners();
         onMainWebViewLoadedEvent.addListener(this.runTestPageTypeScript);
@@ -404,7 +422,6 @@ app = new Vue({
               onMainWebViewLoadedEvent.removeListener(
                 this.runTestPageTypeScript
               );
-              this.mainWebView.stop();
               break;
             case -1:
               this.test_result_page_type = "Auto Captcha";
@@ -507,6 +524,7 @@ app = new Vue({
           t_rule.pagetype_code = this.test_pagetype_code;
           t_rule.toc_code = this.test_toc_code;
           t_rule.chapter_code = this.test_chapter_code;
+          t_rule.url_blocks = this.test_url_blocks;
         } else {
           this.rules.unshift({
             guid: guid(),
@@ -515,6 +533,7 @@ app = new Vue({
             pagetype_code: this.test_pagetype_code,
             toc_code: this.test_toc_code,
             chapter_code: this.test_chapter_code,
+            url_blocks: this.test_url_blocks,
           });
         }
       } else {
@@ -525,6 +544,7 @@ app = new Vue({
           pagetype_code: this.test_pagetype_code,
           toc_code: this.test_toc_code,
           chapter_code: this.test_chapter_code,
+          url_blocks: this.test_url_blocks,
         });
       }
       saveConfigArrayData("rules");
@@ -538,6 +558,7 @@ app = new Vue({
         this.test_pagetype_code = t_rule.pagetype_code;
         this.test_toc_code = t_rule.toc_code;
         this.test_chapter_code = t_rule.chapter_code;
+        this.test_url_blocks = t_rule.url_blocks;
 
         this.setActiveTab(2);
       }
@@ -624,6 +645,8 @@ app = new Vue({
       log("Rule applied -> " + t_rule.rule_name);
       log("Downloading Novel Metadata...");
 
+      this.blockURLIncludes(t_rule.url_blocks);
+
       let onTOCPageConfirmed = async () => {
         try {
           logVerbose("Running TOC Script...");
@@ -643,6 +666,7 @@ app = new Vue({
                 let downloader = fileDownloader();
                 downloader.addEntry(data.CoverURL, cover_file_path);
                 data.CoverURL = "";
+                this.blockURLIncludes("");
                 downloader.download("_cover_image_callback", () => {
                   data.CoverURL =
                     "." + coverDirectoryRelativePath + cover_file_name;
@@ -690,6 +714,7 @@ app = new Vue({
             } else {
               t_rule = t_rule_2;
               log("Rule applied -> " + t_rule.rule_name);
+              this.blockURLIncludes(t_rule.url_blocks);
             }
             t_url_origin = new URL(curr_url).origin;
           }
@@ -773,6 +798,9 @@ app = new Vue({
                 );
               }
             });
+          }
+          if (await pathExists(novelDirectoryAbsolutePath(t_novel.GUID))) {
+            await deletePath(novelDirectoryAbsolutePath(t_novel.GUID));
           }
           if (this.novels.splice(index, 1).length > 0) {
             saveConfigArrayData("novels");
@@ -901,6 +929,7 @@ app = new Vue({
 
       this.d_novel = t_novel;
       let curr_url_index = 0;
+      this.blockURLIncludes(t_rule.url_blocks);
 
       let onLoadCallback = async () => {
         try {
@@ -921,6 +950,7 @@ app = new Vue({
             } else {
               t_rule = t_rule_2;
               log("Rule applied -> " + t_rule.rule_name);
+              this.blockURLIncludes(t_rule.url_blocks);
             }
             t_url_origin = new URL(curr_url).origin;
           }
@@ -1127,6 +1157,7 @@ app = new Vue({
 
       log("Rule applied -> " + t_rule.rule_name);
       log("Updating Novel Metadata...");
+      this.blockURLIncludes(t_rule.url_blocks);
 
       let onTOCPageConfirmed = async () => {
         try {
@@ -1196,6 +1227,7 @@ app = new Vue({
             } else {
               t_rule = t_rule_2;
               log("Rule applied -> " + t_rule.rule_name);
+              this.blockURLIncludes(t_rule.url_blocks);
             }
             t_url_origin = new URL(curr_url).origin;
           }
@@ -1982,6 +2014,10 @@ window.electronAPI.callGlobalCallBack((event, callBackName, data) => {
 
 function msgBox(text, caption = appName) {
   window.electronAPI.msgBox(text, caption);
+}
+
+function urlIncludesToBlock(includes = []) {
+  window.electronAPI.urlIncludesToBlock(includes);
 }
 
 function toggleFullScreen() {
