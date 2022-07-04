@@ -75,7 +75,8 @@
                           <div>
                             <a href="#" @click="enterReadingMode(n)">Read</a>
                             <a href="#" :class="{'disabled': iframe_working}" @click="viewNovelDetails(n)">Details</a>
-                            <a href="#" :class="{'disabled': iframe_working || isDetailingMode(n), 'dn': !n.CheckUpdates}"
+                            <a href="#"
+                              :class="{'disabled': iframe_working || isDetailingMode(n), 'dn': !n.CheckUpdates}"
                               @click="updateNovel(n)">Update</a>
                             <a href="#" :class="{
                                 'disabled': iframe_working || isDetailingMode(n),
