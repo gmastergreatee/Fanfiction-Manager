@@ -71,29 +71,67 @@ Reading Mode
   - if supported, `return 0;`
   - for captcha page
     - `return -1` for Auto-Captcha
+      - meaning page will auto-redirect, just need to wait for it
     - `return -2` for Manual-Captcha
+      - meaning there's a chance user needs to use the renderer to proceed from the page
+      - otherwise similar to `Auto-Captcha`, if auto-redirects
   - returning anything else will mean
     - page not supported by rule
 - TOCScript
   - Table Of Contents
   - gets `Novel` info from page
-  - for return-type, check in-app hints
+  - return type -
+    ```JSON
+    {
+      "CoverURL": "",              // may be empty
+      "Title": "novel name here",
+      "Summary": "",               // may be empty
+      "ChapterCount": 1,           // chapter count here
+      "ChapterURLs": [             // list of chapter-URLs
+          "",                      // must contain atleast the first chapter URL
+          "",
+      ],
+    }
+    ```
 - ChapterScript
   - gets the `Chapter` data from page
-  - for return-type, check in-app hints
+  - return type -
+    ```JSON
+    [
+      {
+        "title": "",    // title of chapter
+        "content": "",  // content
+        "nextURL": ""   // when "ChapterCount" <= 0 & "nextURL" always comes non-empty
+                        // will loop infinitely unless something else(javascript) breaks
+      },
+    ]
+    ```
+  - maybe one or more chapters at once, therefore an `Array`
 #### Tips
+- All scripts support custom-redirection if they return JSON in the following format -
+  ```JSON
+  {
+    'retry': 1,
+    'nextURL': '', // the URL to redirect to
+  }
+  ```
+
 - Make sure no infinite loops are present in any `scripts`.
   - Use `Ctrl+Shift+R` to reload application, in-case UI gets stuck or high CPU usage
 - Use `Tester` tab to load `TestURL` and execute particular scripts on them
-- want to wait(for some seconds) in script, use -
+- Want to wait(for some seconds) in script, use -
   - `await sleep(ms);`
     - where `ms` is in milliseconds
     - simple `Promise` based in-built `async/await` function
-- want to inject jQuery in script, use -
+- Want to inject jQuery in script, use -
   - `injectJquery();`
-- want to decode html-codes like `&amp;`, `&larr;`, ... to their actual character in script, use -
+- Want to decode html-codes like `&amp;`, `&larr;`, ... to their actual character in script, use -
   - `htmlDecode(input);`
     - where `input` is a string
+- Make sure `Title`/`title` for `Novel`/`Chapter` is actually the `innerText`, __not__ `innerHTML`
+- In `Chapter`'s `content` field, HTML is to be used.
+  - Make sure all anchor tags in HTML are marked with `target="_blank"`
+    - This will open the link in external browser whenever clicked upon
 
 ---
 
