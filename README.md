@@ -20,6 +20,7 @@ Current Status: __BETA__
     - out of scope
   - `comrademao.com`
   - `archiveofourown.org`
+  - `royalroad.com`
 - `Rules Editor`
 - Novel `Reading Mode`
 - Novel `Details Editor`
