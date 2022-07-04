@@ -1438,6 +1438,7 @@ app = new Vue({
           this.r_chapter_index = 0;
           this.r_novel = t_novel;
           document.title = this.r_novel.Title;
+          this.chapterChangeLock = false;
           activateReadingModeEventListeners();
           setTimeout(() => {
             this.setReadingChapterIndex(this.r_reader_options.r_chapter_index);
