@@ -105,7 +105,7 @@ const createWindow = () => {
       function (details, callback) {
         let blocked = false;
         let url = details.url.toLowerCase();
-        if (url.startsWith("file://")) {
+        if (url.startsWith("file://") || url.startsWith('devtools://')) {
           callback({ cancel: false });
           return;
         }
