@@ -45,6 +45,7 @@ Reading Mode
 ---
 
 ### Known Issues
+- [WIP] No images support within chapters.
 - [NYI] Rules export option.
 - [NYI] Download next `Chapter` using `nextURL` when `ChapterCount` is <= 0
   - Although, the case is possible, but currently, no known website requires this.
