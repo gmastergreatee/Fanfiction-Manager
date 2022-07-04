@@ -1,9 +1,18 @@
 [
   {
+    "guid": "18f77d09-fe80-4a18-9976-a9a54e480148",
+    "rule_name": "ArchiveOfOurOwn.org",
+    "url_regex": "(?:https://)*(?:www|m)*archiveofourown\\.org/works/([0-9]+).*",
+    "pagetype_code": "injectJquery();\n\nlet adult_proceed = $(\"#main ul.actions a\");\nif (adult_proceed.length == 2) {\n  return {\n    retry: 1,\n    nextURL: adult_proceed[0].href,\n  };\n}\n\nif ($(\"#selected_id\")) {\n  return 0;\n}\n",
+    "toc_code": "injectJquery();\n\nlet matches = new RegExp(/(?:https:\\/\\/)*(?:www|m)*archiveofourown\\.org\\/works\\/([0-9]+)\\/.*/gi).exec(window.location.href);\n\nif ($('.summary blockquote').length <= 0) {\n  // summary not found, meaning this ain't TOC page, switching to TOC page\n  return {\n    retry: 1,\n    nextURL: window.location.origin + '/works/' + matches[1]\n  };\n}\n\nlet retMe = {\n  'CoverURL': '',              // may be empty\n  'Title': $('h2.title')[0].innerText.replace(/\\n/g, '').trim(),\n  'Summary': $('.summary blockquote')[0].innerHTML.replace(/\\n/g, '').trim(),\n  'ChapterCount': $('#selected_id option').length,\n  'ChapterURLs': Array.from($('#selected_id option')).map(e => window.location.origin + '/works/' + matches[1] + '/chapters/' + e.value),\n};\n\nreturn retMe;",
+    "chapter_code": "injectJquery();\n\n$('.userstuff.module .landmark.heading').remove();\n$('.userstuff.module a[title]').remove();\nArray.from($('.userstuff.module a')).forEach(el => el.target = '_blank');\n\nlet retMe = [\n  {\n    \"title\": $('h3.title').text().replace(/\\n/g, '').trim(),\n    \"content\": $('.userstuff.module').html().replace(/\\n/g, '').trim(),\n    \"nextURL\": \"\"   // when \"ChapterCount\" <= 0 & \"nextURL\" always comes non-empty\n                    // will loop infinitely unless something else(javascript) breaks\n  },\n];\n\nreturn retMe;",
+    "url_blocks": ".js\n/images/\n/skins/\nfreecounterstat"
+  },
+  {
     "guid": "5516b773-f939-4c68-89c1-4c8ba6641822",
     "rule_name": "Royalroad.com",
     "url_regex": "(?:https://)*(?:www|m).royalroad.com/fiction/.+",
-    "pagetype_code": "// https://www.royalroad.com/fiction/53329/reborn-in-naruto-with-my-girlfriend/chapter/884590/1--reincarnation-and-wishes-prologue\n// https://www.royalroad.com/fiction/53329/reborn-in-naruto-with-my-girlfriend\n\nif (document.querySelector('.fic-header h1') != null) {\n    return 0;\n}",
+    "pagetype_code": "if (document.querySelector('.fic-header h1') != null) {\n    return 0;\n}",
     "toc_code": "let retMe = {\n  'CoverURL': window.fictionCover,\n  'Title': document.querySelector('.fic-header h1').innerText,\n  'Summary': document.querySelector('.fiction-info .description div').innerHTML.trim().replace(/\\n/g, ''),\n  'ChapterCount': window.chapters.length,\n  'ChapterURLs': window.chapters.map(i => window.location.origin + i.url),\n};\n\nreturn retMe;",
     "chapter_code": "let retMe = [\n  {\n    \"title\": document.querySelector('.fic-header h1').innerText,    // title of chapter\n    \"content\": document.querySelector('.chapter-content').innerHTML.trim().replace(/\\n/g,'').replace(/ data-original-margin=\"\"/g, ''),\n    \"nextURL\": \"\"   // when \"ChapterCount\" <= 0 & \"nextURL\" always comes non-empty\n                    // will loop infinitely unless something else(javascript) breaks\n  },\n];\n\nreturn retMe;",
     "url_blocks": "/a/c?\nanalytics.google\nsentry.js\nsite.js\n.woff2\n/covers\n/gtag\n/img/\ngstatic.com\n.png\nwebfont\nelastic-rum\nsecurepubads\namazon\n/ads\n.css\nemail-decode\nfonts.googleapis"
