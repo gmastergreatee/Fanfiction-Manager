@@ -43,6 +43,8 @@ let chapterChangeLockTimeout = 200;
 let appOptionsChanged = false;
 let novelOptionsChanged = false;
 
+let extras = [];
+
 const simpleEvent = function (context) {
   if (context === void 0) {
     context = null;
@@ -327,6 +329,11 @@ app = new Vue({
         htmlDecodeCode +
         injectJqueryCode +
         "(async function() {" +
+        "let extras = " +
+        (typeof extras == "object"
+          ? "JSON.parse('" + JSON.stringify(extras).replace(/\'/g,"\\'") + "')"
+          : extras) +
+        ";\n" +
         script +
         "})()"
       );
@@ -405,7 +412,7 @@ app = new Vue({
         this.blockURLIncludes(this.test_url_blocks);
 
         onMainWebViewLoadedEvent.clearAllListeners();
-        onMainWebViewLoadedEvent.addListener(this.runTestPageTypeScript);
+        onMainWebViewLoadedEvent.addListener(this.runTestPageTypeScript);        
         if (this.test_url.trim() != this.iframe_url) {
           this.iframe_url = this.test_url.trim();
         } else {
@@ -427,6 +434,10 @@ app = new Vue({
           this.getEvaluateJavascriptCode(this.test_pagetype_code)
         );
         if (data || data == 0) {
+          // check for extras
+          if (data.extras) {
+            extras = data.extras;
+          }
           // check for chapter custom redirection
           // dataFormat -> { retry: 1, nextURL: '' }
           if (data.retry && data.nextURL) {
@@ -475,12 +486,17 @@ app = new Vue({
     },
     async runTestTOCScript() {
       try {
+        extras = [];
         log("Running TOC Script...");
         let data = await this.mainWebView.executeJavaScript(
           this.getEvaluateJavascriptCode(this.test_toc_code)
         );
         this.test_novel_toc_data = null;
         if (data) {
+          // check for extras
+          if (data.extras) {
+            extras = data.extras;
+          }
           // check for chapter custom redirection
           // dataFormat -> { retry: 1, nextURL: '' }
           if (data.retry && data.nextURL) {
@@ -521,6 +537,10 @@ app = new Vue({
           )
         );
         if (data) {
+          // check for extras
+          if (data.extras) {
+            extras = data.extras;
+          }
           // check for chapter custom redirection
           // dataFormat -> { retry: 1, nextURL: '' }
           if (data.retry && data.nextURL) {
@@ -719,6 +739,10 @@ app = new Vue({
             this.getEvaluateJavascriptCode(t_rule.toc_code)
           );
           if (data) {
+            // check for extras
+            if (data.extras) {
+              extras = data.extras;
+            }
             // check for chapter custom redirection
             // dataFormat -> { retry: 1, nextURL: '' }
             if (data.retry && data.nextURL) {
@@ -807,6 +831,10 @@ app = new Vue({
             this.getEvaluateJavascriptCode(t_rule.pagetype_code)
           );
           if (data || data == 0) {
+            // check for extras
+            if (data.extras) {
+              extras = data.extras;
+            }
             // check for chapter custom redirection
             // dataFormat -> { retry: 1, nextURL: '' }
             if (data.retry && data.nextURL) {
@@ -859,6 +887,9 @@ app = new Vue({
 
       onMainWebViewLoadedEvent.clearAllListeners();
       onMainWebViewLoadedEvent.addListener(onLoadCallback);
+
+      extras = [];
+
       if (t_url != this.iframe_url) {
         this.iframe_url = t_url;
       } else {
@@ -1061,6 +1092,10 @@ app = new Vue({
             this.getEvaluateJavascriptCode(t_rule.pagetype_code)
           );
           if (data || data == 0) {
+            // check for extras
+            if (data.extras) {
+              extras = data.extras;
+            }
             // check for chapter custom redirection
             // dataFormat -> { retry: 1, nextURL: '' }
             if (data.retry && data.nextURL) {
@@ -1116,6 +1151,10 @@ app = new Vue({
           this.mainWebView.stop();
           let t_c_url = urls_to_download[curr_url_index];
           if (data) {
+            // check for extras
+            if (data.extras) {
+              extras = data.extras;
+            }
             // check for chapter custom redirection
             // dataFormat -> { retry: 1, nextURL: '' }
             if (data.retry && data.nextURL) {
@@ -1215,6 +1254,9 @@ app = new Vue({
       t_url = urls_to_download[curr_url_index].url;
       onMainWebViewLoadedEvent.clearAllListeners();
       onMainWebViewLoadedEvent.addListener(onLoadCallback);
+
+      extras = [];
+
       log(
         "[" +
           (t_novel.ChapterCount -
@@ -1284,6 +1326,10 @@ app = new Vue({
             this.getEvaluateJavascriptCode(t_rule.toc_code)
           );
           if (data) {
+            // check for extras
+            if (data.extras) {
+              extras = data.extras;
+            }
             // check for chapter custom redirection
             // dataFormat -> { retry: 1, nextURL: '' }
             if (data.retry && data.nextURL) {
@@ -1410,6 +1456,9 @@ app = new Vue({
 
       onMainWebViewLoadedEvent.clearAllListeners();
       onMainWebViewLoadedEvent.addListener(onLoadCallback);
+
+      extras = [];
+
       if (t_url != this.iframe_url) {
         this.iframe_url = t_url;
       } else {
@@ -1579,10 +1628,10 @@ app = new Vue({
               .scrollIntoViewIfNeeded(false);
             // lil bit of delay before allowing chapter change,
             // to disallow repeated triggers resulting in chapter skips
-            setTimeout(() => {
-              chapterChangeLock = false;
-            }, chapterChangeLockTimeout);
           }
+          setTimeout(() => {
+            chapterChangeLock = false;
+          }, chapterChangeLockTimeout);
         }
       }
     },
