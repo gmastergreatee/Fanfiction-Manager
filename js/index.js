@@ -313,10 +313,6 @@ app = new Vue({
       this.app_options.showConsole = !this.app_options.showConsole;
     },
     getEvaluateJavascriptCode(script = "") {
-      let sleepCode =
-        "function sleep(ms) { return new Promise((resolve) => {setTimeout(resolve, ms);}); }\n";
-      let htmlDecodeCode =
-        "function htmlDecode(input) { var doc = new DOMParser().parseFromString(input, 'text/html'); return doc.documentElement.textContent; }\n";
       let sleepCode = script.includes("sleep(")
         ? "function sleep(ms) { return new Promise((resolve) => {setTimeout(resolve, ms);}); }\n"
         : "";
@@ -430,6 +426,24 @@ app = new Vue({
           this.getEvaluateJavascriptCode(this.test_pagetype_code)
         );
         if (data || data == 0) {
+          // check for chapter custom redirection
+          // dataFormat -> { retry: 1, nextURL: '' }
+          if (data.retry && data.nextURL) {
+            this.mainWebView.stop();
+            log("Chapter redirection detected, working...");
+            let t_url = data.nextURL;
+            if (t_url != this.iframe_url) {
+              this.iframe_url = t_url;
+            } else {
+              try {
+                this.mainWebView.loadURL(t_url);
+              } catch {
+                this.mainWebView.reload();
+              }
+            }
+            return;
+          }
+
           switch (data) {
             case 0:
               this.test_result_page_type = "TOCPage";
@@ -466,6 +480,23 @@ app = new Vue({
         );
         this.test_novel_toc_data = null;
         if (data) {
+          // check for chapter custom redirection
+          // dataFormat -> { retry: 1, nextURL: '' }
+          if (data.retry && data.nextURL) {
+            log("Chapter redirection detected, working...");
+            let t_url = data.nextURL;
+            if (t_url != this.iframe_url) {
+              this.iframe_url = t_url;
+            } else {
+              try {
+                this.mainWebView.loadURL(t_url);
+              } catch {
+                this.mainWebView.reload();
+              }
+            }
+            return;
+          }
+
           this.test_novel_toc_data = data;
           this.test_result_content =
             "<pre>" + JSON.stringify(data, null, 4) + "</pre>";
@@ -488,12 +519,31 @@ app = new Vue({
               : "") + this.test_chapter_code
           )
         );
-        if (data && data.length > 0) {
-          let t_data = data[0];
-          this.test_result_content =
-            (t_data.title
-              ? '<div class="fwb">' + t_data.title + "</div>"
-              : "") + t_data.content;
+        if (data) {
+          // check for chapter custom redirection
+          // dataFormat -> { retry: 1, nextURL: '' }
+          if (data.retry && data.nextURL) {
+            log("Chapter redirection detected, working...");
+            let t_url = data.nextURL;
+            if (t_url != this.iframe_url) {
+              this.iframe_url = t_url;
+            } else {
+              try {
+                this.mainWebView.loadURL(t_url);
+              } catch {
+                this.mainWebView.reload();
+              }
+            }
+            return;
+          }
+
+          if (data.length > 0) {
+            let t_data = data[0];
+            this.test_result_content =
+              (t_data.title
+                ? '<div class="fwb">' + t_data.title + "</div>"
+                : "") + t_data.content;
+          }
         } else window.electronAPI.msgBox("No data received", appName);
         log("Script executed successfully");
       } catch {
@@ -668,6 +718,23 @@ app = new Vue({
             this.getEvaluateJavascriptCode(t_rule.toc_code)
           );
           if (data) {
+            // check for chapter custom redirection
+            // dataFormat -> { retry: 1, nextURL: '' }
+            if (data.retry && data.nextURL) {
+              log("Chapter redirection detected, working...");
+              t_url = data.nextURL;
+              if (t_url != this.iframe_url) {
+                this.iframe_url = t_url;
+              } else {
+                try {
+                  this.mainWebView.loadURL(t_url);
+                } catch {
+                  this.mainWebView.reload();
+                }
+              }
+              return false;
+            }
+
             data["GUID"] = guid();
             if (data.CoverURL) {
               try {
@@ -707,6 +774,7 @@ app = new Vue({
           log("Error");
         }
         this.iframe_working = false;
+        return true;
       };
 
       let onLoadCallback = async () => {
@@ -738,13 +806,31 @@ app = new Vue({
             this.getEvaluateJavascriptCode(t_rule.pagetype_code)
           );
           if (data || data == 0) {
+            // check for chapter custom redirection
+            // dataFormat -> { retry: 1, nextURL: '' }
+            if (data.retry && data.nextURL) {
+              log("Chapter redirection detected, working...");
+              t_url = data.nextURL;
+              if (t_url != this.iframe_url) {
+                this.iframe_url = t_url;
+              } else {
+                try {
+                  this.mainWebView.loadURL(t_url);
+                } catch {
+                  this.mainWebView.reload();
+                }
+              }
+              return;
+            }
+
             switch (data) {
               case 0:
-                onMainWebViewLoadedEvent.clearAllListeners();
-                logVerbose("TOC page found");
-                await onTOCPageConfirmed();
                 this.mainWebView.stop();
-                this.iframe_url = dummyPageUrl;
+                logVerbose("TOC page found");
+                if (await onTOCPageConfirmed()) {
+                  onMainWebViewLoadedEvent.clearAllListeners();
+                  this.iframe_url = dummyPageUrl;
+                }
                 break;
               case -1:
               case -2:
@@ -974,6 +1060,23 @@ app = new Vue({
             this.getEvaluateJavascriptCode(t_rule.pagetype_code)
           );
           if (data || data == 0) {
+            // check for chapter custom redirection
+            // dataFormat -> { retry: 1, nextURL: '' }
+            if (data.retry && data.nextURL) {
+              log("Chapter redirection detected, working...");
+              t_url = data.nextURL;
+              if (t_url != this.iframe_url) {
+                this.iframe_url = t_url;
+              } else {
+                try {
+                  this.mainWebView.loadURL(t_url);
+                } catch {
+                  this.mainWebView.reload();
+                }
+              }
+              return;
+            }
+
             let skipDownload = true;
             switch (data) {
               case 0:
@@ -1011,7 +1114,7 @@ app = new Vue({
           );
           this.mainWebView.stop();
           let t_c_url = urls_to_download[curr_url_index];
-          if (data && data.length > 0) {
+          if (data) {
             // check for chapter custom redirection
             // dataFormat -> { retry: 1, nextURL: '' }
             if (data.retry && data.nextURL) {
@@ -1180,6 +1283,23 @@ app = new Vue({
             this.getEvaluateJavascriptCode(t_rule.toc_code)
           );
           if (data) {
+            // check for chapter custom redirection
+            // dataFormat -> { retry: 1, nextURL: '' }
+            if (data.retry && data.nextURL) {
+              log("Chapter redirection detected, working...");
+              t_url = data.nextURL;
+              if (t_url != this.iframe_url) {
+                this.iframe_url = t_url;
+              } else {
+                try {
+                  this.mainWebView.loadURL(t_url);
+                } catch {
+                  this.mainWebView.reload();
+                }
+              }
+              return false;
+            }
+
             if (!t_novel.CoverURL && data.CoverURL) {
               try {
                 new URL(data.CoverURL);
@@ -1220,6 +1340,7 @@ app = new Vue({
           log("Error");
         }
         this.iframe_working = false;
+        return true;
       };
 
       let onLoadCallback = async () => {
@@ -1253,11 +1374,12 @@ app = new Vue({
           if (data || data == 0) {
             switch (data) {
               case 0:
-                onMainWebViewLoadedEvent.clearAllListeners();
-                logVerbose("TOC page found");
-                await onTOCPageConfirmed();
                 this.mainWebView.stop();
-                this.iframe_url = dummyPageUrl;
+                logVerbose("TOC page found");
+                if (await onTOCPageConfirmed()) {
+                  onMainWebViewLoadedEvent.clearAllListeners();
+                  this.iframe_url = dummyPageUrl;
+                }
                 break;
               case -1:
               case -2:
