@@ -1465,8 +1465,8 @@ app = new Vue({
             if (chapter_file_exist) {
               let data = await readFile(chapter_file_name);
               Vue.set(this.r_chapters, this.r_chapter_index, JSON.parse(data));
+              this.r_chapterIndex_loaded.push(this.r_chapter_index);
             }
-            this.r_chapterIndex_loaded.push(this.r_chapter_index);
             setTimeout(() => {
               let reader = document.getElementById("novel-reader");
               let topElIndex =
