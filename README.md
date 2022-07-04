@@ -21,6 +21,7 @@ Current Status: __BETA__
   - `comrademao.com`
   - `archiveofourown.org`
   - `royalroad.com`
+  - `wattpad.com`
 - `Rules Editor`
 - Novel `Reading Mode`
 - Novel `Details Editor`
