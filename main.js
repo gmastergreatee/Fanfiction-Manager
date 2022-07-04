@@ -8,6 +8,7 @@ const {
   dialog,
   session,
   Menu,
+  shell,
 } = require("electron");
 
 const gotTheLock = app.requestSingleInstanceLock();
@@ -89,6 +90,11 @@ const createWindow = () => {
     } else if (selectionText && selectionText.trim() !== "") {
       selectionMenu.popup();
     }
+  });
+
+  mainWindow.webContents.on("new-window", function (event, url) {
+    event.preventDefault();
+    shell.openExternal(url);
   });
 
   mainWindow.on("ready-to-show", () => {
