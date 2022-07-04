@@ -19,6 +19,7 @@ Current Status: __BETA__
     - need to add rules related to external linked sites
     - out of scope
   - `comrademao.com`
+  - `archiveofourown.org`
 - `Rules Editor`
 - Novel `Reading Mode`
 - Novel `Details Editor`
