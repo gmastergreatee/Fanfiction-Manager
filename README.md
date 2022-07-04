@@ -111,8 +111,8 @@ Reading Mode
 - All scripts support custom-redirection if they return JSON in the following format -
   ```JSON
   {
-    'retry': 1,
-    'nextURL': '', // the URL to redirect to
+    "retry": 1,
+    "nextURL": "", // the URL to redirect to
   }
   ```
 
