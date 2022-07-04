@@ -85,10 +85,15 @@ Reading Mode
 - Make sure no infinite loops are present in any `scripts`.
   - Use `Ctrl+Shift+R` to reload application, in-case UI gets stuck or high CPU usage
 - Use `Tester` tab to load `TestURL` and execute particular scripts on them
-- If want to wait(for some seconds) in script, use -
+- want to wait(for some seconds) in script, use -
   - `await sleep(ms);`
     - where `ms` is in milliseconds
     - simple `Promise` based in-built `async/await` function
+- want to inject jQuery in script, use -
+  - `injectJquery();`
+- want to decode html-codes like `&amp;`, `&larr;`, ... to their actual character in script, use -
+  - `htmlDecode(input);`
+    - where `input` is a string
 
 ---
 
