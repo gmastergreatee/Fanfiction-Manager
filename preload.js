@@ -3,11 +3,22 @@
 // All of the Node.js APIs are available in the preload process.
 // It has the same sandbox as a Chrome extension.
 const { contextBridge, ipcRenderer } = require("electron");
+const path = require("path");
+const fs = require("fs");
+
+let jqFileContents = fs.readFileSync(
+  path.join(__dirname, "js", "jquery.min.js"),
+  {
+    encoding: "utf8",
+  }
+);
 
 contextBridge.exposeInMainWorld("electronAPI", {
+  JqueryString: () => jqFileContents,
   // --- renderer to main - 1 way
   msgBox: (text, caption) => ipcRenderer.send("show-msgbox", text, caption),
-  urlIncludesToBlock: (includes) => ipcRenderer.send("block-includes", includes),
+  urlIncludesToBlock: (includes) =>
+    ipcRenderer.send("block-includes", includes),
   toggleFullScreen: () => ipcRenderer.send("toggle-fullscreen"),
 
   // --- renderer to main - 2 way

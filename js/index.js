@@ -317,8 +317,22 @@ app = new Vue({
         "function sleep(ms) { return new Promise((resolve) => {setTimeout(resolve, ms);}); }\n";
       let htmlDecodeCode =
         "function htmlDecode(input) { var doc = new DOMParser().parseFromString(input, 'text/html'); return doc.documentElement.textContent; }\n";
+      let sleepCode = script.includes("sleep(")
+        ? "function sleep(ms) { return new Promise((resolve) => {setTimeout(resolve, ms);}); }\n"
+        : "";
+      let htmlDecodeCode = script.includes("htmlDecode(")
+        ? "function htmlDecode(input) { var doc = new DOMParser().parseFromString(input, 'text/html'); return doc.documentElement.textContent; }\n"
+        : "";
+      let injectJqueryCode = script.includes("injectJquery()")
+        ? "function injectJquery() { " + JqueryString() + " }\n"
+        : "";
       return (
-        "(async function() {" + sleepCode + htmlDecodeCode + script + "})()"
+        sleepCode +
+        htmlDecodeCode +
+        injectJqueryCode +
+        "(async function() {" +
+        script +
+        "})()"
       );
     },
     blockURLIncludes(url_blocks = "") {
@@ -2011,6 +2025,14 @@ window.electronAPI.callGlobalCallBack((event, callBackName, data) => {
 //#endregion
 
 //#region Electron API wrappers
+
+/**
+ * Returns the contents of jQuery file
+ * @returns {String} The string contents of jQuery minified file
+ */
+function JqueryString() {
+  return window.electronAPI.JqueryString();
+}
 
 function msgBox(text, caption = appName) {
   window.electronAPI.msgBox(text, caption);
