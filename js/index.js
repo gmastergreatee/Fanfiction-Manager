@@ -331,7 +331,7 @@ app = new Vue({
         "(async function() {" +
         "let extras = " +
         (typeof extras == "object"
-          ? "JSON.parse('" + JSON.stringify(extras).replace(/\'/g,"\\'") + "')"
+          ? "JSON.parse('" + JSON.stringify(extras).replace(/\'/g, "\\'") + "')"
           : extras) +
         ";\n" +
         script +
@@ -412,7 +412,7 @@ app = new Vue({
         this.blockURLIncludes(this.test_url_blocks);
 
         onMainWebViewLoadedEvent.clearAllListeners();
-        onMainWebViewLoadedEvent.addListener(this.runTestPageTypeScript);        
+        onMainWebViewLoadedEvent.addListener(this.runTestPageTypeScript);
         if (this.test_url.trim() != this.iframe_url) {
           this.iframe_url = this.test_url.trim();
         } else {
@@ -1569,11 +1569,13 @@ app = new Vue({
       );
     },
     setReadingChapterIndex(index = 0) {
-      this.r_chapter_index = index;
-      this.r_reader_options.r_chapter_index = this.r_chapter_index;
-      novelOptionsChanged = true;
-      let reader = document.getElementById("novel-reader");
-      reader.scrollTo(0, 0);
+      if (this.r_chapter_index != index) {
+        this.r_chapter_index = index;
+        this.r_reader_options.r_chapter_index = this.r_chapter_index;
+        novelOptionsChanged = true;
+        let reader = document.getElementById("novel-reader");
+        reader.scrollTo(0, 0);
+      }
       document
         .querySelector('[href="#' + this.r_chapter_index + '"]')
         .scrollIntoViewIfNeeded(false);
