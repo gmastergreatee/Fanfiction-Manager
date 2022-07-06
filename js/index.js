@@ -1579,11 +1579,11 @@ app = new Vue({
       );
     },
     setReadingChapterIndex(index = 0) {
+      let reader = document.getElementById("novel-reader");
       if (this.r_chapter_index != index) {
         this.r_chapter_index = index;
         this.r_reader_options.r_chapter_index = this.r_chapter_index;
         novelOptionsChanged = true;
-        let reader = document.getElementById("novel-reader");
         reader.scrollTo(0, 0);
       }
       document

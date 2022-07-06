@@ -59,7 +59,7 @@
                       </div>
                       <div class="f1 df fdc w-100 pl-4">
                         <div>
-                          <span v-html="n.Title"></span> ({{ n.DownloadedCount }}/{{ n.ChapterCount }})
+                          <span v-html="n.Title" class="fwb"></span> ({{ n.DownloadedCount }}/{{ n.ChapterCount }})
                         </div>
                         <div class="f1 bt mt-4 pt-4 pr">
                           <div :class="{'dn': !n.Summary, 'summary-shrunk': summaryExpandedGUID != n.GUID}"
