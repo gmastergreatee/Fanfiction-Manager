@@ -303,9 +303,9 @@ app = new Vue({
         } else {
           this.mainWebView.closeDevTools();
         }
-      } catch {
+      } catch (ex) {
         window.electronAPI.msgBox(
-          "Please load an URL before opening DevTools",
+          "Please load an URL before opening DevTools.\nError ->" + ex.message,
           appName
         );
       }
@@ -404,8 +404,8 @@ app = new Vue({
       if (this.test_url.trim() && this.iframe_working == false) {
         try {
           new URL(this.test_url.trim());
-        } catch {
-          msgBox("Please enter a valid URL");
+        } catch (ex) {
+          msgBox("Please enter a valid URL\nError -> " + ex.message);
           return;
         }
 
@@ -478,8 +478,12 @@ app = new Vue({
               break;
           }
           return;
-        } else this.test_result_page_type = "UNKNOWN";
-      } catch {
+        } else {
+          log("No PAGETYPE data received");
+          this.test_result_page_type = "UNKNOWN";
+        }
+      } catch (ex) {
+        log("Error -> " + ex.message);
         this.test_result_page_type = "UNKNOWN";
       }
       onMainWebViewLoadedEvent.removeListener(this.runTestPageTypeScript);
@@ -517,10 +521,12 @@ app = new Vue({
           this.test_novel_toc_data = data;
           this.test_result_content =
             "<pre>" + JSON.stringify(data, null, 4) + "</pre>";
-        } else msgBox("No data received");
+        } else {
+          log("No TOC data received");
+        }
         log("Script executed successfully");
-      } catch {
-        log("Error");
+      } catch (ex) {
+        log("Error -> " + ex.message);
         msgBox(
           "Error executing script.\nMake sure an URL is already loaded & the script is valid.\n\nCheck DevTools for more details."
         );
@@ -565,10 +571,12 @@ app = new Vue({
                 ? '<div class="fwb">' + t_data.title + "</div>"
                 : "") + t_data.content;
           }
-        } else window.electronAPI.msgBox("No data received", appName);
+        } else {
+          log("No TOC data received");
+        }
         log("Script executed successfully");
-      } catch {
-        log("Error");
+      } catch (ex) {
+        log("Error -> " + ex.message);
         window.electronAPI.msgBox(
           "Error executing script.\nMake sure an URL is already loaded & the script is valid.\n\nCheck DevTools for more details.",
           appName
@@ -706,8 +714,8 @@ app = new Vue({
       let t_url_origin = "";
       try {
         t_url_origin = new URL(t_url).origin;
-      } catch {
-        msgBox("Please enter a valid URL");
+      } catch (ex) {
+        msgBox("Please enter a valid URL\nError -> " + ex.message);
         this.iframe_working = false;
         return;
       }
@@ -778,7 +786,8 @@ app = new Vue({
                     "." + coverDirectoryRelativePath + cover_file_name;
                   saveConfigArrayData("novels");
                 });
-              } catch {
+              } catch (ex) {
+                log("Cover download error\nError -> " + ex.message);
                 data.CoverURL = "";
               }
             }
@@ -792,11 +801,11 @@ app = new Vue({
             this.add_novel_url = "";
           } else {
             this.test_url = this.mainWebView.getURL();
-            log("Error");
+            log("No TOC data returned");
           }
         } catch (ex) {
           this.test_url = this.mainWebView.getURL();
-          log("Error");
+          log("Error -> " + ex.message);
         }
         this.iframe_working = false;
         return true;
@@ -874,14 +883,14 @@ app = new Vue({
             return;
           } else {
             this.test_url = this.mainWebView.getURL();
-            log("Error");
+            log("No PAGETYPE data received");
           }
-        } catch {
+        } catch (ex) {
           this.test_url = this.mainWebView.getURL();
           onMainWebViewLoadedEvent.clearAllListeners();
           this.mainWebView.stop();
           this.iframe_working = false;
-          log("Error");
+          log("Error -> " + ex.message);
         }
       };
 
@@ -1016,8 +1025,8 @@ app = new Vue({
       let t_url_origin = "";
       try {
         t_url_origin = new URL(t_url).origin;
-      } catch {
-        msgBox("Please fix the URL for the novel");
+      } catch (ex) {
+        msgBox("Please fix the URL for the novel\nError -> " + ex.message);
         this.iframe_working = false;
         return;
       }
@@ -1137,7 +1146,7 @@ app = new Vue({
             }
           } else {
             this.test_url = this.mainWebView.getURL();
-            log("Unknown page-type");
+            log("No PAGETYPE data received");
             onMainWebViewLoadedEvent.clearAllListeners();
             this.d_novel = null;
             this.iframe_working = false;
@@ -1232,9 +1241,9 @@ app = new Vue({
           } else {
             this.test_url = this.mainWebView.getURL();
             log(
-              "Error downloading chapter (" +
+              "No CHAPTER data received\n" +
                 (t_c_url.index + 1) +
-                ") - " +
+                " -> " +
                 t_c_url.url,
               data
             );
@@ -1244,7 +1253,7 @@ app = new Vue({
           }
         } catch (ex) {
           this.test_url = this.mainWebView.getURL();
-          log("Error");
+          log("Error -> " + ex.message);
           onMainWebViewLoadedEvent.clearAllListeners();
           this.d_novel = null;
           this.iframe_working = false;
@@ -1292,8 +1301,8 @@ app = new Vue({
       let t_url_origin = "";
       try {
         t_url_origin = new URL(t_url).origin;
-      } catch {
-        msgBox("Please enter a valid URL");
+      } catch (ex) {
+        msgBox("Please enter a valid URL\nError -> " + ex.message);
         this.iframe_working = false;
         return;
       }
@@ -1363,7 +1372,8 @@ app = new Vue({
                     "." + coverDirectoryRelativePath + cover_file_name;
                   saveConfigArrayData("novels");
                 });
-              } catch {
+              } catch (ex) {
+                log("Cover download error\nError -> " + ex.message);
                 data.CoverURL = "";
               }
             }
@@ -1380,11 +1390,11 @@ app = new Vue({
             log("Updated novel -> " + t_novel.Title);
           } else {
             this.test_url = this.mainWebView.getURL();
-            log("Error");
+            log("No TOC data received");
           }
         } catch (ex) {
           this.test_url = this.mainWebView.getURL();
-          log("Error");
+          log("Error -> " + ex.message);
         }
         this.iframe_working = false;
         return true;
@@ -1442,14 +1452,14 @@ app = new Vue({
             return;
           } else {
             this.test_url = this.mainWebView.getURL();
-            log("Error");
+            log("No PAGETYPE data received");
           }
-        } catch {
+        } catch (ex) {
           this.test_url = this.mainWebView.getURL();
           onMainWebViewLoadedEvent.clearAllListeners();
           this.mainWebView.stop();
           this.iframe_working = false;
-          log("Error");
+          log("Error -> " + ex.message);
         }
         u_novel = null;
       };
