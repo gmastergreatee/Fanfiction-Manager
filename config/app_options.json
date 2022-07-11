@@ -2,9 +2,9 @@
   "showNewOnly": false,
   "showCheckUpdatedOnly": true,
   "showGridLayout": false,
-  "activeTab": 1,
-  "showWebPage": true,
-  "showTestResults": false,
+  "activeTab": 0,
+  "showWebPage": false,
+  "showTestResults": true,
   "showConsole": true,
   "darkMode": true
 }
