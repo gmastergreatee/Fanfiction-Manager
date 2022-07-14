@@ -17,6 +17,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
   JqueryString: () => jqFileContents,
   // --- renderer to main - 1 way
   msgBox: (text, caption) => ipcRenderer.send("show-msgbox", text, caption),
+  relaunchApp: () => ipcRenderer.send("app-relaunch"),
   urlIncludesToBlock: (includes) =>
     ipcRenderer.send("block-includes", includes),
   toggleFullScreen: () => ipcRenderer.send("toggle-fullscreen"),
@@ -33,6 +34,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
   deletePath: (somePath) => ipcRenderer.invoke("path-delete", somePath),
   sendInput: (type, accelerator) =>
     ipcRenderer.invoke("send-input", type, accelerator),
+  updateApp: (appZipUrl) => ipcRenderer.invoke("app-update-self", appZipUrl),
 
   // --- main to renderer
   log: (callback) => ipcRenderer.on("log-message", callback),

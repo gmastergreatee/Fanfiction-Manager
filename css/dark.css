@@ -96,7 +96,8 @@ div.chapter-active {
   background-color: #333;
 }
 
-.goto-box {
+.goto-box,
+.update-box {
   background-color: #3339;
 }
 

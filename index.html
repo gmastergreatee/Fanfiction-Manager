@@ -16,7 +16,7 @@
     <link v-if="app_options.darkMode" rel="stylesheet" href="./css/dark.css" />
     <div class="f1 w-100" :class="{'df': !reading_mode, 'dn': reading_mode}">
       <div class="fdc br wp-150" :class="{ 'df': showSideBar, 'dn': !showSideBar }">
-        <div class="dib bb tac fwb p-4">ND_v3</div>
+        <div class="dib bb tac fwb p-4">FM_vb3</div>
         <div class="df fdc">
           <div v-for="(t, i) in tabs" @click="setActiveTab(i)" class="df fdr bb cp p-4">
             <div class="f1"><a href="#">{{ t }}</a></div>
@@ -28,6 +28,7 @@
         <div class="df bb fwb p-4">
           <div class="f1">{{ tabs[app_options.activeTab] }} -</div>
           <div>
+            <a href="#" class="mx-4" :class="{ 'disabled': checkingForUpdates }" @click="checkForAppUpdates()">{{ checkingForUpdates ? 'Checking for Update' : 'Update' }}</a>
             <a href="#" class="mx-4" @click="toggleDarkMode()">{{ app_options.darkMode ? 'LightMode' :
               'DarkMode' }}</a>
             <a v-if="tabs[app_options.activeTab] != 'Rules'" class="ml-4" href="#" @click="toggleRenderer()">{{
@@ -394,6 +395,21 @@
     <div class="fdr p-4 bt" :class="{'df': r_show_sidebar, 'dn': !r_show_sidebar}">
       <div class="fwb wsn">Status :</div>
       <div class="wsn pl-4 toe oh">{{ status }}</div>
+    </div>
+
+    <div v-if="isDisplayingUpdateDialog" class="update-box">
+      <div v-if="isAppUpdating" class="bb bt bl br p-4">
+        <div class="m-4 p-4">Downloading update, please wait...</div>
+      </div>
+      <div v-else class="df fdc bb bt bl br p-4">
+        <div class="pb-4">
+          New update found - {{ newVersionTag }}, wanna download ?
+        </div>
+        <div class="df fdr jcc">
+          <a href="#" class="mx-4" @click="downloadAppUpdate()">Yaay!</a>
+          <a href="#" class="mx-4" @click="discardAppUpdate()">Nope</a>
+        </div>
+      </div>
     </div>
   </div>
 </body>

@@ -17,9 +17,9 @@ if (!gotTheLock) {
 }
 
 const path = require("path");
-var https = require("https");
-var http = require("http");
+var { http, https } = require("follow-redirects");
 const fs = require("fs");
+const extract = require("extract-zip");
 
 let mainWindow;
 let url_includes_to_block = [
@@ -105,7 +105,7 @@ const createWindow = () => {
       function (details, callback) {
         let blocked = false;
         let url = details.url.toLowerCase();
-        if (url.startsWith("file://") || url.startsWith('devtools://')) {
+        if (url.startsWith("file://") || url.startsWith("devtools://")) {
           callback({ cancel: false });
           return;
         }
@@ -160,6 +160,7 @@ function handleComs() {
   ipcMain.on("show-msgbox", showMessageBox);
   ipcMain.on("block-includes", urlIncludesToBlock);
   ipcMain.on("toggle-fullscreen", toggleFullScreen);
+  ipcMain.on("app-relaunch", relaunchApp);
   ipcMain.handle("dir-create", createDirectory);
   ipcMain.handle("dir-root", rootDir);
   ipcMain.handle("file-read", readFile);
@@ -168,6 +169,7 @@ function handleComs() {
   ipcMain.handle("path-exists", pathExists);
   ipcMain.handle("path-delete", deletePath);
   ipcMain.handle("send-input", sendInput);
+  ipcMain.handle("app-update-self", updateApp);
 }
 
 //#region APIS
@@ -267,7 +269,7 @@ async function downloadFile(e, url, filePath, index, callBackName) {
       })
       .on("error", function (err) {
         // Handle errors
-        fs.unlink(dest); // Delete the file async. (But we don't check the result)
+        fs.unlink(filePath); // Delete the file async. (But we don't check the result)
         mainWindow.webContents.send("globalCallBack", callBackName, {
           index: index,
           fileStatus: true,
@@ -288,7 +290,7 @@ async function downloadFile(e, url, filePath, index, callBackName) {
       })
       .on("error", function (err) {
         // Handle errors
-        fs.unlink(dest); // Delete the file async. (But we don't check the result)
+        fs.unlink(filePath); // Delete the file async. (But we don't check the result)
         mainWindow.webContents.send(
           "log-messager",
           "Error downloading file -> " + url,
@@ -296,5 +298,54 @@ async function downloadFile(e, url, filePath, index, callBackName) {
         );
       });
   }
+}
+
+async function updateApp(e, appZipUrl = "") {
+  let dirPath = __dirname;
+  let dirPathExists = pathExists(null, dirPath);
+  if (!dirPathExists) {
+    createDirectory(null, dirPath);
+  }
+  let filePath = path.join(dirPath, "app.zip");
+  var file = fs.createWriteStream(filePath);
+
+  let request = new Promise((resolve, reject) => {
+    https
+      .get(appZipUrl, function (response) {
+        response.pipe(file);
+        file.on("finish", function () {
+          file.end(() => {
+            resolve(filePath);
+          });
+        });
+      })
+      .on("error", function (err) {
+        // Handle errors
+        fs.unlink(filePath); // Delete the file async. (But we don't check the result)
+        reject(err);
+      });
+  });
+
+  try {
+    let response = await request;
+    await extract(response, {
+      dir: dirPath,
+    });
+    fs.unlink(response);
+    return {
+      success: true,
+    };
+  } catch (ex) {
+    console.log(ex);
+    return {
+      success: false,
+      message: ex.message,
+    };
+  }
+}
+
+function relaunchApp() {
+  app.relaunch();
+  app.exit();
 }
 //#endregion

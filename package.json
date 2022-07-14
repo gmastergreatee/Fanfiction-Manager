@@ -6,7 +6,7 @@
   "author": "gmastergreatee",
   "license": "MIT",
   "dependencies": {
-    "@types/electron": "^1.6.10",
-    "@types/vue": "^2.0.0"
+    "extract-zip": "^2.0.1",
+    "follow-redirects": "^1.15.1"
   }
 }

@@ -1,4 +1,5 @@
-let appName = "Novel Downloader v3";
+let appName = "Fanfiction-Manager";
+let appVersion = "beta_3.0.3";
 let verboseMode = false;
 
 let site_vars_script = `
@@ -75,6 +76,7 @@ let chapter_default_styles =
 
 // --------------------------------------------------------------------------------------------------------------------
 
+let updateData = null;
 let dummyPageUrl = "./dummy.html";
 
 let configDirectoryRelativePath = "/config/";
@@ -186,6 +188,7 @@ let rootDirectoryAbsolutePath = "";
 app = new Vue({
   el: "#main",
   async mounted() {
+    window.document.title = appName + " - " + appVersion;
     rootDirectoryAbsolutePath = await rootDir();
 
     loadAllConfigs();
@@ -214,6 +217,10 @@ app = new Vue({
       }
       onMainWebViewLoadedEvent.trigger();
     });
+    checkAppUpdate();
+    setInterval(async () => {
+      checkAppUpdate();
+    }, 1000 * 60 * 60 * 12);
   },
   data() {
     return {
@@ -242,6 +249,11 @@ app = new Vue({
       iframe_working: false,
       iframe_url: dummyPageUrl,
       status: "NA",
+
+      checkingForUpdates: false,
+      newVersionTag: appVersion,
+      isDisplayingUpdateDialog: false,
+      isAppUpdating: false,
       //#endregion
 
       //#region Reader Mode
@@ -395,6 +407,37 @@ app = new Vue({
         else blocks = [];
       }
       urlIncludesToBlock(blocks);
+    },
+    checkForAppUpdates() {
+      checkAppUpdate(true);
+    },
+    showUpdateDialog() {
+      if (this.newVersionTag != updateData.tag_name) {
+        let latestAppZip = updateData.assets.find((i) => i.name == "app.zip");
+        if (latestAppZip) {
+          this.newVersionTag = updateData.tag_name;
+          this.isDisplayingUpdateDialog = true;
+        }
+      }
+    },
+    async downloadAppUpdate() {
+      let latestAppZip = updateData.assets.find((i) => i.name == "app.zip");
+      if (latestAppZip) {
+        this.isAppUpdating = true;
+        let resp = await updateApp(latestAppZip.browser_download_url);
+        if (resp && resp.success) {
+          relaunchApp();
+        } else if (resp) {
+          this.discardAppUpdate();
+          log("Something went wrong while updating. :(");
+          console.log(resp.message);
+        }
+        this.isAppUpdating = false;
+      }
+    },
+    discardAppUpdate() {
+      this.isDisplayingUpdateDialog = false;
+      this.newVersionTag = appVersion;
     },
     //#region Rules Related
     toggleTestResults() {
@@ -1556,7 +1599,8 @@ app = new Vue({
           this.reading_mode = true;
           this.r_chapter_index = 0;
           this.r_novel = t_novel;
-          document.title = this.r_novel.Title;
+          document.title =
+            this.r_novel.Title + " - " + appName + " - " + appVersion;
           chapterChangeLock = false;
           activateReadingModeEventListeners();
           setTimeout(() => {
@@ -1730,7 +1774,7 @@ app = new Vue({
       if (this.r_temp_reader_options) {
         this.r_reader_options = JSON.parse(this.r_temp_reader_options);
       }
-      document.title = appName;
+      document.title = appName + " - " + appVersion;
       deactivateReadingModeEventListeners();
     },
     toggleReaderOptions() {
@@ -2371,6 +2415,14 @@ async function sendInput(type = "keyDown", accelerator) {
   await window.electronAPI.sendInput(type, accelerator);
 }
 
+async function updateApp(appZipUrl) {
+  return await window.electronAPI.updateApp(appZipUrl);
+}
+
+async function relaunchApp() {
+  window.electronAPI.relaunchApp();
+}
+
 //#endregion
 
 //#region Utility Functions
@@ -2453,3 +2505,33 @@ setInterval(async () => {
 }, 3000);
 
 //#endregion
+
+async function checkAppUpdate(showStatus = false) {
+  if (showStatus) {
+    log("Checking for app-update...");
+  }
+  app.checkingForUpdates = true;
+  try {
+    let data = await fetch(
+      "https://api.github.com/repos/gmastergreatee/Fanfiction-Manager/releases/latest"
+    ).then((e) => e.json());
+    app.checkingForUpdates = false;
+    if (data && data.tag_name != appVersion) {
+      updateData = data;
+      if (showStatus) {
+        log("Update found -> " + data.tag_name);
+      }
+      app.showUpdateDialog();
+    } else {
+      if (showStatus) {
+        log("Already latest version");
+      }
+    }
+  } catch (ex) {
+    app.checkingForUpdates = false;
+    if (showStatus) {
+      log("Error checking app-update -> " + ex.message);
+    }
+    console.log(ex);
+  }
+}

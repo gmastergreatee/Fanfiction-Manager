@@ -367,7 +367,12 @@ div.chapter-active {
   z-index: 1;
 }
 
-.goto-box {
+.zi-3 {
+  z-index: 3;
+}
+
+.goto-box,
+.update-box {
   position: absolute;
   z-index: 1;
   left: 0;
@@ -379,6 +384,10 @@ div.chapter-active {
   align-items: center;
   flex-flow: row;
   background-color: #fff9;
+}
+
+.update-box {
+  z-index: 3;
 }
 
 .l-0 {
