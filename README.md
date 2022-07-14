@@ -1,5 +1,5 @@
 # LightNovel-Manager
-Light-novel manager/downloader/reader
+Fanfiction manager/downloader/reader
 
 <img src="https://github.com/gmastergreatee/LightNovel-Manager/raw/master/pic1.png">
 
