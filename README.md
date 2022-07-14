@@ -1,7 +1,7 @@
 # Fanfiction-Manager
 Fanfiction manager/downloader/reader
 
-<img src="https://github.com/gmastergreatee/LightNovel-Manager/raw/master/pic1.png">
+<img src="https://github.com/gmastergreatee/Fanfiction-Manager/raw/master/pic1.png">
 
 Provides extreme flexibility with the help of `Rule` system to `power-users`* in downloading, tracking-status & reading novels from __ANY__ site they want.
 
