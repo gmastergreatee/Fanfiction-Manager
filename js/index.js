@@ -1,6 +1,51 @@
 let appName = "Novel Downloader v3";
 let verboseMode = false;
 
+let site_vars_script = `
+let defaultGlobals = ["window", "self", "document", "name", "location", "customElements", "history", "locationbar", "menubar",
+  "personalbar", "scrollbars", "statusbar", "toolbar", "status", "closed", "frames", "length", "top", "opener", "parent",
+  "frameElement", "navigator", "origin", "external", "screen", "innerWidth", "innerHeight", "scrollX", "pageXOffset", "scrollY",
+  "pageYOffset", "visualViewport", "screenX", "screenY", "outerWidth", "outerHeight", "devicePixelRatio", "clientInformation",
+  "screenLeft", "screenTop", "defaultStatus", "defaultstatus", "styleMedia", "onsearch", "isSecureContext", "performance",
+  "onappinstalled", "onbeforeinstallprompt", "crypto", "indexedDB", "webkitStorageInfo", "sessionStorage", "localStorage",
+  "onbeforexrselect", "onabort", "onblur", "oncancel", "oncanplay", "oncanplaythrough", "onchange", "onclick", "onclose",
+  "oncontextlost", "oncontextmenu", "oncontextrestored", "oncuechange", "ondblclick", "ondrag", "ondragend", "ondragenter",
+  "ondragleave", "ondragover", "ondragstart", "ondrop", "ondurationchange", "onemptied", "onended", "onerror", "onfocus",
+  "onformdata", "oninput", "oninvalid", "onkeydown", "onkeypress", "onkeyup", "onload", "onloadeddata", "onloadedmetadata",
+  "onloadstart", "onmousedown", "onmouseenter", "onmouseleave", "onmousemove", "onmouseout", "onmouseover", "onmouseup",
+  "onmousewheel", "onpause", "onplay", "onplaying", "onprogress", "onratechange", "onreset", "onresize", "onscroll",
+  "onsecuritypolicyviolation", "onseeked", "onseeking", "onselect", "onslotchange", "onstalled", "onsubmit", "onsuspend",
+  "ontimeupdate", "ontoggle", "onvolumechange", "onwaiting", "onwebkitanimationend", "onwebkitanimationiteration",
+  "onwebkitanimationstart", "onwebkittransitionend", "onwheel", "onauxclick", "ongotpointercapture", "onlostpointercapture",
+  "onpointerdown", "onpointermove", "onpointerup", "onpointercancel", "onpointerover", "onpointerout", "onpointerenter",
+  "onpointerleave", "onselectstart", "onselectionchange", "onanimationend", "onanimationiteration", "onanimationstart",
+  "ontransitionrun", "ontransitionstart", "ontransitionend", "ontransitioncancel", "onafterprint", "onbeforeprint",
+  "onbeforeunload", "onhashchange", "onlanguagechange", "onmessage", "onmessageerror", "onoffline", "ononline", "onpagehide",
+  "onpageshow", "onpopstate", "onrejectionhandled", "onstorage", "onunhandledrejection", "onunload", "alert", "atob", "blur",
+  "btoa", "cancelAnimationFrame", "cancelIdleCallback", "captureEvents", "clearInterval", "clearTimeout", "close", "confirm",
+  "createImageBitmap", "fetch", "find", "focus", "getComputedStyle", "getSelection", "matchMedia", "moveBy", "moveTo", "open",
+  "postMessage", "print", "prompt", "queueMicrotask", "releaseEvents", "reportError", "requestAnimationFrame",
+  "requestIdleCallback", "resizeBy", "resizeTo", "scroll", "scrollBy", "scrollTo", "setInterval", "setTimeout", "stop",
+  "structuredClone", "webkitCancelAnimationFrame", "webkitRequestAnimationFrame", "chrome", "caches", "cookieStore",
+  "ondevicemotion", "ondeviceorientation", "ondeviceorientationabsolute", "launchQueue", "onbeforematch", "getScreenDetails",
+  "showDirectoryPicker", "showOpenFilePicker", "showSaveFilePicker", "originAgentCluster", "trustedTypes", "navigation",
+  "speechSynthesis", "onpointerrawupdate", "crossOriginIsolated", "scheduler", "openDatabase", "webkitRequestFileSystem",
+  "webkitResolveLocalFileSystemURL", "getSiteGlobals"];
+
+function getSiteGlobals() {
+  let globals = Object.keys(window);
+  let siteGlobals = globals.filter((i) => !defaultGlobals.includes(i));
+  return siteGlobals.map((i) => {
+    return {
+        type: typeof(window[i]),
+        name: i,
+    };
+  });
+}
+
+return getSiteGlobals();
+`;
+
 let default_TOC_Code = `let retMe = {
   'CoverURL': '',              // may be empty
   'Title': 'novel name here',
@@ -429,6 +474,21 @@ app = new Vue({
       }
     },
     async runTestPageTypeScript() {
+      try {
+        log("Getting site vars...");
+        let data = await this.mainWebView.executeJavaScript(
+          this.getEvaluateJavascriptCode(site_vars_script)
+        );
+        if (data) {
+          this.test_result_content =
+            "<pre>" + JSON.stringify(data, null, 4) + "</pre>";
+          log("Site vars loaded");
+        } else {
+          log("No site vars found");
+        }
+      } catch (ex) {
+        log("Error getting site vars");
+      }
       try {
         let data = await this.mainWebView.executeJavaScript(
           this.getEvaluateJavascriptCode(this.test_pagetype_code)
