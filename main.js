@@ -51,7 +51,7 @@ const createWindow = () => {
     show: false,
     autoHideMenuBar: true,
   });
-  mainWindow.setIcon(path.join(__dirname, 'Icon.png'));
+  mainWindow.setIcon(path.join(__dirname, "Icon.png"));
 
   // mainWindow.webContents.session.webRequest.onHeadersReceived(
   //   (details, callback) => {
@@ -106,7 +106,11 @@ const createWindow = () => {
       function (details, callback) {
         let blocked = false;
         let url = details.url.toLowerCase();
-        if (url.startsWith("file://") || url.startsWith("devtools://") || url.includes('gmastergreatee/Fanfiction-Manager')) {
+        if (
+          url.startsWith("file://") ||
+          url.startsWith("devtools://") ||
+          url.includes("gmastergreatee/Fanfiction-Manager")
+        ) {
           callback({ cancel: false });
           return;
         }
@@ -166,7 +170,6 @@ function handleComs() {
   ipcMain.handle("dir-root", rootDir);
   ipcMain.handle("file-read", readFile);
   ipcMain.handle("file-write", writeFile);
-  ipcMain.handle("file-download", downloadFile);
   ipcMain.handle("path-exists", pathExists);
   ipcMain.handle("path-delete", deletePath);
   ipcMain.handle("send-input", sendInput);
@@ -245,58 +248,6 @@ async function rootDir() {
 
 async function sendInput(e, type, accelerator) {
   mainWindow.webContents.sendInputEvent({ type: type, keyCode: accelerator });
-}
-
-async function downloadFile(e, url, filePath, index, callBackName) {
-  let dirPath = path.dirname(filePath);
-  let dirPathExists = pathExists(null, dirPath);
-  if (!dirPathExists) {
-    createDirectory(null, dirPath);
-  }
-
-  var file = fs.createWriteStream(filePath);
-  if (url.startsWith("https")) {
-    https
-      .get(url, function (response) {
-        response.pipe(file);
-        file.on("finish", function () {
-          file.end(() => {
-            mainWindow.webContents.send("globalCallBack", callBackName, {
-              index: index,
-              fileStatus: true,
-            });
-          });
-        });
-      })
-      .on("error", function (err) {
-        deletePath(filePath);
-        mainWindow.webContents.send("globalCallBack", callBackName, {
-          index: index,
-          fileStatus: true,
-        });
-      });
-  } else {
-    http
-      .get(url, function (response) {
-        response.pipe(file);
-        file.on("finish", function () {
-          file.end(() => {
-            mainWindow.webContents.send(
-              "log-messager",
-              "File Downloaded -> " + url
-            );
-          });
-        });
-      })
-      .on("error", function (err) {
-        deletePath(filePath);
-        mainWindow.webContents.send(
-          "log-messager",
-          "Error downloading file -> " + url,
-          err.message
-        );
-      });
-  }
 }
 
 async function updateApp(e, appZipUrl = "") {

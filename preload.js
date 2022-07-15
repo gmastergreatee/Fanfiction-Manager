@@ -38,5 +38,4 @@ contextBridge.exposeInMainWorld("electronAPI", {
 
   // --- main to renderer
   log: (callback) => ipcRenderer.on("log-message", callback),
-  callGlobalCallBack: (callback) => ipcRenderer.on("globalCallBack", callback),
 });

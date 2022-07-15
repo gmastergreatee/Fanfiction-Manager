@@ -84,7 +84,6 @@ let dataDirectoryRelativePath = "/data/";
 let coverDirectoryRelativePath = dataDirectoryRelativePath + "covers/";
 let novelDirectoryRelativePath = dataDirectoryRelativePath + "novels/";
 
-let globalCallbacks = {};
 let chapterChangeLock = false;
 let chapterChangeLockTimeout = 200;
 let appOptionsChanged = false;
@@ -120,62 +119,64 @@ const simpleEvent = function (context) {
   };
 };
 
-const fileDownloader = function (context) {
+const fileDownloader_2 = function (context) {
   if (context === void 0) {
     context = null;
   }
+  const fileDownloadScript = `  
+  async function downloadFileArrayBuffer(url) {
+    let prom = new Promise(async (resolve, reject) => {
+      try {
+        let data = await fetch(url).then((a) => a.blob());
+        let reader = new FileReader();
+        reader.loadend += () => {};
+        reader.readAsArrayBuffer(data);
+        let sleepCounter = 0;
+        while (reader.readyState != 2 && reader.readyState != 0) {
+          await sleep(500);
+          sleepCounter++;
+          if (sleepCounter > 20) {
+            reject("Wait timeout expired");
+          }
+        }
+        resolve(reader.result);
+      } catch (ex) {
+        reject(ex);
+      }
+    });
+    return await prom;
+  }
+  `;
   var urlFileMaps = [];
-  var callBackName = null;
-  var finalCallback = null;
   return {
     addEntry: function (url, filePath) {
       urlFileMaps.push({
         url: url,
         path: filePath,
-        done: false,
       });
     },
-    download: function (_callbackName = "file_0", cb = null) {
-      if (urlFileMaps.length > 0) {
-        callBackName = _callbackName;
-        globalCallbacks[callBackName] = this.recurse;
-        log(
-          "[1/" + urlFileMaps.length + "] File Downloading",
-          urlFileMaps[0].url
-        );
-        if (cb) {
-          finalCallback = cb;
-        }
-        downloadFile(urlFileMaps[0].url, urlFileMaps[0].path, 0, callBackName);
-      }
-    },
-    recurse: function (fileDownloadStatus) {
-      let index = fileDownloadStatus.index;
-      let fileStatus = fileDownloadStatus.fileStatus;
+    download: async function () {
+      for (let i = 0; i < urlFileMaps.length; i++) {
+        try {
+          let fileData = await app.mainWebView.executeJavaScript(
+            app.getEvaluateJavascriptCode(
+              fileDownloadScript +
+                "return await downloadFileArrayBuffer('" +
+                urlFileMaps[i].url +
+                "')"
+            )
+          );
 
-      if (index != null && fileStatus != null) {
-        urlFileMaps[index].done = fileStatus;
-        if (!fileStatus) {
-          log("File Download Error", urlFileMaps[index].url);
-        }
-        index++;
-        if (index < urlFileMaps.length) {
-          log(
-            "[" + (index + 1) + "/" + urlFileMaps.length + "] File Downloading",
-            urlFileMaps[0].url
-          );
-          downloadFile(
-            urlFileMaps[index].url,
-            urlFileMaps[index].path,
-            index,
-            callBackName
-          );
-        } else {
-          globalCallbacks[callBackName] = null;
-          log("All Files Downloaded");
-          if (finalCallback) {
-            finalCallback();
+          if (fileData) {
+            writeFile(urlFileMaps[i].path, new DataView(fileData));
           }
+        } catch (ex) {
+          log(
+            "Error downloading file (" +
+              ex.message +
+              ") -> " +
+              urlFileMaps[i].url
+          );
         }
       }
     },
@@ -914,15 +915,14 @@ app = new Vue({
                   rootDirectoryAbsolutePath +
                   coverDirectoryRelativePath +
                   cover_file_name;
-                let downloader = fileDownloader();
+                let downloader = fileDownloader_2();
                 downloader.addEntry(data.CoverURL, cover_file_path);
                 data.CoverURL = "";
                 this.blockURLIncludes("");
-                downloader.download("_cover_image_callback", () => {
-                  data.CoverURL =
-                    "." + coverDirectoryRelativePath + cover_file_name;
-                  saveConfigArrayData("novels");
-                });
+                await downloader.download();
+                data.CoverURL =
+                  "." + coverDirectoryRelativePath + cover_file_name;
+                saveConfigArrayData("novels");
               } catch (ex) {
                 log("Cover download error\nError -> " + ex.message);
                 data.CoverURL = "";
@@ -1496,22 +1496,20 @@ app = new Vue({
             if (!t_novel.CoverURL && data.CoverURL) {
               try {
                 new URL(data.CoverURL);
-                let cover_file_name = data["GUID"] + ".png";
+                let cover_file_name = t_novel.GUID + ".png";
                 let cover_file_path =
                   rootDirectoryAbsolutePath +
                   coverDirectoryRelativePath +
                   cover_file_name;
-                let downloader = fileDownloader();
+                let downloader = fileDownloader_2();
                 downloader.addEntry(data.CoverURL, cover_file_path);
-                data.CoverURL = "";
-                downloader.download("_cover_image_callback", () => {
-                  data.CoverURL =
-                    "." + coverDirectoryRelativePath + cover_file_name;
-                  saveConfigArrayData("novels");
-                });
+                await downloader.download();
+                t_novel.CoverURL =
+                  "." + coverDirectoryRelativePath + cover_file_name;
+                saveConfigArrayData("novels");
               } catch (ex) {
                 log("Cover download error\nError -> " + ex.message);
-                data.CoverURL = "";
+                t_novel.CoverURL = "";
               }
             }
             if (
@@ -2338,13 +2336,6 @@ window.electronAPI.log((event, text, more_text = "") => {
   }
 });
 
-window.electronAPI.callGlobalCallBack((event, callBackName, data) => {
-  let cb = globalCallbacks[callBackName];
-  if (cb) {
-    cb(data);
-  }
-});
-
 //#endregion
 
 //#region Electron API wrappers
@@ -2402,25 +2393,6 @@ async function readFile(filePath) {
  */
 async function writeFile(filePath, contents) {
   await window.electronAPI.writeFile(filePath, contents);
-}
-
-/**
- * Downloads the file and saves it to the provided destination
- * @param {string} url The URL of the file to download
- * @param {string} filePath Download destination filepath
- */
-async function downloadFile(
-  url,
-  filePath,
-  index = 0,
-  globalCallBackName = null
-) {
-  await window.electronAPI.downloadFile(
-    url,
-    filePath,
-    index,
-    globalCallBackName
-  );
 }
 
 /**
