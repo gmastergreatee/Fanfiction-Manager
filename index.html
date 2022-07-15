@@ -28,7 +28,8 @@
         <div class="df bb fwb p-4">
           <div class="f1">{{ tabs[app_options.activeTab] }} -</div>
           <div>
-            <a href="#" class="mx-4" :class="{ 'disabled': checkingForUpdates }" @click="checkForAppUpdates()">{{ checkingForUpdates ? 'Checking for Updates...' : 'Update App' }}</a>
+            <a href="#" class="mx-4" :class="{ 'disabled': checkingForUpdates }" @click="checkForAppUpdates()">{{
+              checkingForUpdates ? 'Checking for Updates...' : 'Update App' }}</a>
             <a href="#" class="mx-4" @click="toggleDarkMode()">{{ app_options.darkMode ? 'LightMode' :
               'DarkMode' }}</a>
             <a v-if="tabs[app_options.activeTab] != 'Rules'" class="ml-4" href="#" @click="toggleRenderer()">{{
@@ -195,65 +196,84 @@
                 <div class="f1 oya pr">
                   <div class="pa w-100 h-100">
                     <div v-if="isTabActive('Tester')" class="df f1 fdc p-4 oya">
-                      <div class="df fdr aic mb-4">
-                        <label class="mr-4">Rule Name :</label>
-                        <input type="text" class="p-2 f1" v-model="test_rule_name" placeholder="Enter rule name here" />
-                      </div>
-                      <div class="df fdr aic mb-4">
-                        <label class="mr-4">URL Regex :</label>
-                        <input type="text" class="p-2 f1" v-model="test_url_regex"
-                          placeholder="Regex for the URL to match the rule to" />
-                      </div>
-                      <div class="df fdr aic mb-4">
-                        <label class="mr-4">Test URL&nbsp; :</label>
-                        <input type="text" class="p-2 f1" v-model="test_url" placeholder="URL for testing" />
-                      </div>
-                      <div class="df fdr mb-4">
-                        <label class="mr-4 mt-4">Page Type :</label>
-                        <textarea class="p-2 f1 hp-200 wsn oyh rn" v-model="test_pagetype_code"
-                          placeholder="JavaScript code to determine is the page is TOC or Chapter page&#10;&#10;Return type should be number(int) -&#10;&#10;-2 for Manual-Captcha&#10;-1 for Auto-Captcha&#10; 0 for TOC&#10;&#10;Returning anything else will be treated as UNKNOWN"
-                          onfocus="this.style.height = '';this.style.height = this.scrollHeight + 15 + 'px';"
-                          oninput="this.style.height = '';this.style.height = this.scrollHeight + 15 + 'px';"
-                          spellcheck="false"></textarea>
-                      </div>
-                      <div class="df fdr mb-4">
-                        <label class="mr-4 mt-4">TOCScript :</label>
-                        <textarea class="p-2 f1 hp-200 wsn oyh rn" v-model="test_toc_code"
-                          placeholder="JavaScript code to get content from TOC page&#10;&#10;Return type should be JSON & must contain the following JSON nodes -&#10;&#10;{&#10;    'CoverURL': ''              // may be empty&#10;    'Title': 'novel name here',&#10;    'Summary': '',              // may be empty&#10;    'ChapterCount': 1,          // chapter count here&#10;    'ChapterURLs': [            // list of chapter-URLs&#10;        '', // must contain atleast the first chapter URL&#10;        '',&#10;    ],&#10;}&#10;&#10;This object will be passed as 'ndata' to the Ch-Script"
-                          onfocus="this.style.height = '';this.style.height = this.scrollHeight + 15 + 'px';"
-                          oninput="this.style.height = '';this.style.height = this.scrollHeight + 15 + 'px';"
-                          spellcheck="false"></textarea>
-                      </div>
-                      <div class="df fdr mb-4">
-                        <label class="mr-4 mt-4">Ch-Script :</label>
-                        <textarea class="p-2 f1 hp-200 wsn oyh rn" v-model="test_chapter_code"
-                          placeholder="JavaScript code to get content from Chapter page.&#10;Can be one or multiple chapters at once.&#10;&#10;Return type should be JSON in the following format -&#10;&#10;[&#10;    {&#10;        'title': '',&#10;        'content': '',&#10;        'nextURL': ''&#10;    },&#10;]&#10;&#10;'nextURL' will be used in case it is non-empty"
-                          onfocus="this.style.height = '';this.style.height = this.scrollHeight + 15 + 'px';"
-                          oninput="this.style.height = '';this.style.height = this.scrollHeight + 15 + 'px';"
-                          spellcheck="false"></textarea>
-                      </div>
-                      <div class="df fdr mb-4">
-                        <label class="mr-4 mt-4">URLBlocks :</label>
-                        <textarea class="p-2 f1 hp-200 wsn oyh rn" v-model="test_url_blocks"
-                          placeholder="URLs containg these will be blocked.&#10;Need to be one entry per line.&#10;&#10;Example -&#10;&#10;googleads&#10;adsbygoogle"
-                          onfocus="this.style.height = '';this.style.height = this.scrollHeight + 15 + 'px';"
-                          oninput="this.style.height = '';this.style.height = this.scrollHeight + 15 + 'px';"
-                          spellcheck="false"></textarea>
-                      </div>
-                      <div class="df fdr jce fwb fww">
-                        <a href="#" class="mx-4" :class="{'disabled': iframe_working}"
-                          @click="loadTestURL()">LoadURL</a>
-                        <a href="#" class="mx-4" :class="{'disabled': iframe_working}"
-                          @click="runTestTOCScript()">RunTOCScript</a>
-                        <a href="#" class="mx-4" :class="{'disabled': iframe_working}"
-                          @click="runTestChapterScript()">RunChapterScript</a>
-                        <a href="#" class="mx-4" :class="{'disabled': iframe_working}"
-                          @click="resetTestFields()">ResetFields</a>
-                        <a href="#" class="mx-4" :class="{'disabled': iframe_working}"
-                          @click="saveTestRule()">SaveRule</a>
-                        <a v-if="test_rule_guid.length > 0" href="#" class="ml-4" :class="{'disabled': iframe_working}"
-                          @click="goBackFromEditRule()">Back</a>
-                      </div>
+                      <table class="w-100">
+                        <tr>
+                          <th class="wp-1 wsn tar pr-4">Rule Name :</th>
+                          <td>
+                            <input type="text" class="p-2 w-100" v-model="test_rule_name"
+                              placeholder="Enter rule name here" />
+                          </td>
+                        </tr>
+                        <tr>
+                          <th class="wsn tar pr-4">URL Regex :</th>
+                          <td>
+                            <input type="text" class="p-2 w-100" v-model="test_url_regex"
+                              placeholder="Regex for the URL to match the rule to" />
+                          </td>
+                        </tr>
+                        <tr>
+                          <th class="wsn tar pr-4">Test URL :</th>
+                          <td>
+                            <input type="text" class="p-2 w-100" v-model="test_url" placeholder="URL for testing" />
+                          </td>
+                        </tr>
+                        <tr>
+                          <th class="wsn tar vat pr-4">Page Type :</th>
+                          <td>
+                            <textarea class="p-2 w-100 hp-200 wsn oyh rn" v-model="test_pagetype_code"
+                              placeholder="JavaScript code to determine is the page is TOC or Chapter page&#10;&#10;Return type should be number(int) -&#10;&#10;-2 for Manual-Captcha&#10;-1 for Auto-Captcha&#10; 0 for TOC&#10;&#10;Returning anything else will be treated as UNKNOWN"
+                              onfocus="this.style.height = '';this.style.height = this.scrollHeight + 15 + 'px';"
+                              oninput="this.style.height = '';this.style.height = this.scrollHeight + 15 + 'px';"
+                              spellcheck="false"></textarea>
+                          </td>
+                        </tr>
+                        <tr>
+                          <th class="wsn tar vat pr-4">TOC Script :</th>
+                          <td>
+                            <textarea class="p-2 w-100 hp-200 wsn oyh rn" v-model="test_toc_code"
+                              placeholder="JavaScript code to get content from TOC page&#10;&#10;Return type should be JSON & must contain the following JSON nodes -&#10;&#10;{&#10;    'CoverURL': ''              // may be empty&#10;    'Title': 'novel name here',&#10;    'Summary': '',              // may be empty&#10;    'ChapterCount': 1,          // chapter count here&#10;    'ChapterURLs': [            // list of chapter-URLs&#10;        '', // must contain atleast the first chapter URL&#10;        '',&#10;    ],&#10;}&#10;&#10;This object will be passed as 'ndata' to the Ch-Script"
+                              onfocus="this.style.height = '';this.style.height = this.scrollHeight + 15 + 'px';"
+                              oninput="this.style.height = '';this.style.height = this.scrollHeight + 15 + 'px';"
+                              spellcheck="false"></textarea>
+                          </td>
+                        </tr>
+                        <tr>
+                          <th class="wsn tar vat pr-4">Ch-Script :</th>
+                          <td>
+                            <textarea class="p-2 w-100 hp-200 wsn oyh rn" v-model="test_chapter_code"
+                              placeholder="JavaScript code to get content from Chapter page.&#10;Can be one or multiple chapters at once.&#10;&#10;Return type should be JSON in the following format -&#10;&#10;[&#10;    {&#10;        'title': '',&#10;        'content': '',&#10;        'nextURL': ''&#10;    },&#10;]&#10;&#10;'nextURL' will be used in case it is non-empty"
+                              onfocus="this.style.height = '';this.style.height = this.scrollHeight + 15 + 'px';"
+                              oninput="this.style.height = '';this.style.height = this.scrollHeight + 15 + 'px';"
+                              spellcheck="false"></textarea>
+                          </td>
+                        </tr>
+                        <tr>
+                          <th class="wsn tar vat pr-4">URL Blocks :</th>
+                          <td>
+                            <textarea class="p-2 w-100 hp-200 wsn oyh rn" v-model="test_url_blocks"
+                              placeholder="URLs containg these will be blocked.&#10;Need to be one entry per line.&#10;&#10;Example -&#10;&#10;googleads&#10;adsbygoogle"
+                              onfocus="this.style.height = '';this.style.height = this.scrollHeight + 15 + 'px';"
+                              oninput="this.style.height = '';this.style.height = this.scrollHeight + 15 + 'px';"
+                              spellcheck="false"></textarea>
+                          </td>
+                        </tr>
+                        <tr class="tar">
+                          <td colspan="2">
+                            <a href="#" class="mx-4" :class="{'disabled': iframe_working}"
+                              @click="loadTestURL()">LoadURL</a>
+                            <a href="#" class="mx-4" :class="{'disabled': iframe_working}"
+                              @click="runTestTOCScript()">RunTOCScript</a>
+                            <a href="#" class="mx-4" :class="{'disabled': iframe_working}"
+                              @click="runTestChapterScript()">RunChapterScript</a>
+                            <a href="#" class="mx-4" :class="{'disabled': iframe_working}"
+                              @click="resetTestFields()">ResetFields</a>
+                            <a href="#" class="mx-4" :class="{'disabled': iframe_working}"
+                              @click="saveTestRule()">SaveRule</a>
+                            <a v-if="test_rule_guid.length > 0" href="#" class="ml-4"
+                              :class="{'disabled': iframe_working}" @click="goBackFromEditRule()">Back</a>
+                          </td>
+                        </tr>
+                      </table>
                     </div>
                   </div>
                 </div>

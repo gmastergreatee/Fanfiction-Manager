@@ -129,6 +129,10 @@ body {
   text-align: center;
 }
 
+.tar {
+  text-align: right;
+}
+
 .fwb {
   font-weight: bold;
 }
@@ -323,6 +327,13 @@ pre {
 a.disabled {
   color: #adadad;
   pointer-events: none;
+}
+
+input[type="text"],
+input[type="number"],
+textarea {
+  border-style: solid;
+  border-width: 1px;
 }
 
 .vat {

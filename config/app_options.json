@@ -2,8 +2,8 @@
   "showNewOnly": false,
   "showCheckUpdatedOnly": true,
   "showGridLayout": false,
-  "activeTab": 0,
-  "showWebPage": false,
+  "activeTab": 2,
+  "showWebPage": true,
   "showTestResults": true,
   "showConsole": true,
   "darkMode": true
