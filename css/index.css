@@ -153,6 +153,26 @@ body {
   padding-bottom: 4px;
 }
 
+.p-8,
+.pt-8 {
+  padding-top: 8px;
+}
+
+.p-8,
+.pb-8 {
+  padding-bottom: 8px;
+}
+
+.p-8,
+.pl-8 {
+  padding-left: 8px;
+}
+
+.p-8,
+.pr-8 {
+  padding-right: 8px;
+}
+
 .p-2 {
   padding: 2px;
 }
@@ -196,23 +216,43 @@ body {
   margin-right: 4px;
 }
 
-.mr-8 {
-  margin-right: 8px;
-}
-
 .m-4,
 .mx-4,
 .ml-4 {
   margin-left: 4px;
 }
 
-.mr-10 {
-  margin-right: 10px;
-}
-
 .m-4,
 .mb-4 {
   margin-bottom: 4px;
+}
+
+.m-8,
+.my-8,
+.mt-8 {
+  margin-top: 8px;
+}
+
+.m-8,
+.my-8,
+.mb-8 {
+  margin-bottom: 8px;
+}
+
+.m-8,
+.mx-8,
+.ml-8 {
+  margin-left: 8px;
+}
+
+.m-8,
+.mx-8,
+.mr-8 {
+  margin-right: 8px;
+}
+
+.mr-10 {
+  margin-right: 10px;
 }
 
 .rn {
@@ -289,16 +329,25 @@ a.disabled {
   vertical-align: top;
 }
 
-div.new-updates {
-  border-color: lightgreen;
-  box-shadow: 0 0 20px 2px lightgreen;
+div.new-updates,
+div.new-updates * {
+  /* border-color: lightgreen;
+  box-shadow: 0 0 20px 2px lightgreen; */
+  background-color: #d8e88e;
 }
 
 div.updating,
 div.downloading {
   z-index: 1;
-  border-color: chocolate;
-  box-shadow: 0 0 20px 2px chocolate;
+  border-color: green;
+  box-shadow: 0 0 20px 2px green;
+}
+
+div.updating,
+div.updating *,
+div.downloading,
+div.downloading * {
+  background-color: #c0ffc0;
 }
 
 div.detailing {
@@ -323,8 +372,8 @@ div.chapter-active {
   overflow: hidden;
   text-overflow: ellipsis;
   /* white-space: nowrap; */
-  top: 4px;
-  bottom: 4px;
+  top: 8px;
+  bottom: 8px;
   width: 100%;
 }
 

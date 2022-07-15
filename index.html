@@ -48,26 +48,26 @@
               <div v-if="isTabActive('Library')" class="df fdc f1 w-100">
                 <div class="df f1 fdc pr">
                   <div class="df f1 fdc pa w-100 h-100 oya p-4">
-                    <div v-for="n in getNovels" class="m-4 bt bb bl br df fdr p-4" :class="{
+                    <div v-for="n in getNovels" class="m-8 bt bb bl br df fdr p-8" :class="{
                         'detailing': isDetailingMode(n), 
                         'new-updates': n.ChapterCount > n.DownloadedCount,
                         'downloading': n == d_novel,
                         'updating': n == u_novel}">
-                      <div class="df pr-4 br pr cover-image">
+                      <div class="df pr-8 br pr cover-image">
                         <div class="df fdc pr">
                           <img class="bb bt bl br" :src="n.CoverURL" alt="Image Not Found">
                         </div>
                       </div>
-                      <div class="f1 df fdc w-100 pl-4">
+                      <div class="f1 df fdc w-100 pl-8">
                         <div>
                           <span v-html="n.Title" class="fwb"></span> ({{ n.DownloadedCount }}/{{ n.ChapterCount }})
                         </div>
-                        <div class="f1 bt mt-4 pt-4 pr">
+                        <div class="f1 bt mt-8 pt-8 pr">
                           <div :class="{'dn': !n.Summary, 'summary-shrunk': summaryExpandedGUID != n.GUID}"
                             v-html="n.Summary">
                           </div>
                         </div>
-                        <div class="bt mt-4 pt-4 df fdr">
+                        <div class="bt mt-8 pt-8 df fdr">
                           <div class="f1">
                             <a v-if="n.Summary" href="#" @click="setSummaryGUID(n.GUID)">{{ summaryExpandedGUID ==
                               n.GUID ? 'Shrink' :
@@ -107,8 +107,8 @@
                 <div v-if="detailing_novel" class="df fdc hp-300">
                   <div class="df fdr bt p-4">
                     <div class="f1">Details</div>
-                    <a href="#" @click="saveCloseNovelDetails()" class="mx-4">Save&Close</a>
-                    <a href="#" @click="discardNovelDetailsChanges()" class="ml-4">Discard</a>
+                    <a href="#" @click="saveCloseNovelDetails()" class="mx-8">Save&Close</a>
+                    <a href="#" @click="discardNovelDetailsChanges()" class="ml-8">Discard</a>
                   </div>
                   <div class="f1 bt pr">
                     <div class="df fdc pa w-100 h-100 oya">

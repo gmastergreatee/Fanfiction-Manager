@@ -68,16 +68,25 @@ textarea {
   background: #000;
 }
 
-div.new-updates {
-  border-color: lightgreen;
-  box-shadow: 0 0 20px 2px lightgreen;
+div.new-updates,
+div.new-updates * {
+  /* border-color: lightgreen;
+  box-shadow: 0 0 20px 2px lightgreen; */
+  background-color: #404720;
 }
 
 div.updating,
 div.downloading {
   z-index: 1;
-  border-color: chocolate;
-  box-shadow: 0 0 20px 2px chocolate;
+  border-color: lightgreen;
+  box-shadow: 0 0 20px 2px lightgreen;
+}
+
+div.updating,
+div.updating *,
+div.downloading,
+div.downloading * {
+  background-color: #2b782b;
 }
 
 div.detailing {
