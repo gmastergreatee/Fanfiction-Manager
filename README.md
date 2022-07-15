@@ -1,7 +1,8 @@
 # Fanfiction-Manager
 Fanfiction manager/downloader/reader
 
-<img src="https://github.com/gmastergreatee/Fanfiction-Manager/raw/master/pic1.png">
+<img src="https://github.com/gmastergreatee/Fanfiction-Manager/raw/master/pic_dark_2022-07-15.png">
+<img src="https://github.com/gmastergreatee/Fanfiction-Manager/raw/master/pic_light_2022-07-15.png">
 
 Provides extreme flexibility with the help of `Rule` system to `power-users`* in downloading, tracking-status & reading novels from __ANY__ site they want.
 
@@ -25,6 +26,7 @@ Current Status: __BETA__
 - `Rules Editor`
 - Novel `Reading Mode`
 - Novel `Details Editor`
+- App auto-updater
 
 ---
 
