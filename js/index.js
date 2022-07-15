@@ -1423,7 +1423,7 @@ app = new Vue({
         return;
       }
 
-      u_novel = t_novel;
+      this.u_novel = t_novel;
 
       log("Rule applied -> " + t_rule.rule_name);
       log("Updating Novel Metadata...");
@@ -1549,7 +1549,7 @@ app = new Vue({
                 this.iframe_url = dummyPageUrl;
                 break;
             }
-            u_novel = null;
+            this.u_novel = null;
             return;
           } else {
             this.test_url = this.mainWebView.getURL();
@@ -1562,7 +1562,7 @@ app = new Vue({
           this.iframe_working = false;
           log("Error -> " + ex.message);
         }
-        u_novel = null;
+        this.u_novel = null;
       };
 
       onMainWebViewLoadedEvent.clearAllListeners();
@@ -2504,6 +2504,8 @@ setInterval(async () => {
 
 //#endregion
 
+//#region App Update
+
 function getVersionNoFromString(versionText) {
   return parseInt(versionText.replace(/[(beta_)\.]/g, ""));
 }
@@ -2549,3 +2551,5 @@ async function checkAppUpdate(showStatus = false) {
     console.log(ex);
   }
 }
+
+//#endregion
