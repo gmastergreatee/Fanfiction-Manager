@@ -106,7 +106,7 @@ const createWindow = () => {
       function (details, callback) {
         let blocked = false;
         let url = details.url.toLowerCase();
-        if (url.startsWith("file://") || url.startsWith("devtools://")) {
+        if (url.startsWith("file://") || url.startsWith("devtools://") || url.includes('gmastergreatee/Fanfiction-Manager')) {
           callback({ cancel: false });
           return;
         }

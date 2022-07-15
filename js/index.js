@@ -1,5 +1,5 @@
 let appName = "Fanfiction-Manager";
-let appVersion = "beta_3.0.6";
+let appVersion = "beta_3.0.7";
 let verboseMode = false;
 
 let site_vars_script = `
@@ -254,6 +254,9 @@ app = new Vue({
       newVersionTag: appVersion,
       isDisplayingUpdateDialog: false,
       isAppUpdating: false,
+
+      updatingRules: false,
+
       //#endregion
 
       //#region Reader Mode
@@ -436,6 +439,39 @@ app = new Vue({
       this.isDisplayingUpdateDialog = false;
       this.newVersionTag = appVersion;
       updatedAppZip = null;
+    },
+    async updateRules() {
+      if (!this.updatingRules) {
+        this.updatingRules = true;
+        log("Updating rules...");
+        try {
+          let latestRules = JSON.parse(
+            await fetch(
+              "https://github.com/gmastergreatee/Fanfiction-Manager/raw/master/config/rules.json"
+            ).then((e) => e.text())
+          );
+          latestRules.forEach((el) => {
+            let oldRule = this.rules.find(
+              (i) => i.rule_name.toLowerCase() == el.rule_name.toLowerCase()
+            );
+            if (oldRule) {
+              oldRule.url_regex = el.url_regex;
+              oldRule.pagetype_code = el.pagetype_code;
+              oldRule.toc_code = el.toc_code;
+              oldRule.chapter_code = el.chapter_code;
+              oldRule.url_blocks = el.url_blocks;
+            } else {
+              this.rules.unshift(el);
+            }
+          });
+          saveConfigArrayData("rules");
+          log("Rules updated");
+        } catch (ex) {
+          log("Error updating rules -> " + ex.message);
+          console.log(ex);
+        }
+        this.updatingRules = false;
+      }
     },
     //#region Rules Related
     toggleTestResults() {

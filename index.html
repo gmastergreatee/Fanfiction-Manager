@@ -19,7 +19,7 @@
         <div class="dib bb tac fwb p-4">FM_vb3</div>
         <div class="df fdc">
           <div v-for="(t, i) in tabs" @click="setActiveTab(i)" class="df fdr bb cp p-4">
-            <div class="f1"><a href="#">{{ t }}</a></div>
+            <div class="f1"><a href="#" class="dib w-100">{{ t }}</a></div>
             <div v-if="app_options.activeTab == i">-></div>
           </div>
         </div>
@@ -32,7 +32,8 @@
               checkingForUpdates ? 'Checking for Updates...' : 'Update App' }}</a>
             <a href="#" class="mx-4" @click="toggleDarkMode()">{{ app_options.darkMode ? 'LightMode' :
               'DarkMode' }}</a>
-            <a v-if="tabs[app_options.activeTab] != 'Rules'" class="ml-4" href="#" @click="toggleRenderer()">{{
+            <a v-if="isTabActive('Rules')" href="#" class="mx-4" :class="{'disabled': iframe_working}" @click="updateRules()">{{ updatingRules ? 'Updating rules...' : 'Update Rules' }}</a>
+            <a v-if="!isTabActive('Rules')" class="ml-4" href="#" @click="toggleRenderer()">{{
               showRenderer ?
               'Hide'
               : 'Show' }} Renderer</a>
@@ -429,6 +430,12 @@
           <a href="#" class="mx-4" @click="downloadAppUpdate()">Yaay!</a>
           <a href="#" class="mx-4" @click="discardAppUpdate()">Meh...</a>
         </div>
+      </div>
+    </div>
+
+    <div v-if="updatingRules" class="update-box">
+      <div class="bb bt bl br p-4">
+        <div class="m-4 p-4">Updating rules, please wait...</div>
       </div>
     </div>
   </div>
