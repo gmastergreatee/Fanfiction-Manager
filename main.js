@@ -51,7 +51,7 @@ const createWindow = () => {
     show: false,
     autoHideMenuBar: true,
   });
-  mainWindow.setIcon(path.join(__dirname, 'Icon.ico'));
+  mainWindow.setIcon(path.join(__dirname, 'Icon.png'));
 
   // mainWindow.webContents.session.webRequest.onHeadersReceived(
   //   (details, callback) => {
