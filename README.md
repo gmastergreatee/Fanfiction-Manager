@@ -56,14 +56,18 @@ Reading Mode
 
 ---
 
-### Download Steps
+### Download
 
-- Download `electron` from [this](https://github.com/electron/electron/releases) page
-    - Example, for window 64bit, you need to download `electron-[version]-win32-x64.zip`
-- Extract the `electron` zip file to empty directory
-- Delete `default_app.asar` file inside `.../[electron-folder]/resources`
+For windows 64bit, download [here](https://github.com/gmastergreatee/Fanfiction-Manager/releases/download/beta_3.0.5/Fanfiction-Manager_win_x86-64_beta_2022-07-15.zip)
+
+For others -
+
+- Download `electron` from [this](https://github.com/electron/electron/releases/tag/v19.0.5) page
+    - Example, for windows 64bit, you need to download `electron-v19.0.5-win32-x64.zip`
+- Extract the `electron` zip file to an empty directory
+- Delete `default_app.asar` file present in `.../[electron-dir]/resources`
 - Create new directory `app` in `.../[electron-folder]/resources`
-- Paste the contents of this repo into `app` folder
+- Extract the contents of [this](https://github.com/gmastergreatee/Fanfiction-Manager/releases/download/beta_3.0.5/app.zip) zip file into `.../[electron-dir]/resources/app` directory
 - Now run `electron` executable
 - Done
 
