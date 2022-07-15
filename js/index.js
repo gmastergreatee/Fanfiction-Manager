@@ -461,7 +461,7 @@ app = new Vue({
               oldRule.chapter_code = el.chapter_code;
               oldRule.url_blocks = el.url_blocks;
             } else {
-              this.rules.unshift(el);
+              this.rules.push(el);
             }
           });
           saveConfigArrayData("rules");
