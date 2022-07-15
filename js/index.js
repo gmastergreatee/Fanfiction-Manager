@@ -76,7 +76,7 @@ let chapter_default_styles =
 
 // --------------------------------------------------------------------------------------------------------------------
 
-let updateData = null;
+let updatedAppZip = null;
 let dummyPageUrl = "./dummy.html";
 
 let configDirectoryRelativePath = "/config/";
@@ -412,19 +412,12 @@ app = new Vue({
       checkAppUpdate(true);
     },
     showUpdateDialog() {
-      if (this.newVersionTag != updateData.tag_name) {
-        let latestAppZip = updateData.assets.find((i) => i.name == "app.zip");
-        if (latestAppZip) {
-          this.newVersionTag = updateData.tag_name;
-          this.isDisplayingUpdateDialog = true;
-        }
-      }
+      this.isDisplayingUpdateDialog = true;
     },
     async downloadAppUpdate() {
-      let latestAppZip = updateData.assets.find((i) => i.name == "app.zip");
-      if (latestAppZip) {
+      if (updatedAppZip != null) {
         this.isAppUpdating = true;
-        let resp = await updateApp(latestAppZip.browser_download_url);
+        let resp = await updateApp(updatedAppZip.browser_download_url);
         if (resp && resp.success) {
           relaunchApp();
         } else if (resp) {
@@ -433,11 +426,16 @@ app = new Vue({
           console.log(resp.message);
         }
         this.isAppUpdating = false;
+      } else {
+        log(
+          'Error -> "updatedAppZip" cannot be null. Please report this error.'
+        );
       }
     },
     discardAppUpdate() {
       this.isDisplayingUpdateDialog = false;
       this.newVersionTag = appVersion;
+      updatedAppZip = null;
     },
     //#region Rules Related
     toggleTestResults() {
@@ -2506,6 +2504,10 @@ setInterval(async () => {
 
 //#endregion
 
+function getVersionNoFromString(versionText) {
+  return parseInt(versionText.replace(/[(beta_)\.]/g, ""));
+}
+
 async function checkAppUpdate(showStatus = false) {
   if (showStatus) {
     log("Checking for app-update...");
@@ -2516,13 +2518,25 @@ async function checkAppUpdate(showStatus = false) {
       "https://api.github.com/repos/gmastergreatee/Fanfiction-Manager/releases/latest"
     ).then((e) => e.json());
     app.checkingForUpdates = false;
-    if (data && data.tag_name != appVersion) {
-      updateData = data;
-      if (showStatus) {
-        log("Update found -> " + data.tag_name);
+    if (data && data.tag_name) {
+      let latestVersion = getVersionNoFromString(data.tag_name);
+      let currentVersion = getVersionNoFromString(appVersion);
+      if (
+        latestVersion > currentVersion &&
+        data.assets &&
+        data.assets.length > 0
+      ) {
+        let appZip = data.assets.find((i) => i.name == "app.zip");
+        if (appZip) {
+          app.newVersionTag = data.tag_name;
+          updatedAppZip = appZip;
+          if (showStatus) {
+            log("Update found -> " + data.tag_name);
+          }
+          app.showUpdateDialog();
+          return;
+        }
       }
-      app.showUpdateDialog();
-    } else {
       if (showStatus) {
         log("Already latest version");
       }

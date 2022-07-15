@@ -28,7 +28,7 @@
         <div class="df bb fwb p-4">
           <div class="f1">{{ tabs[app_options.activeTab] }} -</div>
           <div>
-            <a href="#" class="mx-4" :class="{ 'disabled': checkingForUpdates }" @click="checkForAppUpdates()">{{ checkingForUpdates ? 'Checking for Update' : 'Update' }}</a>
+            <a href="#" class="mx-4" :class="{ 'disabled': checkingForUpdates }" @click="checkForAppUpdates()">{{ checkingForUpdates ? 'Checking for Updates...' : 'Update App' }}</a>
             <a href="#" class="mx-4" @click="toggleDarkMode()">{{ app_options.darkMode ? 'LightMode' :
               'DarkMode' }}</a>
             <a v-if="tabs[app_options.activeTab] != 'Rules'" class="ml-4" href="#" @click="toggleRenderer()">{{
@@ -407,7 +407,7 @@
         </div>
         <div class="df fdr jcc">
           <a href="#" class="mx-4" @click="downloadAppUpdate()">Yaay!</a>
-          <a href="#" class="mx-4" @click="discardAppUpdate()">Nope</a>
+          <a href="#" class="mx-4" @click="discardAppUpdate()">Meh...</a>
         </div>
       </div>
     </div>

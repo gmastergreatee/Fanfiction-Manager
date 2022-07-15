@@ -268,8 +268,7 @@ async function downloadFile(e, url, filePath, index, callBackName) {
         });
       })
       .on("error", function (err) {
-        // Handle errors
-        fs.unlink(filePath); // Delete the file async. (But we don't check the result)
+        deletePath(filePath);
         mainWindow.webContents.send("globalCallBack", callBackName, {
           index: index,
           fileStatus: true,
@@ -289,8 +288,7 @@ async function downloadFile(e, url, filePath, index, callBackName) {
         });
       })
       .on("error", function (err) {
-        // Handle errors
-        fs.unlink(filePath); // Delete the file async. (But we don't check the result)
+        deletePath(filePath);
         mainWindow.webContents.send(
           "log-messager",
           "Error downloading file -> " + url,
@@ -320,8 +318,7 @@ async function updateApp(e, appZipUrl = "") {
         });
       })
       .on("error", function (err) {
-        // Handle errors
-        fs.unlink(filePath); // Delete the file async. (But we don't check the result)
+        deletePath(e, filePath);
         reject(err);
       });
   });
@@ -331,7 +328,7 @@ async function updateApp(e, appZipUrl = "") {
     await extract(response, {
       dir: dirPath,
     });
-    fs.unlink(response);
+    deletePath(e, response);
     return {
       success: true,
     };
