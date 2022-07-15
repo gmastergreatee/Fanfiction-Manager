@@ -60,6 +60,8 @@ Reading Mode
 
 ### Download
 
+__NOTE :__ After downloading make sure to update rules by clicking the `Update Rules` button on top-right of `Rules` tab
+
 For windows 64bit, download [here](https://github.com/gmastergreatee/Fanfiction-Manager/releases/download/beta_3.0.5/Fanfiction-Manager_win_x86-64_beta_2022-07-15.zip)
 
 For others -
