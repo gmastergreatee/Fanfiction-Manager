@@ -1,10 +1,10 @@
 {
   "showNewOnly": false,
   "showCheckUpdatedOnly": true,
-  "showGridLayout": false,
+  "showGridLayout": true,
   "activeTab": 0,
   "showWebPage": false,
-  "showTestResults": false,
+  "showTestResults": true,
   "showConsole": true,
   "darkMode": true
 }

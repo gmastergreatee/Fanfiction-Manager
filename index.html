@@ -15,25 +15,27 @@
   <div id="main" class="dn h-100 w-100 fdc" :class="{ 'df': hasMounted }">
     <link v-if="app_options.darkMode" rel="stylesheet" href="./css/dark.css" />
     <div class="f1 fdc w-100" :class="{'df': !reading_mode, 'dn': reading_mode}">
-      <div class="df bb fwb">
-        <div class="fdr f1" :class="{ 'df': showSideBar, 'dn': !showSideBar }">
-          <a href="#" class="dib px-8 py-4" :class="{ 'active-tab': app_options.activeTab == i }" v-for="(t, i) in tabs"
-            @click="setActiveTab(i)">{{ t }}</a>
+      <div class="df aic bb fwb">
+        <div class="df fdr f1 h-100 aic">
+          <div class="fdr f1 h-100 aic" :class="{ 'df': showSideBar, 'dn': !showSideBar }">
+            <a href="#" class="df h-100 aic px-8 py-4" :class="{ 'active-tab': app_options.activeTab == i }"
+              v-for="(t, i) in tabs" @click="setActiveTab(i)">{{ t }}</a>
+          </div>
         </div>
-        <div class="p-4">
+        <div class="df aic p-4">
           <a href="#" class="mx-4" :class="{ 'disabled': checkingForUpdates }" @click="checkForAppUpdates()"
             title="Update Fanfiction-Manager">
             {{ checkingForUpdates ? 'Checking for Updates...' : 'Update' }}</a>
-          <a href="#" class="ml-4" @click="onToggleFullScreenClick()" title="Toggle FullScreen">TFS</a>
-          <a href="#" class="ml-4" @click="toggleDarkMode()"
+          <a href="#" class="ml-8" @click="onToggleFullScreenClick()" title="Toggle FullScreen">TFS</a>
+          <a href="#" class="ml-8" @click="toggleDarkMode()"
             :title="'Switch to ' + (app_options.darkMode ? 'Light' : 'Dark') + ' theme'">
             {{ app_options.darkMode ? 'LightMode' : 'DarkMode' }}</a>
-          <a v-if="isTabActive('Rules')" href="#" class="ml-4" :class="{'disabled': iframe_working}"
+          <a v-if="isTabActive('Rules')" href="#" class="ml-8" :class="{'disabled': iframe_working}"
             @click="updateRules()">{{ updatingRules ? 'Updating rules...' : 'Update Rules' }}</a>
-          <a v-if="!isTabActive('Rules')" class="ml-4" href="#" @click="toggleRenderer()">{{
-            showRenderer ?
-            'Hide'
-            : 'Show' }} Renderer</a>
+          <div v-if="!isTabActive('Rules')" class="df fdr aic ml-8">
+            <input type="checkbox" v-model="showRenderer" class="hwp20" />
+            <a href="#" @click="toggleRenderer()">Renderer</a>
+          </div>
         </div>
       </div>
       <div class="df f1 fdr">
@@ -86,7 +88,7 @@
                           <a href="#" class="ml-4" :class="{'disabled': iframe_working}"
                             @click="viewNovelDetails(n)">Details</a>
                           <a href="#" class="ml-4"
-                            :class="{'disabled': iframe_working || isDetailingMode(n), 'dn': !n.CheckUpdates}"
+                            :class="{'disabled': iframe_working || isDetailingMode(n), 'dn': !n.CheckUpdates || n == d_novel}"
                             @click="updateNovel(n)">{{ u_novel == n ? 'Updating' : 'Update' }}</a>
                           <a href="#" class="ml-4" :class="{
                                 'disabled': iframe_working || isDetailingMode(n),
@@ -176,9 +178,9 @@
                 <a href="#" @click="onToggleLibraryViewStyle()">
                   {{ app_options.showGridLayout ? 'ListView' : 'ThumbnailView' }}</a>
                 <input type="checkbox" class="hwp20 dib ml-8 cp" v-model="app_options.showNewOnly">
-                <div class="cp" @click="toggleNewOnly()">NewOnly</div>
+                <a href="#" @click="toggleNewOnly()">NewOnly</a>
                 <input type="checkbox" class="hwp20 dib ml-8 cp" v-model="app_options.showCheckUpdatedOnly">
-                <div class="cp" @click="toggleCheckUpdatedOnly()">UpdatedOnly</div>
+                <a href="#" @click="toggleCheckUpdatedOnly()">UpdatedOnly</a>
               </div>
 
               <!-- Library Filters / Commands End -->
