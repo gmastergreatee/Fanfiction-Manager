@@ -1,5 +1,5 @@
 let appName = "Fanfiction-Manager";
-let appVersion = "beta_3.0.7";
+let appVersion = "beta_3.0.8";
 let verboseMode = false;
 
 let site_vars_script = `
