@@ -33,7 +33,7 @@
           <a v-if="isTabActive('Rules')" href="#" class="ml-8" :class="{'disabled': iframe_working}"
             @click="updateRules()">{{ updatingRules ? 'Updating rules...' : 'Update Rules' }}</a>
           <div v-if="!isTabActive('Rules')" class="df fdr aic ml-8">
-            <input type="checkbox" v-model="showRenderer" class="hwp20" />
+            <input type="checkbox" v-model="app_options.showWebPage" class="hwp20" />
             <a href="#" @click="toggleRenderer()">Renderer</a>
           </div>
         </div>
