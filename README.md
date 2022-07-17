@@ -71,7 +71,7 @@ For others -
 - Extract the `electron` zip file to an empty directory
 - Delete `default_app.asar` file present in `.../[electron-dir]/resources`
 - Create new directory `app` in `.../[electron-folder]/resources`
-- Extract the contents of [this](https://github.com/gmastergreatee/Fanfiction-Manager/releases/download/beta_3.0.8/app.zip) zip file into `.../[electron-dir]/resources/app` directory
+- Extract the contents of [this](https://github.com/gmastergreatee/Fanfiction-Manager/releases/download/beta_3.0.7/app.zip) zip file into `.../[electron-dir]/resources/app` directory
 - Now run `electron` executable
 - Done
 
