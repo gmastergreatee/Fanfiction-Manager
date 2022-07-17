@@ -17,7 +17,8 @@
     <div class="f1 fdc w-100" :class="{'df': !reading_mode, 'dn': reading_mode}">
       <div class="df bb fwb">
         <div class="fdr f1" :class="{ 'df': showSideBar, 'dn': !showSideBar }">
-          <a href="#" class="dib px-8 py-4" :class="{ 'active-tab': app_options.activeTab == i }" v-for="(t, i) in tabs" @click="setActiveTab(i)">{{ t }}</a>
+          <a href="#" class="dib px-8 py-4" :class="{ 'active-tab': app_options.activeTab == i }" v-for="(t, i) in tabs"
+            @click="setActiveTab(i)">{{ t }}</a>
         </div>
         <div class="p-4">
           <a href="#" class="mx-4" :class="{ 'disabled': checkingForUpdates }" @click="checkForAppUpdates()"
@@ -50,12 +51,15 @@
 
                 <div class="df f1 pa w-100 h-100 oya p-4"
                   :class="{ 'lib-list': !app_options.showGridLayout, 'lib-thumbnail': app_options.showGridLayout }">
-                  <div v-for="n in getNovels" class="m-8 bt bb bl br df fdr p-8" :class="{
+                  <div v-for="n in novels" class="m-8 bt bb bl br dn fdr p-8" :class="{
                         'detailing': isDetailingMode(n), 
                         'new-updates': n.ChapterCount > n.DownloadedCount,
                         'downloading': n == d_novel,
                         'updating': n == u_novel,
-                        'novel-summary-expanded': summaryExpandedGUID == n.GUID
+                        'novel-summary-expanded': summaryExpandedGUID == n.GUID,
+                        'df': ((app_options.showNewOnly ? n.DownloadedCount < n.ChapterCount || n.ChapterCount <= 0 : true) && 
+                                (app_options.showCheckUpdatedOnly ? n.CheckUpdates : true)
+                              )
                       }">
                     <div class="df pr-8 br pr cover-image">
                       <div class="df fdc pr">
@@ -79,15 +83,17 @@
                         </div>
                         <div class="df fdr jce fww">
                           <a href="#" class="ml-4" @click="enterReadingMode(n)">Read</a>
-                          <a href="#" class="ml-4" :class="{'disabled': iframe_working}" @click="viewNovelDetails(n)">Details</a>
-                          <a href="#" class="ml-4" :class="{'disabled': iframe_working || isDetailingMode(n), 'dn': !n.CheckUpdates}"
-                            @click="updateNovel(n)">Update</a>
+                          <a href="#" class="ml-4" :class="{'disabled': iframe_working}"
+                            @click="viewNovelDetails(n)">Details</a>
+                          <a href="#" class="ml-4"
+                            :class="{'disabled': iframe_working || isDetailingMode(n), 'dn': !n.CheckUpdates}"
+                            @click="updateNovel(n)">{{ u_novel == n ? 'Updating' : 'Update' }}</a>
                           <a href="#" class="ml-4" :class="{
                                 'disabled': iframe_working || isDetailingMode(n),
                                  'dn': n.ChapterCount <= n.DownloadedCount || n == d_novel
                                 }" @click="downloadNovel(n)">Download</a>
-                          <a href="#" v-if="n == d_novel" class="cr ml-4" :class="{'disabled': stop_download_update_novel}"
-                            @click="stopDownloadNovel()">{{
+                          <a href="#" v-if="n == d_novel" class="cr ml-4"
+                            :class="{'disabled': stop_download_update_novel}" @click="stopDownloadNovel()">{{
                             stop_download_update_novel ? 'Stopping' : 'Stop' }}</a>
                           <a href="#" class="ml-4" :class="{'disabled': iframe_working || isDetailingMode(n)}"
                             @click="deleteNovel($event,n)">Delete</a>
@@ -166,14 +172,13 @@
 
               <!-- Library Filters / Commands Start -->
 
-              <div class="df fdr p-4 bt">
-                <div class="f1">
-                  <a href="#" @click="onToggleLibraryViewStyle()">{{ app_options.showGridLayout ? 'ListView' :
-                    'ThumbnailView' }}</a>
-                  <a href="#" @click="toggleNewOnly()">{{ app_options.showNewOnly ? 'NewOnlyOff' : 'NewOnlyOn' }}</a>
-                  <a href="#" @click="toggleCheckUpdatedOnly()">
-                    {{ app_options.showCheckUpdatedOnly ? 'CheckUpdatedOnlyOff' : 'CheckUpdatedOnlyOn' }}</a>
-                </div>
+              <div class="df fdr aic p-4 bt">
+                <a href="#" @click="onToggleLibraryViewStyle()">
+                  {{ app_options.showGridLayout ? 'ListView' : 'ThumbnailView' }}</a>
+                <input type="checkbox" class="hwp20 dib ml-8 cp" v-model="app_options.showNewOnly">
+                <div class="cp" @click="toggleNewOnly()">NewOnly</div>
+                <input type="checkbox" class="hwp20 dib ml-8 cp" v-model="app_options.showCheckUpdatedOnly">
+                <div class="cp" @click="toggleCheckUpdatedOnly()">UpdatedOnly</div>
               </div>
 
               <!-- Library Filters / Commands End -->
