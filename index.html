@@ -23,11 +23,11 @@
           <a href="#" class="mx-4" :class="{ 'disabled': checkingForUpdates }" @click="checkForAppUpdates()"
             title="Update Fanfiction-Manager">
             {{ checkingForUpdates ? 'Checking for Updates...' : 'Update' }}</a>
-          <a href="#" class="mx-4" @click="onToggleFullScreenClick()" title="Toggle FullScreen">TFS</a>
-          <a href="#" class="mx-4" @click="toggleDarkMode()"
+          <a href="#" class="ml-4" @click="onToggleFullScreenClick()" title="Toggle FullScreen">TFS</a>
+          <a href="#" class="ml-4" @click="toggleDarkMode()"
             :title="'Switch to ' + (app_options.darkMode ? 'Light' : 'Dark') + ' theme'">
             {{ app_options.darkMode ? 'LightMode' : 'DarkMode' }}</a>
-          <a v-if="isTabActive('Rules')" href="#" class="mx-4" :class="{'disabled': iframe_working}"
+          <a v-if="isTabActive('Rules')" href="#" class="ml-4" :class="{'disabled': iframe_working}"
             @click="updateRules()">{{ updatingRules ? 'Updating rules...' : 'Update Rules' }}</a>
           <a v-if="!isTabActive('Rules')" class="ml-4" href="#" @click="toggleRenderer()">{{
             showRenderer ?
@@ -77,19 +77,19 @@
                             n.GUID ? 'Shrink' :
                             'Expand' }}</a>
                         </div>
-                        <div>
-                          <a href="#" @click="enterReadingMode(n)">Read</a>
-                          <a href="#" :class="{'disabled': iframe_working}" @click="viewNovelDetails(n)">Details</a>
-                          <a href="#" :class="{'disabled': iframe_working || isDetailingMode(n), 'dn': !n.CheckUpdates}"
+                        <div class="df fdr jce fww">
+                          <a href="#" class="ml-4" @click="enterReadingMode(n)">Read</a>
+                          <a href="#" class="ml-4" :class="{'disabled': iframe_working}" @click="viewNovelDetails(n)">Details</a>
+                          <a href="#" class="ml-4" :class="{'disabled': iframe_working || isDetailingMode(n), 'dn': !n.CheckUpdates}"
                             @click="updateNovel(n)">Update</a>
-                          <a href="#" :class="{
+                          <a href="#" class="ml-4" :class="{
                                 'disabled': iframe_working || isDetailingMode(n),
-                                 'dn': n.ChapterCount <= n.DownloadedCount
+                                 'dn': n.ChapterCount <= n.DownloadedCount || n == d_novel
                                 }" @click="downloadNovel(n)">Download</a>
-                          <a href="#" v-if="n == d_novel" class="cr" :class="{'disabled': stop_download_update_novel}"
+                          <a href="#" v-if="n == d_novel" class="cr ml-4" :class="{'disabled': stop_download_update_novel}"
                             @click="stopDownloadNovel()">{{
                             stop_download_update_novel ? 'Stopping' : 'Stop' }}</a>
-                          <a href="#" :class="{'disabled': iframe_working || isDetailingMode(n)}"
+                          <a href="#" class="ml-4" :class="{'disabled': iframe_working || isDetailingMode(n)}"
                             @click="deleteNovel($event,n)">Delete</a>
                         </div>
                       </div>
