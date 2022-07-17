@@ -192,6 +192,8 @@ app = new Vue({
     window.document.title = appName + " - " + appVersion;
     rootDirectoryAbsolutePath = await rootDir();
 
+    this.hasMounted = true;
+    
     loadAllConfigs();
     this.mainWebView = document.getElementById("mainWebView");
     this.console = document.getElementById("web-console");
@@ -226,6 +228,7 @@ app = new Vue({
   data() {
     return {
       //#region Main variables
+      hasMounted: false,
       mainWebView: null,
       console: null,
       tabs: ["Library", "Rules", "Tester"],
@@ -412,6 +415,14 @@ app = new Vue({
       }
       urlIncludesToBlock(blocks);
     },
+    onToggleFullScreenClick() {
+      toggleFullScreen();
+    },
+    onToggleLibraryViewStyle() {
+      this.app_options.showGridLayout = !this.app_options.showGridLayout;
+      appOptionsChanged = true;
+    },
+    //#region Updates Related
     checkForAppUpdates() {
       checkAppUpdate(true);
     },
@@ -474,6 +485,7 @@ app = new Vue({
         this.updatingRules = false;
       }
     },
+    //#endregion
     //#region Rules Related
     toggleTestResults() {
       appOptionsChanged = true;
@@ -1136,7 +1148,7 @@ app = new Vue({
       }
     },
     //#endregion
-    //#region Downloader related
+    //#region Downloader Related
     async downloadNovel(t_novel) {
       if (this.iframe_working) {
         msgBox("Renderer busy, please wait");

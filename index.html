@@ -12,325 +12,350 @@
 </head>
 
 <body>
-  <div id="main" class="df h-100 w-100 fdc" v-cloak>
+  <div id="main" class="dn h-100 w-100 fdc" :class="{ 'df': hasMounted }">
     <link v-if="app_options.darkMode" rel="stylesheet" href="./css/dark.css" />
-    <div class="f1 w-100" :class="{'df': !reading_mode, 'dn': reading_mode}">
-      <div class="fdc br wp-150" :class="{ 'df': showSideBar, 'dn': !showSideBar }">
-        <div class="dib bb tac fwb p-4">FM_vb3</div>
-        <div class="df fdc">
-          <div v-for="(t, i) in tabs" @click="setActiveTab(i)" class="df fdr bb cp p-4">
-            <div class="f1"><a href="#" class="dib w-100">{{ t }}</a></div>
-            <div v-if="app_options.activeTab == i">-></div>
-          </div>
+    <div class="f1 fdc w-100" :class="{'df': !reading_mode, 'dn': reading_mode}">
+      <div class="df bb fwb">
+        <div class="fdr f1" :class="{ 'df': showSideBar, 'dn': !showSideBar }">
+          <a href="#" class="dib px-8 py-4" :class="{ 'active-tab': app_options.activeTab == i }" v-for="(t, i) in tabs" @click="setActiveTab(i)">{{ t }}</a>
+        </div>
+        <div class="p-4">
+          <a href="#" class="mx-4" :class="{ 'disabled': checkingForUpdates }" @click="checkForAppUpdates()"
+            title="Update Fanfiction-Manager">
+            {{ checkingForUpdates ? 'Checking for Updates...' : 'Update' }}</a>
+          <a href="#" class="mx-4" @click="onToggleFullScreenClick()" title="Toggle FullScreen">TFS</a>
+          <a href="#" class="mx-4" @click="toggleDarkMode()"
+            :title="'Switch to ' + (app_options.darkMode ? 'Light' : 'Dark') + ' theme'">
+            {{ app_options.darkMode ? 'LightMode' : 'DarkMode' }}</a>
+          <a v-if="isTabActive('Rules')" href="#" class="mx-4" :class="{'disabled': iframe_working}"
+            @click="updateRules()">{{ updatingRules ? 'Updating rules...' : 'Update Rules' }}</a>
+          <a v-if="!isTabActive('Rules')" class="ml-4" href="#" @click="toggleRenderer()">{{
+            showRenderer ?
+            'Hide'
+            : 'Show' }} Renderer</a>
         </div>
       </div>
-      <div class="df fdc f1">
-        <div class="df bb fwb p-4">
-          <div class="f1">{{ tabs[app_options.activeTab] }} -</div>
-          <div>
-            <a href="#" class="mx-4" :class="{ 'disabled': checkingForUpdates }" @click="checkForAppUpdates()">{{
-              checkingForUpdates ? 'Checking for Updates...' : 'Update App' }}</a>
-            <a href="#" class="mx-4" @click="toggleDarkMode()">{{ app_options.darkMode ? 'LightMode' :
-              'DarkMode' }}</a>
-            <a v-if="isTabActive('Rules')" href="#" class="mx-4" :class="{'disabled': iframe_working}" @click="updateRules()">{{ updatingRules ? 'Updating rules...' : 'Update Rules' }}</a>
-            <a v-if="!isTabActive('Rules')" class="ml-4" href="#" @click="toggleRenderer()">{{
-              showRenderer ?
-              'Hide'
-              : 'Show' }} Renderer</a>
-          </div>
-        </div>
-        <div class="df f1 fdr">
+      <div class="df f1 fdr">
 
-          <!-- tabs code start -->
+        <!-- tabs code start -->
 
-          <div class="df fdc f1 oya pr">
-            <div class="df fdc h-100 w-100 pa">
-              <!-- library part start -->
+        <div class="df fdc f1 oya pr">
+          <div class="df fdc h-100 w-100 pa">
+            <!-- library part start -->
 
-              <div v-if="isTabActive('Library')" class="df fdc f1 w-100">
-                <div class="df f1 fdc pr">
-                  <div class="df f1 fdc pa w-100 h-100 oya p-4">
-                    <div v-for="n in getNovels" class="m-8 bt bb bl br df fdr p-8" :class="{
+            <div class="dn fdc f1 w-100" :class="{ 'df' : isTabActive('Library') }">
+              <div class="df f1 fdc pr">
+
+                <!-- Novels List Start -->
+
+                <div class="df f1 pa w-100 h-100 oya p-4"
+                  :class="{ 'lib-list': !app_options.showGridLayout, 'lib-thumbnail': app_options.showGridLayout }">
+                  <div v-for="n in getNovels" class="m-8 bt bb bl br df fdr p-8" :class="{
                         'detailing': isDetailingMode(n), 
                         'new-updates': n.ChapterCount > n.DownloadedCount,
                         'downloading': n == d_novel,
-                        'updating': n == u_novel}">
-                      <div class="df pr-8 br pr cover-image">
-                        <div class="df fdc pr">
-                          <img class="bb bt bl br" :src="n.CoverURL" alt="Image Not Found">
+                        'updating': n == u_novel,
+                        'novel-summary-expanded': summaryExpandedGUID == n.GUID
+                      }">
+                    <div class="df pr-8 br pr cover-image">
+                      <div class="df fdc pr">
+                        <img class="bb bt bl br" :src="n.CoverURL" alt="Image Not Found">
+                      </div>
+                    </div>
+                    <div class="f1 df fdc w-100 pl-8">
+                      <div>
+                        <span v-html="n.Title" class="fwb"></span> ({{ n.DownloadedCount }}/{{ n.ChapterCount }})
+                      </div>
+                      <div class="f1 bt mt-8 pt-8 pr">
+                        <div :class="{'dn': !n.Summary, 'summary-shrunk': summaryExpandedGUID != n.GUID}"
+                          v-html="n.Summary">
                         </div>
                       </div>
-                      <div class="f1 df fdc w-100 pl-8">
+                      <div class="bt mt-8 pt-8 df fdr">
+                        <div class="f1">
+                          <a v-if="n.Summary" href="#" @click="setSummaryGUID(n.GUID)">{{ summaryExpandedGUID ==
+                            n.GUID ? 'Shrink' :
+                            'Expand' }}</a>
+                        </div>
                         <div>
-                          <span v-html="n.Title" class="fwb"></span> ({{ n.DownloadedCount }}/{{ n.ChapterCount }})
-                        </div>
-                        <div class="f1 bt mt-8 pt-8 pr">
-                          <div :class="{'dn': !n.Summary, 'summary-shrunk': summaryExpandedGUID != n.GUID}"
-                            v-html="n.Summary">
-                          </div>
-                        </div>
-                        <div class="bt mt-8 pt-8 df fdr">
-                          <div class="f1">
-                            <a v-if="n.Summary" href="#" @click="setSummaryGUID(n.GUID)">{{ summaryExpandedGUID ==
-                              n.GUID ? 'Shrink' :
-                              'Expand' }}</a>
-                          </div>
-                          <div>
-                            <a href="#" @click="enterReadingMode(n)">Read</a>
-                            <a href="#" :class="{'disabled': iframe_working}" @click="viewNovelDetails(n)">Details</a>
-                            <a href="#"
-                              :class="{'disabled': iframe_working || isDetailingMode(n), 'dn': !n.CheckUpdates}"
-                              @click="updateNovel(n)">Update</a>
-                            <a href="#" :class="{
+                          <a href="#" @click="enterReadingMode(n)">Read</a>
+                          <a href="#" :class="{'disabled': iframe_working}" @click="viewNovelDetails(n)">Details</a>
+                          <a href="#" :class="{'disabled': iframe_working || isDetailingMode(n), 'dn': !n.CheckUpdates}"
+                            @click="updateNovel(n)">Update</a>
+                          <a href="#" :class="{
                                 'disabled': iframe_working || isDetailingMode(n),
                                  'dn': n.ChapterCount <= n.DownloadedCount
                                 }" @click="downloadNovel(n)">Download</a>
-                            <a href="#" v-if="n == d_novel" class="cr" :class="{'disabled': stop_download_update_novel}"
-                              @click="stopDownloadNovel()">{{
-                              stop_download_update_novel ? 'Stopping' : 'Stop' }}</a>
-                            <a href="#" :class="{'disabled': iframe_working || isDetailingMode(n)}"
-                              @click="deleteNovel($event,n)">Delete</a>
-                          </div>
+                          <a href="#" v-if="n == d_novel" class="cr" :class="{'disabled': stop_download_update_novel}"
+                            @click="stopDownloadNovel()">{{
+                            stop_download_update_novel ? 'Stopping' : 'Stop' }}</a>
+                          <a href="#" :class="{'disabled': iframe_working || isDetailingMode(n)}"
+                            @click="deleteNovel($event,n)">Delete</a>
                         </div>
                       </div>
                     </div>
                   </div>
-                  <div v-if="getNovels.length == 0" class="df fdr h-100 w-100 jcc aic zi-1">
-                    !~~~ {{loading_novels ?
-                    'Loading Novels' :
-                    (
-                    this.novels.length > 0 ?
-                    'No novels for the filters applied' :
-                    'No novels added yet'
-                    )
-                    }} ~~~!
-                  </div>
                 </div>
-                <div v-if="detailing_novel" class="df fdc hp-300">
-                  <div class="df fdr bt p-4">
-                    <div class="f1">Details</div>
-                    <a href="#" @click="saveCloseNovelDetails()" class="mx-8">Save&Close</a>
-                    <a href="#" @click="discardNovelDetailsChanges()" class="ml-8">Discard</a>
-                  </div>
-                  <div class="f1 bt pr">
-                    <div class="df fdc pa w-100 h-100 oya">
-                      <table class="w-100 p-4">
-                        <tr>
-                          <td class="wp-1">URL</td>
-                          <td>
-                            <input type="text" v-model="detailing_novel.URL" class="w-100">
-                          </td>
-                        </tr>
-                        <tr>
-                          <td class="wp-1">CoverURL</td>
-                          <td>
-                            <input type="text" v-model="detailing_novel.CoverURL" class="w-100">
-                          </td>
-                        </tr>
-                        <tr>
-                          <td class="wp-1">Title</td>
-                          <td>
-                            <input type="text" v-model="detailing_novel.Title" class="w-100">
-                          </td>
-                        </tr>
-                        <tr>
-                          <td class="wp-1 vat pt-4">Summary</td>
-                          <td>
-                            <textarea v-model="detailing_novel.Summary" class="w-100 hp-100 rn"></textarea>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td class="wp-1 vat pt-4">CheckUpdates</td>
-                          <td>
-                            <input type="checkbox" v-model="detailing_novel.CheckUpdates" class="hwp20" />
-                          </td>
-                        </tr>
-                      </table>
-                    </div>
-                  </div>
+
+                <!-- Novels List End -->
+
+                <!-- No Novels Added Start -->
+
+                <div v-if="getNovels.length == 0" class="df fdr h-100 w-100 jcc aic zi-1">
+                  !~~~ {{loading_novels ?
+                  'Loading Novels' :
+                  (
+                  this.novels.length > 0 ?
+                  'No novels for the filters applied' :
+                  'No novels added yet'
+                  )
+                  }} ~~~!
                 </div>
-                <div class="df fdr p-4 bt">
-                  <div class="f1">
-                    <a href="#" @click="toggleNewOnly()">{{ app_options.showNewOnly ? 'NewOnlyOff' : 'NewOnlyOn'}}</a>
-                    <a href="#" @click="toggleCheckUpdatedOnly()">{{ app_options.showCheckUpdatedOnly ?
-                      'CheckUpdatedOnlyOff' :
-                      'CheckUpdatedOnlyOn'}}</a>
-                  </div>
-                </div>
-                <div class="df bt fdr aic p-4">
-                  <div class="mr-4">URL :</div>
-                  <input class="f1 mr-4" type="text" v-model="add_novel_url"
-                    placeholder="Enter the target URL of Novel-page here">
-                  <a href="#" :class="{'disabled': iframe_working}" @click="addNewNovel()">Load URL</a>
-                </div>
+
+                <!-- No Novels Added End -->
+
               </div>
 
-              <!-- library part end -->
+              <!-- Novel Details Start -->
 
-              <!-- rules page start -->
-
-              <div v-if="isTabActive('Rules')" class="df fdc f1 w-100">
-                <div v-for="r in rules" class="df fdr p-4 m-4 bt bl br bb">
-                  <div class="df fdr f1">
-                    <div class="pr-4">{{ r.rule_name }} -></div>
-                    <div class="df fdr f1 mr-10 pr">
-                      <div class="f1 pa w-100 h-100 wsn toe oh">
-                        {{ r.url_regex }}
-                      </div>
-                    </div>
-                  </div>
-                  <div>
-                    <a href="#" :class="{'disabled': iframe_working}" @click="editRule(r)">Edit</a>
-                    <a href="#" :class="{'disabled': iframe_working}" @click="deleteRule($event, r)">Delete</a>
-                  </div>
+              <div v-if="detailing_novel" class="df fdc hp-300">
+                <div class="df fdr bt p-4">
+                  <div class="f1">Details</div>
+                  <a href="#" @click="saveCloseNovelDetails()" class="mx-8">Save&Close</a>
+                  <a href="#" @click="discardNovelDetailsChanges()" class="ml-8">Discard</a>
                 </div>
-                <div v-if="rules.length == 0" class="df f1 fdr jcc aic">
-                  {{ loading_rules ? '!~~~ Loading Rules ~~~!' : 'No rules added yet' }}
-                </div>
-              </div>
-
-              <!-- rules page end -->
-
-              <!-- testing tab start -->
-
-              <div v-if="isTabActive('Tester')" class="df fdc f1 w-100">
-                <div class="f1 oya pr">
-                  <div class="pa w-100 h-100">
-                    <div v-if="isTabActive('Tester')" class="df f1 fdc p-4 oya">
-                      <table class="w-100">
-                        <tr>
-                          <th class="wp-1 wsn tar pr-4">Rule Name :</th>
-                          <td>
-                            <input type="text" class="p-2 w-100" v-model="test_rule_name"
-                              placeholder="Enter rule name here" />
-                          </td>
-                        </tr>
-                        <tr>
-                          <th class="wsn tar pr-4">URL Regex :</th>
-                          <td>
-                            <input type="text" class="p-2 w-100" v-model="test_url_regex"
-                              placeholder="Regex for the URL to match the rule to" />
-                          </td>
-                        </tr>
-                        <tr>
-                          <th class="wsn tar pr-4">Test URL :</th>
-                          <td>
-                            <input type="text" class="p-2 w-100" v-model="test_url" placeholder="URL for testing" />
-                          </td>
-                        </tr>
-                        <tr>
-                          <th class="wsn tar vat pr-4">Page Type :</th>
-                          <td>
-                            <textarea class="p-2 w-100 hp-200 wsn oyh rn" v-model="test_pagetype_code"
-                              placeholder="JavaScript code to determine is the page is TOC or Chapter page&#10;&#10;Return type should be number(int) -&#10;&#10;-2 for Manual-Captcha&#10;-1 for Auto-Captcha&#10; 0 for TOC&#10;&#10;Returning anything else will be treated as UNKNOWN"
-                              onfocus="this.style.height = '';this.style.height = this.scrollHeight + 15 + 'px';"
-                              oninput="this.style.height = '';this.style.height = this.scrollHeight + 15 + 'px';"
-                              spellcheck="false"></textarea>
-                          </td>
-                        </tr>
-                        <tr>
-                          <th class="wsn tar vat pr-4">TOC Script :</th>
-                          <td>
-                            <textarea class="p-2 w-100 hp-200 wsn oyh rn" v-model="test_toc_code"
-                              placeholder="JavaScript code to get content from TOC page&#10;&#10;Return type should be JSON & must contain the following JSON nodes -&#10;&#10;{&#10;    'CoverURL': ''              // may be empty&#10;    'Title': 'novel name here',&#10;    'Summary': '',              // may be empty&#10;    'ChapterCount': 1,          // chapter count here&#10;    'ChapterURLs': [            // list of chapter-URLs&#10;        '', // must contain atleast the first chapter URL&#10;        '',&#10;    ],&#10;}&#10;&#10;This object will be passed as 'ndata' to the Ch-Script"
-                              onfocus="this.style.height = '';this.style.height = this.scrollHeight + 15 + 'px';"
-                              oninput="this.style.height = '';this.style.height = this.scrollHeight + 15 + 'px';"
-                              spellcheck="false"></textarea>
-                          </td>
-                        </tr>
-                        <tr>
-                          <th class="wsn tar vat pr-4">Ch-Script :</th>
-                          <td>
-                            <textarea class="p-2 w-100 hp-200 wsn oyh rn" v-model="test_chapter_code"
-                              placeholder="JavaScript code to get content from Chapter page.&#10;Can be one or multiple chapters at once.&#10;&#10;Return type should be JSON in the following format -&#10;&#10;[&#10;    {&#10;        'title': '',&#10;        'content': '',&#10;        'nextURL': ''&#10;    },&#10;]&#10;&#10;'nextURL' will be used in case it is non-empty"
-                              onfocus="this.style.height = '';this.style.height = this.scrollHeight + 15 + 'px';"
-                              oninput="this.style.height = '';this.style.height = this.scrollHeight + 15 + 'px';"
-                              spellcheck="false"></textarea>
-                          </td>
-                        </tr>
-                        <tr>
-                          <th class="wsn tar vat pr-4">URL Blocks :</th>
-                          <td>
-                            <textarea class="p-2 w-100 hp-200 wsn oyh rn" v-model="test_url_blocks"
-                              placeholder="URLs containg these will be blocked.&#10;Need to be one entry per line.&#10;&#10;Example -&#10;&#10;googleads&#10;adsbygoogle"
-                              onfocus="this.style.height = '';this.style.height = this.scrollHeight + 15 + 'px';"
-                              oninput="this.style.height = '';this.style.height = this.scrollHeight + 15 + 'px';"
-                              spellcheck="false"></textarea>
-                          </td>
-                        </tr>
-                        <tr class="tar">
-                          <td colspan="2">
-                            <a href="#" class="mx-4" :class="{'disabled': iframe_working}"
-                              @click="loadTestURL()">LoadURL</a>
-                            <a href="#" class="mx-4" :class="{'disabled': iframe_working}"
-                              @click="runTestTOCScript()">RunTOCScript</a>
-                            <a href="#" class="mx-4" :class="{'disabled': iframe_working}"
-                              @click="runTestChapterScript()">RunChapterScript</a>
-                            <a href="#" class="mx-4" :class="{'disabled': iframe_working}"
-                              @click="resetTestFields()">ResetFields</a>
-                            <a href="#" class="mx-4" :class="{'disabled': iframe_working}"
-                              @click="saveTestRule()">SaveRule</a>
-                            <a v-if="test_rule_guid.length > 0" href="#" class="ml-4"
-                              :class="{'disabled': iframe_working}" @click="goBackFromEditRule()">Back</a>
-                          </td>
-                        </tr>
-                      </table>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="df fdc">
-                  <div class="df fdr p-4 bt fwb">
-                    <div class="f1">Test Results -</div>
-                    <a href="#" @click="toggleTestResults">{{ app_options.showTestResults ? 'Collapse' : 'Expand' }}</a>
-                  </div>
-                  <div class="hp-300 pr bt"
-                    :class="{'dib': app_options.showTestResults, 'dn': !app_options.showTestResults}">
-                    <div class="df fdc w-100 h-100">
-                      <div class="bb p-4">
-                        Page Type : {{ test_result_page_type }}
-                      </div>
-                      <div class="f1 pr">
-                        <div class="pa p-4 w-100 h-100 oya ust" v-html="test_result_content"></div>
-                      </div>
-                    </div>
+                <div class="f1 bt pr">
+                  <div class="df fdc pa w-100 h-100 oya">
+                    <table class="w-100 p-4">
+                      <tr>
+                        <td class="wp-1">URL</td>
+                        <td>
+                          <input type="text" v-model="detailing_novel.URL" class="w-100">
+                        </td>
+                      </tr>
+                      <tr>
+                        <td class="wp-1">CoverURL</td>
+                        <td>
+                          <input type="text" v-model="detailing_novel.CoverURL" class="w-100">
+                        </td>
+                      </tr>
+                      <tr>
+                        <td class="wp-1">Title</td>
+                        <td>
+                          <input type="text" v-model="detailing_novel.Title" class="w-100">
+                        </td>
+                      </tr>
+                      <tr>
+                        <td class="wp-1 vat pt-4">Summary</td>
+                        <td>
+                          <textarea v-model="detailing_novel.Summary" class="w-100 hp-100 rn"></textarea>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td class="wp-1 vat pt-4">CheckUpdates</td>
+                        <td>
+                          <input type="checkbox" v-model="detailing_novel.CheckUpdates" class="hwp20" />
+                        </td>
+                      </tr>
+                    </table>
                   </div>
                 </div>
               </div>
 
-              <!-- testing tab end -->
+              <!-- Novel Details End -->
+
+              <!-- Library Filters / Commands Start -->
+
+              <div class="df fdr p-4 bt">
+                <div class="f1">
+                  <a href="#" @click="onToggleLibraryViewStyle()">{{ app_options.showGridLayout ? 'ListView' :
+                    'ThumbnailView' }}</a>
+                  <a href="#" @click="toggleNewOnly()">{{ app_options.showNewOnly ? 'NewOnlyOff' : 'NewOnlyOn' }}</a>
+                  <a href="#" @click="toggleCheckUpdatedOnly()">
+                    {{ app_options.showCheckUpdatedOnly ? 'CheckUpdatedOnlyOff' : 'CheckUpdatedOnlyOn' }}</a>
+                </div>
+              </div>
+
+              <!-- Library Filters / Commands End -->
+
+              <!-- Add Novel Start -->
+
+              <div class="df bt fdr aic p-4">
+                <div class="mr-4">URL :</div>
+                <input class="f1 mr-4" type="text" v-model="add_novel_url"
+                  placeholder="Enter the target URL of Novel-page here">
+                <a href="#" :class="{'disabled': iframe_working}" @click="addNewNovel()">Load URL</a>
+              </div>
+
+              <!-- Add Novel End -->
+
             </div>
+
+            <!-- library part end -->
+
+            <!-- rules page start -->
+
+            <div class="dn fdc f1 w-100" :class="{ 'df': isTabActive('Rules') }">
+              <div v-for="r in rules" class="df fdr p-4 m-4 bt bl br bb">
+                <div class="df fdr f1">
+                  <div class="pr-4">{{ r.rule_name }} -></div>
+                  <div class="df fdr f1 mr-10 pr">
+                    <div class="f1 pa w-100 h-100 wsn toe oh">
+                      {{ r.url_regex }}
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <a href="#" :class="{'disabled': iframe_working}" @click="editRule(r)">Edit</a>
+                  <a href="#" :class="{'disabled': iframe_working}" @click="deleteRule($event, r)">Delete</a>
+                </div>
+              </div>
+              <div v-if="rules.length == 0" class="df f1 fdr jcc aic">
+                {{ loading_rules ? '!~~~ Loading Rules ~~~!' : 'No rules added yet' }}
+              </div>
+            </div>
+
+            <!-- rules page end -->
+
+            <!-- testing tab start -->
+
+            <div class="dn fdc f1 w-100" :class="{ 'df': isTabActive('Tester') }">
+              <div class="f1 oya pr">
+                <div class="pa w-100 h-100">
+                  <div v-if="isTabActive('Tester')" class="df f1 fdc p-4 oya">
+                    <table class="w-100">
+                      <tr>
+                        <th class="wp-1 wsn tar pr-4">Rule Name :</th>
+                        <td>
+                          <input type="text" class="p-2 w-100" v-model="test_rule_name"
+                            placeholder="Enter rule name here" />
+                        </td>
+                      </tr>
+                      <tr>
+                        <th class="wsn tar pr-4">URL Regex :</th>
+                        <td>
+                          <input type="text" class="p-2 w-100" v-model="test_url_regex"
+                            placeholder="Regex for the URL to match the rule to" />
+                        </td>
+                      </tr>
+                      <tr>
+                        <th class="wsn tar pr-4">Test URL :</th>
+                        <td>
+                          <input type="text" class="p-2 w-100" v-model="test_url" placeholder="URL for testing" />
+                        </td>
+                      </tr>
+                      <tr>
+                        <th class="wsn tar vat pr-4">Page Type :</th>
+                        <td>
+                          <textarea class="p-2 w-100 hp-200 wsn oyh rn" v-model="test_pagetype_code"
+                            placeholder="JavaScript code to determine is the page is TOC or Chapter page&#10;&#10;Return type should be number(int) -&#10;&#10;-2 for Manual-Captcha&#10;-1 for Auto-Captcha&#10; 0 for TOC&#10;&#10;Returning anything else will be treated as UNKNOWN"
+                            onfocus="this.style.height = '';this.style.height = this.scrollHeight + 15 + 'px';"
+                            oninput="this.style.height = '';this.style.height = this.scrollHeight + 15 + 'px';"
+                            spellcheck="false"></textarea>
+                        </td>
+                      </tr>
+                      <tr>
+                        <th class="wsn tar vat pr-4">TOC Script :</th>
+                        <td>
+                          <textarea class="p-2 w-100 hp-200 wsn oyh rn" v-model="test_toc_code"
+                            placeholder="JavaScript code to get content from TOC page&#10;&#10;Return type should be JSON & must contain the following JSON nodes -&#10;&#10;{&#10;    'CoverURL': ''              // may be empty&#10;    'Title': 'novel name here',&#10;    'Summary': '',              // may be empty&#10;    'ChapterCount': 1,          // chapter count here&#10;    'ChapterURLs': [            // list of chapter-URLs&#10;        '', // must contain atleast the first chapter URL&#10;        '',&#10;    ],&#10;}&#10;&#10;This object will be passed as 'ndata' to the Ch-Script"
+                            onfocus="this.style.height = '';this.style.height = this.scrollHeight + 15 + 'px';"
+                            oninput="this.style.height = '';this.style.height = this.scrollHeight + 15 + 'px';"
+                            spellcheck="false"></textarea>
+                        </td>
+                      </tr>
+                      <tr>
+                        <th class="wsn tar vat pr-4">Ch-Script :</th>
+                        <td>
+                          <textarea class="p-2 w-100 hp-200 wsn oyh rn" v-model="test_chapter_code"
+                            placeholder="JavaScript code to get content from Chapter page.&#10;Can be one or multiple chapters at once.&#10;&#10;Return type should be JSON in the following format -&#10;&#10;[&#10;    {&#10;        'title': '',&#10;        'content': '',&#10;        'nextURL': ''&#10;    },&#10;]&#10;&#10;'nextURL' will be used in case it is non-empty"
+                            onfocus="this.style.height = '';this.style.height = this.scrollHeight + 15 + 'px';"
+                            oninput="this.style.height = '';this.style.height = this.scrollHeight + 15 + 'px';"
+                            spellcheck="false"></textarea>
+                        </td>
+                      </tr>
+                      <tr>
+                        <th class="wsn tar vat pr-4">URL Blocks :</th>
+                        <td>
+                          <textarea class="p-2 w-100 hp-200 wsn oyh rn" v-model="test_url_blocks"
+                            placeholder="URLs containg these will be blocked.&#10;Need to be one entry per line.&#10;&#10;Example -&#10;&#10;googleads&#10;adsbygoogle"
+                            onfocus="this.style.height = '';this.style.height = this.scrollHeight + 15 + 'px';"
+                            oninput="this.style.height = '';this.style.height = this.scrollHeight + 15 + 'px';"
+                            spellcheck="false"></textarea>
+                        </td>
+                      </tr>
+                      <tr class="tar">
+                        <td colspan="2">
+                          <a href="#" class="mx-4" :class="{'disabled': iframe_working}"
+                            @click="loadTestURL()">LoadURL</a>
+                          <a href="#" class="mx-4" :class="{'disabled': iframe_working}"
+                            @click="runTestTOCScript()">RunTOCScript</a>
+                          <a href="#" class="mx-4" :class="{'disabled': iframe_working}"
+                            @click="runTestChapterScript()">RunChapterScript</a>
+                          <a href="#" class="mx-4" :class="{'disabled': iframe_working}"
+                            @click="resetTestFields()">ResetFields</a>
+                          <a href="#" class="mx-4" :class="{'disabled': iframe_working}"
+                            @click="saveTestRule()">SaveRule</a>
+                          <a v-if="test_rule_guid.length > 0" href="#" class="ml-4"
+                            :class="{'disabled': iframe_working}" @click="goBackFromEditRule()">Back</a>
+                        </td>
+                      </tr>
+                    </table>
+                  </div>
+                </div>
+              </div>
+
+              <div class="df fdc">
+                <div class="df fdr p-4 bt fwb">
+                  <div class="f1">Test Results -</div>
+                  <a href="#" @click="toggleTestResults">{{ app_options.showTestResults ? 'Collapse' : 'Expand' }}</a>
+                </div>
+                <div class="hp-300 pr bt"
+                  :class="{'dib': app_options.showTestResults, 'dn': !app_options.showTestResults}">
+                  <div class="df fdc w-100 h-100">
+                    <div class="bb p-4">
+                      Page Type : {{ test_result_page_type }}
+                    </div>
+                    <div class="f1 pr">
+                      <div class="pa p-4 w-100 h-100 oya ust" v-html="test_result_content"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- testing tab end -->
           </div>
-
-          <!-- tabs code end -->
-
-          <div class="slide bl w-0" :class="{'df': showRenderer, 'dn': !showRenderer}" slider="1">
-            &nbsp;
-          </div>
-
-          <!-- renderer code start -->
-
-          <div class="wp-400 fdc" :class="{'df': showRenderer, 'dn': !showRenderer}" slider-targ="1">
-            <div class="df fdr p-4 bb">
-              <div class="fwb f1">Renderer</div>
-              <a href="#" @click="openRendererDevTools()">OpenDevTools</a>
-            </div>
-            <div class="pr f1">
-              <webview id="mainWebView" :src="iframe_url" class="pa w-100 h-100" :class="{ 'pen': iframe_working }">
-              </webview>
-            </div>
-            <div class="df fdr p-4 bt">
-              <div class="f1">Console</div>
-              <a v-if="app_options.showConsole" href="#" class="mr-4 pr-4" @click="clearWebConsole()">Clear</a>
-              <a href="#" @click="toggleWebConsole()">{{ app_options.showConsole ? 'Hide' : 'Show' }}</a>
-            </div>
-            <div class="bt hp-300 pr" :class="{ 'dn': !app_options.showConsole }">
-              <textarea id="web-console" class="w-100 h-100 rn wsp p-4" readonly></textarea>
-            </div>
-          </div>
-
-          <!-- renderer code end -->
         </div>
+
+        <!-- tabs code end -->
+
+        <div class="slide bl w-0" :class="{'df': showRenderer, 'dn': !showRenderer}" slider="1">
+          &nbsp;
+        </div>
+
+        <!-- renderer code start -->
+
+        <div class="wp-400 fdc" :class="{'df': showRenderer, 'dn': !showRenderer}" slider-targ="1">
+          <div class="df fdr p-4 bb">
+            <div class="fwb f1">Renderer</div>
+            <a href="#" @click="openRendererDevTools()">OpenDevTools</a>
+          </div>
+          <div class="pr f1">
+            <webview id="mainWebView" :src="iframe_url" class="pa w-100 h-100" :class="{ 'pen': iframe_working }">
+            </webview>
+          </div>
+          <div class="df fdr p-4 bt">
+            <div class="f1">Console</div>
+            <a v-if="app_options.showConsole" href="#" class="mr-4 pr-4" @click="clearWebConsole()">Clear</a>
+            <a href="#" @click="toggleWebConsole()">{{ app_options.showConsole ? 'Hide' : 'Show' }}</a>
+          </div>
+          <div class="bt hp-300 pr" :class="{ 'dn': !app_options.showConsole }">
+            <textarea id="web-console" class="w-100 h-100 rn wsp p-4" readonly></textarea>
+          </div>
+        </div>
+
+        <!-- renderer code end -->
       </div>
     </div>
 
@@ -343,10 +368,11 @@
           }}/{{
           r_novel.ChapterURLs.length }}]
         </div>
-        <a href="#" class="mx-4" @click="toggleDarkMode();focusOnReader()">{{ app_options.darkMode ? 'LightMode':
-          'DarkMode'
-          }}</a>
-        <a href="#" class="ml-4" @click="exitReadingMode()">Back</a>
+        <a href="#" class="mx-4" @click="onToggleFullScreenClick()" title="Toggle FullScreen">TFS</a>
+        <a href="#" class="mx-4" @click="toggleDarkMode();focusOnReader()"
+          :title="'Switch to ' + (app_options.darkMode ? 'Light' : 'Dark') + ' theme'">
+          {{ app_options.darkMode ? 'LightMode': 'DarkMode' }}</a>
+        <a href="#" class="ml-4" @click="exitReadingMode()" title="Back to Library">Back</a>
       </div>
       <div class="df fdr f1">
         <div v-if="r_show_goto_mode" class="goto-box">

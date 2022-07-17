@@ -11,17 +11,37 @@ body {
   width: 100vw;
 }
 
-.df {
-  display: flex;
-}
-
 .dn,
 [v-cloak] {
   display: none;
 }
 
+.df {
+  display: flex;
+}
+
 .dib {
   display: inline-block;
+}
+
+.wp-50 {
+  width: 50px;
+}
+
+.wp-100 {
+  width: 100px;
+}
+
+.wp-150 {
+  width: 150px;
+}
+
+.wp-200 {
+  width: 200px;
+}
+
+.wp-400 {
+  width: 400px;
 }
 
 .w-0 {
@@ -71,18 +91,6 @@ body {
 
 .bb {
   border-bottom: 1px solid black;
-}
-
-.wp-150 {
-  width: 150px;
-}
-
-.wp-200 {
-  width: 200px;
-}
-
-.wp-400 {
-  width: 400px;
 }
 
 .hp-100 {
@@ -138,41 +146,49 @@ body {
 }
 
 .p-4,
+.px-4,
 .pl-4 {
   padding-left: 4px;
 }
 
 .p-4,
+.px-4,
 .pr-4 {
   padding-right: 4px;
 }
 
 .p-4,
+.py-4,
 .pt-4 {
   padding-top: 4px;
 }
 
 .p-4,
+.py-4,
 .pb-4 {
   padding-bottom: 4px;
 }
 
 .p-8,
+.py-8,
 .pt-8 {
   padding-top: 8px;
 }
 
 .p-8,
+.py-8,
 .pb-8 {
   padding-bottom: 8px;
 }
 
 .p-8,
+.px-8,
 .pl-8 {
   padding-left: 8px;
 }
 
 .p-8,
+.px-8,
 .pr-8 {
   padding-right: 8px;
 }
@@ -486,4 +502,31 @@ div.bgct {
 
 #btn-forward {
   padding-right: 10px;
+}
+
+.lib-list {
+  flex-direction: column;
+}
+
+.lib-thumbnail {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+.lib-thumbnail > div {
+  width: calc(50% - 16px);
+}
+
+.lib-thumbnail .cover-image img {
+  width: 150px;
+}
+
+.lib-thumbnail .novel-summary-expanded {
+  width: calc(100% - 16px);
+}
+
+.active-tab {
+  background-color: lightgreen;
+  color: blue;
 }
