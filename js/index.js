@@ -531,7 +531,8 @@ app = new Vue({
       this.test_pagetype_code = r.pagetype_code;
       this.test_toc_code = r.toc_code;
       this.test_chapter_code = r.chapter_code;
-      this.test_url_blocks = "";
+      this.test_url_blocks = r.url_blocks;
+      
       this.test_result_page_type = "UNKNOWN";
       this.test_result_content = "";
 
