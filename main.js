@@ -16,6 +16,9 @@ if (!gotTheLock) {
   app.quit();
 }
 
+app.commandLine.appendSwitch('disable-site-isolation-trials');
+app.commandLine.appendSwitch('disable-features', 'OutOfBlinkCors');
+
 const path = require("path");
 var { http, https } = require("follow-redirects");
 const fs = require("fs");
@@ -102,21 +105,12 @@ const createWindow = () => {
     mainWindow.show();
 
     //#region Disabling CORS
-    session.defaultSession.webRequest.onBeforeSendHeaders(
-      (details, callback) => {
-        callback({ requestHeaders: { Origin: '*', ...details.requestHeaders } });
-      }
-    );
-
     session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
-      callback({
-        responseHeaders: {
-          'Access-Control-Allow-Origin': ['*'],
-          // We use this to bypass headers
-          'Access-Control-Allow-Headers': ['*'],
-          ...details.responseHeaders,
-        },
-      });
+      let url = details.url.toLowerCase();
+      if (!(url.startsWith("file://") || url.startsWith("devtools://"))) {
+          details.responseHeaders["access-control-allow-origin"] = "*";
+      }
+      callback({ responseHeaders: details.responseHeaders });
     });
     //#endregion
 

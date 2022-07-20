@@ -128,17 +128,7 @@ const fileDownloader_2 = function (context) {
     let prom = new Promise(async (resolve, reject) => {
       try {
         let data = await fetch(url).then((a) => a.blob());
-        let reader = new FileReader();
-        reader.readAsArrayBuffer(data);
-        let sleepCounter = 0;
-        while (reader.readyState != 2 && reader.readyState != 0) {
-          await sleep(500);
-          sleepCounter++;
-          if (sleepCounter > 20) {
-            reject("Wait timeout expired");
-          }
-        }
-        resolve(reader.result);
+        resolve(await data.arrayBuffer());
       } catch (ex) {
         reject(ex);
       }
