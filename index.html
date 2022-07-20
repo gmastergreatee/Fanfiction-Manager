@@ -375,6 +375,9 @@
           }}/{{
           r_novel.ChapterURLs.length }}]
         </div>
+        <div>({{ r_chapter_index + 1 }}/{{ r_novel.ChapterURLs.length }} - {{
+          Math.round((((r_chapter_index + 1) * 100 / r_novel.ChapterURLs.length) + Number.EPSILON) * 100) / 100
+        }}%)</div>
         <a href="#" class="mx-4" @click="onToggleFullScreenClick()" title="Toggle FullScreen">TFS</a>
         <a href="#" class="mx-4" @click="toggleDarkMode();focusOnReader()"
           :title="'Switch to ' + (app_options.darkMode ? 'Light' : 'Dark') + ' theme'">
