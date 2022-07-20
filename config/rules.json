@@ -1,5 +1,14 @@
 [
   {
+    "guid": "f49fc50c-07e1-4d1e-914a-62ad4da423cd",
+    "rule_name": "fulffyball.blogspot.com",
+    "url_regex": "(?:https://)*fulffyball.blogspot.com/[0-9]*/[0-9]*/.*",
+    "pagetype_code": "injectJquery();\n\nreturn 0;",
+    "toc_code": "// TOC content isn't proper in this site, therefore not implented\n\nthrow new Error('TOC content isn\\'t proper in this site, therefore feature not implemented');\n\nlet retMe = {\n  'CoverURL': '',              // may be empty\n  'Title': 'novel name here',\n  'Summary': '',               // may be empty\n  'ChapterCount': 1,           // chapter count here\n  'ChapterURLs': [             // list of chapter-URLs\n      '',                      // must contain atleast the first chapter URL\n      '',\n  ],\n};\n\nreturn retMe;",
+    "chapter_code": "let retMe = [\n  {\n    \"title\": \"\",\n    \"content\": \"\",  // content\n    \"nextURL\": \"\"   // when \"ChapterCount\" <= 0 & \"nextURL\" always comes non-empty\n                    // will loop infinitely unless something else(javascript) breaks\n  },\n];\n\n// grabbing chapter name\nif ($('#post-body h2').length > 1) {\n    if ($('#post-body h2')[1].innerText.trim() != '') {\n        retMe[0].title = $('#post-body h2')[1].innerText.replace(/.*chapter\\s*[0-9]+\\s*:*\\s*/gi, '');\n    } else {\n        retMe[0].title = $('#post-body h2')[0].innerText.replace(/.*chapter\\s*[0-9]+\\s*:*\\s*/gi, '');\n    }\n} else if ($('#post-body h2').length > 0) {\n    retMe[0].title = $('#post-body h2')[0].innerText.replace(/.*chapter\\s*[0-9]+\\s*:*\\s*/gi, '')\n} else { }\n\n// removing undesirables\n$('#post-body p[style], #post-body div[style], #post-body h2').remove();\n\n// getting content\nretMe[0].content = '<p>' + htmlEncode($('#post-body')[0].innerText).replace(/&nbsp;/g, ' ').split('<br>').map(e => e.trim()).filter(e => e != '').join('</p><p>') + '</p>';\n\nreturn retMe;",
+    "url_blocks": "/feeds/\n.js\n.css\n/img/\n.woff\n/gtag/\n.ttf"
+  },
+  {
     "guid": "330b55ff-5f7e-481c-9480-5d35fd058a29",
     "rule_name": "Ranobes.net",
     "url_regex": "(?:https://)*(?:www|m)*\\.*ranobes\\.net/(?:(?:novels/)|(?:chapters/)|(?:[a-z\\-]*))([0-9]*).*",
