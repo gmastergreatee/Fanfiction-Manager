@@ -1,5 +1,14 @@
 [
   {
+    "guid": "f35b1f2d-4841-494f-a9f9-514e18daf550",
+    "rule_name": "mtlnovel.com",
+    "url_regex": "(?:https://)*(?:www\\.)*mtlnovel.com/.*",
+    "pagetype_code": "// https://www.mtlnovel.com/i-the-grandson-of-garp-scared-luffy-into-tears/chapter-1/\n// https://www.mtlnovel.com/i-the-grandson-of-garp-scared-luffy-into-tears/chapter-2/\n\ninjectJquery();\n\nreturn 0;",
+    "toc_code": "let retMe = {\n  'CoverURL': $('.post-content amp-img').last().attr('src'),\n  'Title': $('h1.entry-title').text(),\n  'Summary': '<p>' + Array.from($('#panelnovelinfo .desc p:not([class])')).map(x => x.innerHTML.trim()).join('</p><p>') + '</p>',\n  'ChapterCount': 1,           // chapter count here\n  'ChapterURLs': [],\n};\n\nlet chapterListURLs = Array.from($('#panelchapterlist amp-list')).map(e => e.attributes['src'].value);\n\nfor (let i = 0; i < chapterListURLs.length; i++) {\n    try {\n        let data = JSON.parse(await fetch(chapterListURLs[i]).then(x => x.text()));\n        retMe.ChapterURLs.push(...data.items.map(x => x.permalink));\n    } catch { throw new Error('Error getting chapter-list'); }\n}\n\nretMe.ChapterCount = retMe.ChapterURLs.length;\n\nreturn retMe;",
+    "chapter_code": "let retMe = [\n  {\n    \"title\": \"\",    // title of chapter\n    \"content\": '<p>' + htmlEncode($('.par').text()).split('<br>').map(x => x.trim()).filter(x => x != '').join('</p><p>') + '</p>',  // content\n    \"nextURL\": \"\"   // when \"ChapterCount\" <= 0 & \"nextURL\" always comes non-empty\n                    // will loop infinitely unless something else(javascript) breaks\n  },\n];\n\nreturn retMe;",
+    "url_blocks": "/pagead/\n.svg\n.png\nampproject.org\n"
+  },
+  {
     "guid": "f49fc50c-07e1-4d1e-914a-62ad4da423cd",
     "rule_name": "fulffyball.blogspot.com",
     "url_regex": "(?:https://)*fulffyball.blogspot.com/[0-9]*/[0-9]*/.*",
