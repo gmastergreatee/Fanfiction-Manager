@@ -355,8 +355,8 @@
           <div class="df fdr bt p-4">
             <div>URL :</div>
             <input class="f1 mx-4" type="text" v-model="rendererCustomUrl">
-            <a href="#" @click="loadCustomURL()">Go</a>
-            <a href="#" @click="loadCustomURL(false)">Reset</a>
+            <a href="#" @click="loadCustomURL()" :class="{ 'disabled': iframe_working }">Go</a>
+            <a href="#" class="ml-4" @click="loadCustomURL(false)" :class="{ 'disabled': iframe_working }">Reset</a>
           </div>
           <div class="df fdr p-4 bt">
             <div class="f1">Console</div>
