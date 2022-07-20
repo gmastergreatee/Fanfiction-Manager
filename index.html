@@ -77,7 +77,7 @@
                           v-html="n.Summary">
                         </div>
                       </div>
-                      <div class="bt mt-8 pt-8 df fdr">
+                      <div class="bt mt-8 pt-8 df fdr fww">
                         <div class="f1">
                           <a v-if="n.Summary" href="#" @click="setSummaryGUID(n.GUID)">{{ summaryExpandedGUID ==
                             n.GUID ? 'Shrink' :
@@ -351,6 +351,12 @@
           <div class="pr f1">
             <webview id="mainWebView" :src="iframe_url" class="pa w-100 h-100" :class="{ 'pen': iframe_working }">
             </webview>
+          </div>
+          <div class="df fdr bt p-4">
+            <div>URL :</div>
+            <input class="f1 mx-4" type="text" v-model="rendererCustomUrl">
+            <a href="#" @click="loadCustomURL()">Go</a>
+            <a href="#" @click="loadCustomURL(false)">Reset</a>
           </div>
           <div class="df fdr p-4 bt">
             <div class="f1">Console</div>

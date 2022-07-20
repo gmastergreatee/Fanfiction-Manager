@@ -250,6 +250,8 @@ app = new Vue({
 
       updatingRules: false,
 
+      rendererCustomUrl: "",
+
       //#endregion
 
       //#region Reader Mode
@@ -414,6 +416,29 @@ app = new Vue({
     onToggleLibraryViewStyle() {
       this.app_options.showGridLayout = !this.app_options.showGridLayout;
       appOptionsChanged = true;
+    },
+    loadCustomURL(reallyLoad = true) {
+      if (this.iframe_working) {
+        return;
+      }
+
+      if (!reallyLoad) {
+        this.iframe_url = dummyPageUrl;
+        return;
+      }
+      if (this.rendererCustomUrl.trim() != "") {
+        let t_url = this.rendererCustomUrl;
+        urlIncludesToBlock();
+        if (t_url != this.iframe_url) {
+          this.iframe_url = t_url;
+        } else {
+          try {
+            this.mainWebView.loadURL(t_url);
+          } catch {
+            this.mainWebView.reload();
+          }
+        }
+      }
     },
     //#region Updates Related
     checkForAppUpdates() {
