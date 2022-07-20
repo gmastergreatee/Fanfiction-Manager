@@ -193,7 +193,7 @@ app = new Vue({
     rootDirectoryAbsolutePath = await rootDir();
 
     this.hasMounted = true;
-    
+
     loadAllConfigs();
     this.mainWebView = document.getElementById("mainWebView");
     this.console = document.getElementById("web-console");
@@ -382,6 +382,9 @@ app = new Vue({
       let sleepCode = script.includes("sleep(")
         ? "function sleep(ms) { return new Promise((resolve) => {setTimeout(resolve, ms);}); }\n"
         : "";
+      let htmlEncodeCode = script.includes("htmlEncode(")
+        ? "function htmlEncode(input) { var textArea = document.createElement('textarea'); textArea.innerText = text; return textArea.innerHTML; }\n"
+        : "";
       let htmlDecodeCode = script.includes("htmlDecode(")
         ? "function htmlDecode(input) { var doc = new DOMParser().parseFromString(input, 'text/html'); return doc.documentElement.textContent; }\n"
         : "";
@@ -390,6 +393,7 @@ app = new Vue({
         : "";
       return (
         sleepCode +
+        htmlEncodeCode +
         htmlDecodeCode +
         injectJqueryCode +
         "(async function() {" +
