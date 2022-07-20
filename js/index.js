@@ -129,7 +129,6 @@ const fileDownloader_2 = function (context) {
       try {
         let data = await fetch(url).then((a) => a.blob());
         let reader = new FileReader();
-        reader.loadend += () => {};
         reader.readAsArrayBuffer(data);
         let sleepCounter = 0;
         while (reader.readyState != 2 && reader.readyState != 0) {
@@ -638,7 +637,10 @@ app = new Vue({
           this.test_result_page_type = "UNKNOWN";
         }
       } catch (ex) {
-        let message = ex.message.replace(/Error invoking remote method 'GUEST_VIEW_MANAGER_CALL':\s*(Error:*)*\s*/gi, '[SCRIPT] ');
+        let message = ex.message.replace(
+          /Error invoking remote method 'GUEST_VIEW_MANAGER_CALL':\s*(Error:*)*\s*/gi,
+          "[SCRIPT] "
+        );
         log("Error -> " + message);
         this.test_result_page_type = "UNKNOWN";
       }
@@ -682,7 +684,10 @@ app = new Vue({
         }
         log("Script executed successfully");
       } catch (ex) {
-        let message = ex.message.replace(/Error invoking remote method 'GUEST_VIEW_MANAGER_CALL':\s*(Error:*)*\s*/gi, '[SCRIPT] ');
+        let message = ex.message.replace(
+          /Error invoking remote method 'GUEST_VIEW_MANAGER_CALL':\s*(Error:*)*\s*/gi,
+          "[SCRIPT] "
+        );
         log("Error -> " + message);
         msgBox(
           "Error executing script.\nMake sure an URL is already loaded & the script is valid.\n\nCheck console/DevTools for more details."
@@ -733,7 +738,10 @@ app = new Vue({
         }
         log("Script executed successfully");
       } catch (ex) {
-        let message = ex.message.replace(/Error invoking remote method 'GUEST_VIEW_MANAGER_CALL':\s*(Error:*)*\s*/gi, '[SCRIPT] ');
+        let message = ex.message.replace(
+          /Error invoking remote method 'GUEST_VIEW_MANAGER_CALL':\s*(Error:*)*\s*/gi,
+          "[SCRIPT] "
+        );
         log("Error -> " + message);
         msgBox(
           "Error executing script.\nMake sure an URL is already loaded & the script is valid.\n\nCheck DevTools for more details.",
@@ -961,7 +969,10 @@ app = new Vue({
             log("No TOC data returned");
           }
         } catch (ex) {
-          let message = ex.message.replace(/Error invoking remote method 'GUEST_VIEW_MANAGER_CALL':\s*(Error:*)*\s*/gi, '[SCRIPT] ');
+          let message = ex.message.replace(
+            /Error invoking remote method 'GUEST_VIEW_MANAGER_CALL':\s*(Error:*)*\s*/gi,
+            "[SCRIPT] "
+          );
           this.test_url = this.mainWebView.getURL();
           log("Error -> " + message);
         }
@@ -1044,7 +1055,10 @@ app = new Vue({
             log("No PAGETYPE data received");
           }
         } catch (ex) {
-          let message = ex.message.replace(/Error invoking remote method 'GUEST_VIEW_MANAGER_CALL':\s*(Error:*)*\s*/gi, '[SCRIPT] ');
+          let message = ex.message.replace(
+            /Error invoking remote method 'GUEST_VIEW_MANAGER_CALL':\s*(Error:*)*\s*/gi,
+            "[SCRIPT] "
+          );
           this.test_url = this.mainWebView.getURL();
           onMainWebViewLoadedEvent.clearAllListeners();
           this.mainWebView.stop();
@@ -1411,7 +1425,10 @@ app = new Vue({
             this.iframe_working = false;
           }
         } catch (ex) {
-          let message = ex.message.replace(/Error invoking remote method 'GUEST_VIEW_MANAGER_CALL':\s*(Error:*)*\s*/gi, '[SCRIPT] ');
+          let message = ex.message.replace(
+            /Error invoking remote method 'GUEST_VIEW_MANAGER_CALL':\s*(Error:*)*\s*/gi,
+            "[SCRIPT] "
+          );
           this.test_url = this.mainWebView.getURL();
           log("Error -> " + message);
           onMainWebViewLoadedEvent.clearAllListeners();
@@ -1551,7 +1568,10 @@ app = new Vue({
             log("No TOC data received");
           }
         } catch (ex) {
-          let message = ex.message.replace(/Error invoking remote method 'GUEST_VIEW_MANAGER_CALL':\s*(Error:*)*\s*/gi, '[SCRIPT] ');
+          let message = ex.message.replace(
+            /Error invoking remote method 'GUEST_VIEW_MANAGER_CALL':\s*(Error:*)*\s*/gi,
+            "[SCRIPT] "
+          );
           this.test_url = this.mainWebView.getURL();
           log("Error -> " + message);
         }
@@ -1614,7 +1634,10 @@ app = new Vue({
             log("No PAGETYPE data received");
           }
         } catch (ex) {
-          let message = ex.message.replace(/Error invoking remote method 'GUEST_VIEW_MANAGER_CALL':\s*(Error:*)*\s*/gi, '[SCRIPT] ');
+          let message = ex.message.replace(
+            /Error invoking remote method 'GUEST_VIEW_MANAGER_CALL':\s*(Error:*)*\s*/gi,
+            "[SCRIPT] "
+          );
           this.test_url = this.mainWebView.getURL();
           onMainWebViewLoadedEvent.clearAllListeners();
           this.mainWebView.stop();
