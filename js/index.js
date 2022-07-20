@@ -1,5 +1,5 @@
 let appName = "Fanfiction-Manager";
-let appVersion = "beta_3.0.9";
+let appVersion = "beta_3.1.0";
 let verboseMode = false;
 
 let site_vars_script = `
@@ -532,7 +532,7 @@ app = new Vue({
       this.test_toc_code = r.toc_code;
       this.test_chapter_code = r.chapter_code;
       this.test_url_blocks = r.url_blocks;
-      
+
       this.test_result_page_type = "UNKNOWN";
       this.test_result_content = "";
 
