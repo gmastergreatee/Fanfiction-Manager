@@ -101,6 +101,26 @@ const createWindow = () => {
   mainWindow.on("ready-to-show", () => {
     mainWindow.show();
 
+    //#region Disabling CORS
+    session.defaultSession.webRequest.onBeforeSendHeaders(
+      (details, callback) => {
+        callback({ requestHeaders: { Origin: '*', ...details.requestHeaders } });
+      }
+    );
+
+    session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
+      callback({
+        responseHeaders: {
+          'Access-Control-Allow-Origin': ['*'],
+          // We use this to bypass headers
+          'Access-Control-Allow-Headers': ['*'],
+          ...details.responseHeaders,
+        },
+      });
+    });
+    //#endregion
+
+    //#region URL blocking system
     session.defaultSession.webRequest.onBeforeRequest(
       // { urls: ["*://*./*"] },
       function (details, callback) {
@@ -127,6 +147,7 @@ const createWindow = () => {
         if (!blocked) callback({ cancel: false });
       }
     );
+    //#endregion
   });
 
   // and load the index.html of the app.
