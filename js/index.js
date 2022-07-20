@@ -383,7 +383,7 @@ app = new Vue({
         ? "function sleep(ms) { return new Promise((resolve) => {setTimeout(resolve, ms);}); }\n"
         : "";
       let htmlEncodeCode = script.includes("htmlEncode(")
-        ? "function htmlEncode(input) { var textArea = document.createElement('textarea'); textArea.innerText = text; return textArea.innerHTML; }\n"
+        ? "function htmlEncode(input) { var textArea = document.createElement('textarea'); textArea.innerText = input; return textArea.innerHTML; }\n"
         : "";
       let htmlDecodeCode = script.includes("htmlDecode(")
         ? "function htmlDecode(input) { var doc = new DOMParser().parseFromString(input, 'text/html'); return doc.documentElement.textContent; }\n"
