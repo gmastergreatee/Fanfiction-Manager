@@ -23,6 +23,7 @@ Current Status: __BETA__
   - `archiveofourown.org`
   - `royalroad.com`
   - `wattpad.com`
+  - `mtlnovel.com`
 - `Rules Editor`
 - Novel `Reading Mode`
 - Novel `Details Editor`
