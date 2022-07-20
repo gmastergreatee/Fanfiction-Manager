@@ -637,7 +637,8 @@ app = new Vue({
           this.test_result_page_type = "UNKNOWN";
         }
       } catch (ex) {
-        log("Error -> " + ex.message);
+        let message = ex.message.replace(/Error invoking remote method 'GUEST_VIEW_MANAGER_CALL':\s*(Error:*)*\s*/gi, '[SCRIPT] ');
+        log("Error -> " + message);
         this.test_result_page_type = "UNKNOWN";
       }
       onMainWebViewLoadedEvent.removeListener(this.runTestPageTypeScript);
@@ -680,9 +681,10 @@ app = new Vue({
         }
         log("Script executed successfully");
       } catch (ex) {
-        log("Error -> " + ex.message);
+        let message = ex.message.replace(/Error invoking remote method 'GUEST_VIEW_MANAGER_CALL':\s*(Error:*)*\s*/gi, '[SCRIPT] ');
+        log("Error -> " + message);
         msgBox(
-          "Error executing script.\nMake sure an URL is already loaded & the script is valid.\n\nCheck DevTools for more details."
+          "Error executing script.\nMake sure an URL is already loaded & the script is valid.\n\nCheck console/DevTools for more details."
         );
       }
     },
@@ -730,8 +732,9 @@ app = new Vue({
         }
         log("Script executed successfully");
       } catch (ex) {
-        log("Error -> " + ex.message);
-        window.electronAPI.msgBox(
+        let message = ex.message.replace(/Error invoking remote method 'GUEST_VIEW_MANAGER_CALL':\s*(Error:*)*\s*/gi, '[SCRIPT] ');
+        log("Error -> " + message);
+        msgBox(
           "Error executing script.\nMake sure an URL is already loaded & the script is valid.\n\nCheck DevTools for more details.",
           appName
         );
@@ -957,8 +960,9 @@ app = new Vue({
             log("No TOC data returned");
           }
         } catch (ex) {
+          let message = ex.message.replace(/Error invoking remote method 'GUEST_VIEW_MANAGER_CALL':\s*(Error:*)*\s*/gi, '[SCRIPT] ');
           this.test_url = this.mainWebView.getURL();
-          log("Error -> " + ex.message);
+          log("Error -> " + message);
         }
         this.iframe_working = false;
         return true;
@@ -1039,11 +1043,12 @@ app = new Vue({
             log("No PAGETYPE data received");
           }
         } catch (ex) {
+          let message = ex.message.replace(/Error invoking remote method 'GUEST_VIEW_MANAGER_CALL':\s*(Error:*)*\s*/gi, '[SCRIPT] ');
           this.test_url = this.mainWebView.getURL();
           onMainWebViewLoadedEvent.clearAllListeners();
           this.mainWebView.stop();
           this.iframe_working = false;
-          log("Error -> " + ex.message);
+          log("Error -> " + message);
         }
       };
 
@@ -1405,8 +1410,9 @@ app = new Vue({
             this.iframe_working = false;
           }
         } catch (ex) {
+          let message = ex.message.replace(/Error invoking remote method 'GUEST_VIEW_MANAGER_CALL':\s*(Error:*)*\s*/gi, '[SCRIPT] ');
           this.test_url = this.mainWebView.getURL();
-          log("Error -> " + ex.message);
+          log("Error -> " + message);
           onMainWebViewLoadedEvent.clearAllListeners();
           this.d_novel = null;
           this.iframe_working = false;
@@ -1544,8 +1550,9 @@ app = new Vue({
             log("No TOC data received");
           }
         } catch (ex) {
+          let message = ex.message.replace(/Error invoking remote method 'GUEST_VIEW_MANAGER_CALL':\s*(Error:*)*\s*/gi, '[SCRIPT] ');
           this.test_url = this.mainWebView.getURL();
-          log("Error -> " + ex.message);
+          log("Error -> " + message);
         }
         this.iframe_working = false;
         return true;
@@ -1606,11 +1613,12 @@ app = new Vue({
             log("No PAGETYPE data received");
           }
         } catch (ex) {
+          let message = ex.message.replace(/Error invoking remote method 'GUEST_VIEW_MANAGER_CALL':\s*(Error:*)*\s*/gi, '[SCRIPT] ');
           this.test_url = this.mainWebView.getURL();
           onMainWebViewLoadedEvent.clearAllListeners();
           this.mainWebView.stop();
           this.iframe_working = false;
-          log("Error -> " + ex.message);
+          log("Error -> " + message);
         }
         this.u_novel = null;
       };
