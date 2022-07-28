@@ -140,6 +140,7 @@ For others -
 - Want to decode html-codes like `&amp;`, `&larr;`, ... to their actual character in script, use -
   - `htmlDecode(input);`
     - where `input` is a string
+  - similarly `htmlEncode(input)` is also there
 - Make sure `Title`/`title` for `Novel`/`Chapter` is actually the `innerText`, __not__ `innerHTML`
 - In `Chapter`'s `content` field, HTML is to be used.
   - Make sure all anchor tags in HTML are marked with `target="_blank"`
