@@ -1631,6 +1631,7 @@ app = new Vue({
                   onMainWebViewLoadedEvent.clearAllListeners();
                   this.iframe_url = dummyPageUrl;
                 }
+                this.u_novel = null;
                 break;
               case -1:
               case -2:
@@ -1640,9 +1641,9 @@ app = new Vue({
                 this.iframe_working = false;
                 this.mainWebView.stop();
                 this.iframe_url = dummyPageUrl;
+                this.u_novel = null;
                 break;
             }
-            this.u_novel = null;
             return;
           } else {
             this.test_url = this.mainWebView.getURL();
