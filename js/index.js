@@ -299,6 +299,8 @@ app = new Vue({
       stop_download_update_novel: false,
       u_novel: null,
 
+      update_all_list: [],
+
       //#endregion
 
       //#region tester related
@@ -1338,6 +1340,8 @@ app = new Vue({
             onMainWebViewLoadedEvent.clearAllListeners();
             this.d_novel = null;
             this.iframe_working = false;
+            this.update_all_list = [];
+            this.stop_download_update_novel = false;
             return;
           }
 
@@ -1417,6 +1421,8 @@ app = new Vue({
                   this.d_novel = null;
                   this.iframe_working = false;
                 }
+                if (this.update_all_list.length > 0) {
+                }
               } else {
                 this.iframe_url = dummyPageUrl;
                 saveConfigArrayData("novels");
@@ -1424,6 +1430,15 @@ app = new Vue({
                 onMainWebViewLoadedEvent.clearAllListeners();
                 this.d_novel = null;
                 this.iframe_working = false;
+              }
+
+              let all_update_index = this.update_all_list.indexOf(t_novel);
+              if (all_update_index >= 0) {
+                this.update_all_list.splice(all_update_index, 1);
+              }
+
+              if (this.update_all_list.length > 0) {
+                this.updateNovel(this.update_all_list[0]);
               }
             }
           } else {
@@ -1438,6 +1453,8 @@ app = new Vue({
             onMainWebViewLoadedEvent.clearAllListeners();
             this.d_novel = null;
             this.iframe_working = false;
+            this.update_all_list = [];
+            this.stop_download_update_novel = false;
           }
         } catch (ex) {
           let message = ex.message.replace(
@@ -1449,6 +1466,8 @@ app = new Vue({
           onMainWebViewLoadedEvent.clearAllListeners();
           this.d_novel = null;
           this.iframe_working = false;
+          this.update_all_list = [];
+          this.stop_download_update_novel = false;
         }
       };
 
@@ -1479,7 +1498,16 @@ app = new Vue({
     stopDownloadNovel() {
       this.stop_download_update_novel = true;
     },
-    updateNovel(t_novel) {
+    stopDownloadAllNovel() {
+      if (
+        (this.u_novel != null || this.d_novel != null) &&
+        this.update_all_list.length > 1
+      ) {
+        this.update_all_list.splice(1);
+        this.stopDownloadNovel();
+      }
+    },
+    async updateNovel(t_novel) {
       let t_url = t_novel.URL;
 
       this.iframe_working = true;
@@ -1567,6 +1595,7 @@ app = new Vue({
                 t_novel.CoverURL = "";
               }
             }
+            logVerbose("TOC data retrieved");
             if (
               (data.ChapterURLs &&
                 data.ChapterURLs.length > t_novel.ChapterURLs.length) ||
@@ -1574,9 +1603,23 @@ app = new Vue({
             ) {
               t_novel.ChapterURLs = data.ChapterURLs;
               t_novel.ChapterCount = t_novel.ChapterURLs.length;
+              saveConfigArrayData("novels");
+              if (this.update_all_list.length > 0) {
+                setTimeout(() => {
+                  this.downloadNovel(t_novel);
+                }, 1);
+              }
+            } else {
+              let all_update_index = this.update_all_list.indexOf(t_novel);
+              if (all_update_index >= 0) {
+                this.update_all_list.splice(all_update_index, 1);
+              }
+              setTimeout(() => {
+                if (this.update_all_list.length > 0) {
+                  this.updateNovel(this.update_all_list[0]);
+                }
+              }, 1);
             }
-            saveConfigArrayData("novels");
-            logVerbose("TOC data retrieved");
             log("Updated novel -> " + t_novel.Title);
           } else {
             this.test_url = this.mainWebView.getURL();
@@ -1588,8 +1631,10 @@ app = new Vue({
             "[SCRIPT] "
           );
           this.test_url = this.mainWebView.getURL();
+          this.update_all_list = [];
           log("Error -> " + message);
         }
+        this.stop_download_update_novel = false;
         this.iframe_working = false;
         return true;
       };
@@ -1660,6 +1705,8 @@ app = new Vue({
           this.iframe_working = false;
           log("Error -> " + message);
         }
+        this.update_all_list = [];
+        this.stop_download_update_novel = false;
         this.u_novel = null;
       };
 
@@ -1676,6 +1723,12 @@ app = new Vue({
         } catch {
           this.mainWebView.reload();
         }
+      }
+    },
+    updateDownloadAll() {
+      this.update_all_list = this.novels.filter((i) => i.CheckUpdates == true);
+      if (this.update_all_list.length > 0) {
+        this.updateNovel(this.update_all_list[0]);
       }
     },
     //#endregion

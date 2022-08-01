@@ -174,13 +174,21 @@
 
               <!-- Library Filters / Commands Start -->
 
-              <div class="df fdr aic p-4 bt">
-                <a href="#" @click="onToggleLibraryViewStyle()">
-                  {{ app_options.showGridLayout ? 'ListView' : 'GridView' }}</a>
-                <input type="checkbox" class="hwp20 dib ml-8 cp" v-model="app_options.showNewOnly">
-                <a href="#" @click="toggleNewOnly()">NewOnly</a>
-                <input type="checkbox" class="hwp20 dib ml-8 cp" v-model="app_options.showCheckUpdatedOnly">
-                <a href="#" @click="toggleCheckUpdatedOnly()">UpdatedOnly</a>
+              <div class="df fdr jcsb aic p-4 bt">
+                <div class="df fdr aic">
+                  <a href="#" @click="onToggleLibraryViewStyle()">
+                    {{ app_options.showGridLayout ? 'ListView' : 'GridView' }}</a>
+                  <input type="checkbox" class="hwp20 dib ml-8 cp" v-model="app_options.showNewOnly">
+                  <a href="#" @click="toggleNewOnly()">NewOnly</a>
+                  <input type="checkbox" class="hwp20 dib ml-8 cp" v-model="app_options.showCheckUpdatedOnly">
+                  <a href="#" @click="toggleCheckUpdatedOnly()">UpdatedOnly</a>
+                </div>
+                <div class="df fdr aic">
+                  <a href="#" v-show="update_all_list.length <= 0" :class="{ 'disabled': iframe_working }" @click="updateDownloadAll()">UpdateDownloadAll</a>
+                  <a href="#" v-show="update_all_list.length > 0"
+                    :class="{ 'cr': !stop_download_update_novel, 'disabled': stop_download_update_novel }"
+                    @click="stopDownloadAllNovel()">{{ stop_download_update_novel ? 'Stopping' : 'Stop'}}</a>
+                </div>
               </div>
 
               <!-- Library Filters / Commands End -->
@@ -383,7 +391,7 @@
         </div>
         <div>({{ r_chapter_index + 1 }}/{{ r_novel.ChapterURLs.length }} - {{
           Math.round((((r_chapter_index + 1) * 100 / r_novel.ChapterURLs.length) + Number.EPSILON) * 100) / 100
-        }}%)</div>
+          }}%)</div>
         <a href="#" class="mx-4" @click="onToggleFullScreenClick()" title="Toggle FullScreen">TFS</a>
         <a href="#" class="mx-4" @click="toggleDarkMode();focusOnReader()"
           :title="'Switch to ' + (app_options.darkMode ? 'Light' : 'Dark') + ' theme'">

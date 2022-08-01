@@ -129,6 +129,10 @@ body {
   justify-content: end;
 }
 
+.jcsb {
+  justify-content: space-between;
+}
+
 .aic {
   align-items: center;
 }
