@@ -130,7 +130,8 @@ const fileDownloader_2 = function (context) {
         let data = await fetch(url).then((a) => a.blob());
         resolve(await data.arrayBuffer());
       } catch (ex) {
-        reject(ex);
+          console.error(ex);
+          reject(ex);
       }
     });
     return await prom;
@@ -160,6 +161,7 @@ const fileDownloader_2 = function (context) {
             writeFile(urlFileMaps[i].path, new DataView(fileData));
           }
         } catch (ex) {
+          console.error(ex);
           log(
             "Error downloading file (" +
               ex.message +
@@ -361,6 +363,7 @@ app = new Vue({
           this.mainWebView.closeDevTools();
         }
       } catch (ex) {
+        console.error(ex);
         window.electronAPI.msgBox(
           "Please load an URL before opening DevTools.\nError ->" + ex.message,
           appName
@@ -499,6 +502,7 @@ app = new Vue({
           saveConfigArrayData("rules");
           log("Rules updated");
         } catch (ex) {
+          console.error(ex);
           log("Error updating rules -> " + ex.message);
           console.log(ex);
         }
@@ -561,6 +565,7 @@ app = new Vue({
         try {
           new URL(this.test_url.trim());
         } catch (ex) {
+          console.error(ex);
           msgBox("Please enter a valid URL\nError -> " + ex.message);
           return;
         }
@@ -598,6 +603,7 @@ app = new Vue({
           log("No site vars found");
         }
       } catch (ex) {
+        console.error(ex);
         log("Error getting site vars");
       }
       try {
@@ -654,6 +660,7 @@ app = new Vue({
           this.test_result_page_type = "UNKNOWN";
         }
       } catch (ex) {
+        console.error(ex);
         let message = ex.message.replace(
           /Error invoking remote method 'GUEST_VIEW_MANAGER_CALL':\s*(Error:*)*\s*/gi,
           "[SCRIPT] "
@@ -701,6 +708,7 @@ app = new Vue({
         }
         log("Script executed successfully");
       } catch (ex) {
+        console.error(ex);
         let message = ex.message.replace(
           /Error invoking remote method 'GUEST_VIEW_MANAGER_CALL':\s*(Error:*)*\s*/gi,
           "[SCRIPT] "
@@ -755,6 +763,7 @@ app = new Vue({
         }
         log("Script executed successfully");
       } catch (ex) {
+        console.error(ex);
         let message = ex.message.replace(
           /Error invoking remote method 'GUEST_VIEW_MANAGER_CALL':\s*(Error:*)*\s*/gi,
           "[SCRIPT] "
@@ -898,6 +907,7 @@ app = new Vue({
       try {
         t_url_origin = new URL(t_url).origin;
       } catch (ex) {
+        console.error(ex);
         msgBox("Please enter a valid URL\nError -> " + ex.message);
         this.iframe_working = false;
         return;
@@ -969,6 +979,7 @@ app = new Vue({
                   "." + coverDirectoryRelativePath + cover_file_name;
                 saveConfigArrayData("novels");
               } catch (ex) {
+                console.error(ex);
                 log("Cover download error\nError -> " + ex.message);
                 data.CoverURL = "";
               }
@@ -986,6 +997,7 @@ app = new Vue({
             log("No TOC data returned");
           }
         } catch (ex) {
+          console.error(ex);
           let message = ex.message.replace(
             /Error invoking remote method 'GUEST_VIEW_MANAGER_CALL':\s*(Error:*)*\s*/gi,
             "[SCRIPT] "
@@ -1072,6 +1084,7 @@ app = new Vue({
             log("No PAGETYPE data received");
           }
         } catch (ex) {
+          console.error(ex);
           let message = ex.message.replace(
             /Error invoking remote method 'GUEST_VIEW_MANAGER_CALL':\s*(Error:*)*\s*/gi,
             "[SCRIPT] "
@@ -1216,6 +1229,7 @@ app = new Vue({
       try {
         t_url_origin = new URL(t_url).origin;
       } catch (ex) {
+        console.error(ex);
         msgBox("Please fix the URL for the novel\nError -> " + ex.message);
         this.iframe_working = false;
         return;
@@ -1420,8 +1434,15 @@ app = new Vue({
                   onMainWebViewLoadedEvent.clearAllListeners();
                   this.d_novel = null;
                   this.iframe_working = false;
-                }
-                if (this.update_all_list.length > 0) {
+
+                  let all_update_index = this.update_all_list.indexOf(t_novel);
+                  if (all_update_index >= 0) {
+                    this.update_all_list.splice(all_update_index, 1);
+                  }
+
+                  if (this.update_all_list.length > 0) {
+                    this.updateNovel(this.update_all_list[0]);
+                  }
                 }
               } else {
                 this.iframe_url = dummyPageUrl;
@@ -1430,15 +1451,15 @@ app = new Vue({
                 onMainWebViewLoadedEvent.clearAllListeners();
                 this.d_novel = null;
                 this.iframe_working = false;
-              }
 
-              let all_update_index = this.update_all_list.indexOf(t_novel);
-              if (all_update_index >= 0) {
-                this.update_all_list.splice(all_update_index, 1);
-              }
+                let all_update_index = this.update_all_list.indexOf(t_novel);
+                if (all_update_index >= 0) {
+                  this.update_all_list.splice(all_update_index, 1);
+                }
 
-              if (this.update_all_list.length > 0) {
-                this.updateNovel(this.update_all_list[0]);
+                if (this.update_all_list.length > 0) {
+                  this.updateNovel(this.update_all_list[0]);
+                }
               }
             }
           } else {
@@ -1457,6 +1478,7 @@ app = new Vue({
             this.stop_download_update_novel = false;
           }
         } catch (ex) {
+          console.error(ex);
           let message = ex.message.replace(
             /Error invoking remote method 'GUEST_VIEW_MANAGER_CALL':\s*(Error:*)*\s*/gi,
             "[SCRIPT] "
@@ -1507,7 +1529,7 @@ app = new Vue({
         this.stopDownloadNovel();
       }
     },
-    async updateNovel(t_novel) {
+    updateNovel(t_novel) {
       let t_url = t_novel.URL;
 
       this.iframe_working = true;
@@ -1522,6 +1544,7 @@ app = new Vue({
       try {
         t_url_origin = new URL(t_url).origin;
       } catch (ex) {
+        console.error(ex);
         msgBox("Please enter a valid URL\nError -> " + ex.message);
         this.iframe_working = false;
         return;
@@ -1591,6 +1614,7 @@ app = new Vue({
                   "." + coverDirectoryRelativePath + cover_file_name;
                 saveConfigArrayData("novels");
               } catch (ex) {
+                console.error(ex);
                 log("Cover download error\nError -> " + ex.message);
                 t_novel.CoverURL = "";
               }
@@ -1626,6 +1650,7 @@ app = new Vue({
             log("No TOC data received");
           }
         } catch (ex) {
+          console.error(ex);
           let message = ex.message.replace(
             /Error invoking remote method 'GUEST_VIEW_MANAGER_CALL':\s*(Error:*)*\s*/gi,
             "[SCRIPT] "
@@ -1695,6 +1720,7 @@ app = new Vue({
             log("No PAGETYPE data received");
           }
         } catch (ex) {
+          console.error(ex);
           let message = ex.message.replace(
             /Error invoking remote method 'GUEST_VIEW_MANAGER_CALL':\s*(Error:*)*\s*/gi,
             "[SCRIPT] "
@@ -2669,6 +2695,7 @@ async function checkAppUpdate(showStatus = false) {
       }
     }
   } catch (ex) {
+    console.error(ex);
     app.checkingForUpdates = false;
     if (showStatus) {
       log("Error checking app-update -> " + ex.message);
