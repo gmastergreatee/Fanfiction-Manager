@@ -1,6 +1,6 @@
 let appName = "Fanfiction-Manager";
 let appVersion = "beta_3.1.2";
-let verboseMode = false;
+let verboseMode = true;
 
 let site_vars_script = `
 let defaultGlobals = ["window", "self", "document", "name", "location", "customElements", "history", "locationbar", "menubar",
@@ -654,6 +654,7 @@ app = new Vue({
               this.mainWebView.stop();
               break;
           }
+          logVerbose('"' + this.test_result_page_type + '" page detected');
           return;
         } else {
           log("No PAGETYPE data received");
@@ -1365,6 +1366,9 @@ app = new Vue({
           );
           this.mainWebView.stop();
           let t_c_url = urls_to_download[curr_url_index];
+          if (!t_c_url || !t_c_url.index) {
+            debugger;
+          }
           if (data) {
             // check for extras
             if (data.extras) {
