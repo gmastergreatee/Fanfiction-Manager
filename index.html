@@ -77,13 +77,13 @@
                           v-html="n.Summary">
                         </div>
                       </div>
-                      <div class="bt mt-8 pt-8 df fdr fww">
-                        <div class="f1">
+                      <div class="bt mt-8 pt-8 df fdr fww jcsb">
+                        <div>
                           <a v-if="n.Summary" href="#" @click="setSummaryGUID(n.GUID)">{{ summaryExpandedGUID ==
                             n.GUID ? 'Shrink' :
                             'Expand' }}</a>
                         </div>
-                        <div class="df fdr jce fww">
+                        <div class="f1 df fdr jce fww">
                           <a href="#" class="ml-4" @click="enterReadingMode(n)">Read</a>
                           <a href="#" class="ml-4" :class="{'disabled': iframe_working}"
                             @click="viewNovelDetails(n)">Details</a>
