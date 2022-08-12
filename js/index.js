@@ -1081,8 +1081,7 @@ app = new Vue({
             }
             return;
           } else {
-            this.test_url = this.mainWebView.getURL();
-            log("No PAGETYPE data received");
+            log("Error -> No PAGETYPE data received");
           }
         } catch (ex) {
           console.error(ex);
@@ -1090,12 +1089,12 @@ app = new Vue({
             /Error invoking remote method 'GUEST_VIEW_MANAGER_CALL':\s*(Error:*)*\s*/gi,
             "[SCRIPT] "
           );
-          this.test_url = this.mainWebView.getURL();
-          onMainWebViewLoadedEvent.clearAllListeners();
-          this.mainWebView.stop();
-          this.iframe_working = false;
           log("Error -> " + message);
         }
+        this.test_url = this.mainWebView.getURL();
+        onMainWebViewLoadedEvent.clearAllListeners();
+        this.mainWebView.stop();
+        this.iframe_working = false;
       };
 
       onMainWebViewLoadedEvent.clearAllListeners();
