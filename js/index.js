@@ -1,6 +1,6 @@
 let appName = "Fanfiction-Manager";
-let appVersion = "beta_3.1.2";
-let verboseMode = true;
+let appVersion = "beta_3.1.3";
+let verboseMode = false;
 
 let site_vars_script = `
 let defaultGlobals = ["window", "self", "document", "name", "location", "customElements", "history", "locationbar", "menubar",
