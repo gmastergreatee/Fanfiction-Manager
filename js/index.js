@@ -1260,7 +1260,7 @@ app = new Vue({
           novel_full_path + (i + 1) + ".json"
         );
         if (!doesChapterFileExist) {
-          urls_to_download.push({ index: i, url: chapter_urls[i] });
+          urls_to_download.push({ index: i, url: chapter_urls[i], done: false, });
         }
       }
 
@@ -1278,6 +1278,12 @@ app = new Vue({
 
       let onLoadCallback = async () => {
         try {
+          let t_c_url = urls_to_download[curr_url_index];
+          if (!t_c_url || t_c_url.done) {
+            return;
+          }
+          t_c_url.done = true;
+          
           let curr_url = this.mainWebView.getURL();
           if (!curr_url.includes(t_url_origin)) {
             log("URL changed, probably redirection");
@@ -1364,10 +1370,6 @@ app = new Vue({
             this.getEvaluateJavascriptCode(t_rule.chapter_code)
           );
           this.mainWebView.stop();
-          let t_c_url = urls_to_download[curr_url_index];
-          if (!t_c_url || !t_c_url.index) {
-            debugger;
-          }
           if (data) {
             // check for extras
             if (data.extras) {
