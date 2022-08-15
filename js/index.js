@@ -1278,12 +1278,6 @@ app = new Vue({
 
       let onLoadCallback = async () => {
         try {
-          let t_c_url = urls_to_download[curr_url_index];
-          if (!t_c_url || t_c_url.done) {
-            return;
-          }
-          t_c_url.done = true;
-          
           let curr_url = this.mainWebView.getURL();
           if (!curr_url.includes(t_url_origin)) {
             log("URL changed, probably redirection");
@@ -1369,6 +1363,13 @@ app = new Vue({
           data = await this.mainWebView.executeJavaScript(
             this.getEvaluateJavascriptCode(t_rule.chapter_code)
           );
+
+          let t_c_url = urls_to_download[curr_url_index];
+          if (!t_c_url || t_c_url.done) {
+            return;
+          }
+          t_c_url.done = true;
+          
           this.mainWebView.stop();
           if (data) {
             // check for extras
