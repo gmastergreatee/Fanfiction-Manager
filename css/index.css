@@ -438,9 +438,10 @@ div.chapter-active {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: #fff;
+  background: url('../Icon.png') no-repeat center #fff;
+  background-size: 100%;
   text-align: center;
-  content: attr(alt);
+  content: '';
 }
 
 .zi-1 {
