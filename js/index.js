@@ -1260,7 +1260,11 @@ app = new Vue({
           novel_full_path + (i + 1) + ".json"
         );
         if (!doesChapterFileExist) {
-          urls_to_download.push({ index: i, url: chapter_urls[i], done: false, });
+          urls_to_download.push({
+            index: i,
+            url: chapter_urls[i],
+            done: false,
+          });
         }
       }
 
@@ -1369,7 +1373,7 @@ app = new Vue({
             return;
           }
           t_c_url.done = true;
-          
+
           this.mainWebView.stop();
           if (data) {
             // check for extras
@@ -1801,6 +1805,7 @@ app = new Vue({
       let chapter_urls = this.r_novel.ChapterURLs;
       let novel_directory = novelDirectoryAbsolutePath(this.r_novel.GUID);
       this.r_chapterIndex_loaded = [];
+      let loadedFirstChapterOnce = false;
 
       for (let i = 0; i < chapter_urls.length; i++) {
         if (!this.r_chapterIndex_loaded.includes(this.r_chapter_index)) {
@@ -1814,17 +1819,20 @@ app = new Vue({
               this.r_chapterIndex_loaded.push(this.r_chapter_index);
             }
             setTimeout(() => {
-              let reader = document.getElementById("novel-reader");
-              let topElIndex =
-                this.r_reader_options.r_chapter_top_element_index;
-              let scrollOffset =
-                this.r_reader_options.r_chapter_scroll_top_offset;
-              if (topElIndex) {
-                let firstEl = reader.children[topElIndex];
-                if (reader && firstEl) {
-                  firstEl.scrollIntoView();
-                  if (scrollOffset) {
-                    reader.scrollBy(0, scrollOffset);
+              if (!loadedFirstChapterOnce) {
+                loadedFirstChapterOnce = true;
+                let reader = document.getElementById("novel-reader");
+                let topElIndex =
+                  this.r_reader_options.r_chapter_top_element_index;
+                let scrollOffset =
+                  this.r_reader_options.r_chapter_scroll_top_offset;
+                if (topElIndex) {
+                  let firstEl = reader.children[topElIndex];
+                  if (reader && firstEl) {
+                    firstEl.scrollIntoView();
+                    if (scrollOffset) {
+                      reader.scrollBy(0, scrollOffset);
+                    }
                   }
                 }
               }
