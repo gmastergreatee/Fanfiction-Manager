@@ -1703,6 +1703,27 @@ app = new Vue({
             this.getEvaluateJavascriptCode(t_rule.pagetype_code)
           );
           if (data || data == 0) {
+            // check for extras
+            if (data.extras) {
+              extras = data.extras;
+            }
+            // check for chapter custom redirection
+            // dataFormat -> { retry: 1, nextURL: '' }
+            if (data.retry && data.nextURL) {
+              log("Chapter redirection detected, working...");
+              let t_url = data.nextURL;
+              if (t_url != this.iframe_url) {
+                this.iframe_url = t_url;
+              } else {
+                try {
+                  this.mainWebView.loadURL(t_url);
+                } catch {
+                  this.mainWebView.reload();
+                }
+              }
+              return;
+            }
+
             switch (data) {
               case 0:
                 this.mainWebView.stop();
