@@ -16,8 +16,8 @@ if (!gotTheLock) {
   app.quit();
 }
 
-app.commandLine.appendSwitch('disable-site-isolation-trials');
-app.commandLine.appendSwitch('disable-features', 'OutOfBlinkCors');
+app.commandLine.appendSwitch("disable-site-isolation-trials");
+app.commandLine.appendSwitch("disable-features", "OutOfBlinkCors");
 
 const path = require("path");
 var { http, https } = require("follow-redirects");
@@ -108,7 +108,7 @@ const createWindow = () => {
     session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
       let url = details.url.toLowerCase();
       if (!(url.startsWith("file://") || url.startsWith("devtools://"))) {
-          details.responseHeaders["access-control-allow-origin"] = "*";
+        details.responseHeaders["access-control-allow-origin"] = "*";
       }
       callback({ responseHeaders: details.responseHeaders });
     });
@@ -147,6 +147,8 @@ const createWindow = () => {
   // and load the index.html of the app.
   // mainWindow.loadURL("http://localhost:5500/index.html");
   mainWindow.loadFile(path.join(__dirname, "index.html"));
+
+  session.defaultSession.setProxy({ proxyRules: null });
 
   // Open the DevTools.
   // mainWindow.webContents.openDevTools();
