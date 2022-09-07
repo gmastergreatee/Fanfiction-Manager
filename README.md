@@ -1,4 +1,7 @@
 # Fanfiction-Manager
+
+`NOTE : This program is for personal use only. Please do not use it to share/plagiarize content.`
+
 Fanfiction manager/downloader/reader
 
 <img src="https://github.com/gmastergreatee/Fanfiction-Manager/raw/master/pic_dark_2022-07-15.png">
