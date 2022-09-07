@@ -15,7 +15,7 @@ Current Status: __BETA__
 - Update `Novel`
 - Rules included for sites
   - `fanfiction.net`
-  - `webnovel.com`
+  - `webnovel.com` - temporarily unavailable - `site owners f*cked up big time pissing the entire website user-base`
   - `novelupdates.com`
     - need to add rules related to external linked sites
     - out of scope
