@@ -1,5 +1,14 @@
 [
   {
+    "guid": "8ab6b4d3-56c5-484e-8222-42bfcd95cbdc",
+    "rule_name": "ScribbleHub",
+    "url_regex": "(?:https://)(?:www\\.)*scribblehub\\.com/(?:read|series)/(\\d+)/*-*([a-z\\-]*)/*(?:[a-z]*)/*(\\d*).*",
+    "pagetype_code": "if (document.title.toLowerCase() == 'just a moment...') {\n    return -2;\n}\n\ninjectJquery();\n\nvar match = (new RegExp(/(?:https:\\/\\/)(?:www\\.)*scribblehub\\.com\\/(?:read|series)\\/(\\d+)\\/*-*([a-z\\-]*)\\/*(?:[a-z]*)\\/*(\\d*).*/g)).exec(window.location.href);\nlet targUrl = 'https://www.scribblehub.com/series/' + match[1] + '/' + match[2] + '/';\nif (window.location.href != targUrl && !window.location.href.includes('/read/')) {\n  return {\n    retry: 1,\n    nextURL: targUrl,\n  };\n}\n\nreturn 0;",
+    "toc_code": "let retMe = {\n  'CoverURL': $('.fic_image img')[0].src,\n  'Title': $('.fic_title')[0].innerText,\n  'Summary': $('.wi_fic_desc')[0].innerText.replace(/\\n/g, '<br>'),\n  'ChapterCount': 0,\n  'ChapterURLs': [],\n};\n\nvar match = (new RegExp(/(?:https:\\/\\/)(?:www\\.)*scribblehub\\.com\\/(?:read|series)\\/(\\d+)\\/*-*([a-z\\-]*)\\/*(?:[a-z]*)\\/*(\\d*).*/g)).exec(window.location.href);\nvar postData = new Promise((resolve, reject) => {\n  $.ajax({\n    type: \"POST\",\n    url: \"https://www.scribblehub.com/wp-admin/admin-ajax.php\",\n    data: {\n      action: \"wi_getreleases_pagination\",\n      pagenum: -1,\n      mypostid: parseInt(match[1]),\n    },\n    success: function(t) {\n      let obj = document.createElement('div');\n      obj.innerHTML = t;\n      let anchors = $(obj).find('a');\n      resolve(Array.from(anchors));\n    },\n    error: function() {\n      reject(null);\n    }\n  });\n});\n\nlet chapterAnchors = await postData;\nretMe.ChapterURLs = chapterAnchors.map(x => x.href).reverse();\nretMe.ChapterCount = retMe.ChapterURLs.length;\n\nreturn retMe;",
+    "chapter_code": "let retMe = [\n  {\n    \"title\": $('.chapter-title')[0].innerText,\n    \"content\": '<p>' + $('.chp_raw')[0].innerText.replace(/\\n+/g, '\\n').split('\\n').join('</p><p>') + '</p>',\n    \"nextURL\": \"\"   // when \"ChapterCount\" <= 0 & \"nextURL\" always comes non-empty\n                    // will loop infinitely unless something else(javascript) breaks\n  },\n];\n\nreturn retMe;",
+    "url_blocks": ".js\n.css\ngoogleapis\ngoogletagmanager\n/siteimg/\n/avatar/\n/default/\n/themes/\n/seriesimg/\nwww.scribblehub.com/images/"
+  },
+  {
     "guid": "912e3430-f6b2-419e-a937-0ef713096746",
     "rule_name": "FastNovels.net",
     "url_regex": "(?:https://)*fastnovels.net/(?:[a-z0-9\\-]*)-([0-9]*)/",
