@@ -479,6 +479,7 @@ app = new Vue({
       if (!this.updatingRules) {
         this.updatingRules = true;
         log("Updating rules...");
+        urlIncludesToBlock([]);
         try {
           let latestRules = JSON.parse(
             await fetch(
@@ -2700,6 +2701,7 @@ async function checkAppUpdate(showStatus = false) {
   if (showStatus) {
     log("Checking for app-update...");
   }
+  urlIncludesToBlock([]);
   app.checkingForUpdates = true;
   try {
     let data = await fetch(
