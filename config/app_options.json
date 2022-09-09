@@ -1,6 +1,6 @@
 {
   "showNewOnly": false,
-  "showCheckUpdatedOnly": true,
+  "showCheckUpdatedOnly": false,
   "showGridLayout": true,
   "activeTab": 0,
   "showWebPage": false,
