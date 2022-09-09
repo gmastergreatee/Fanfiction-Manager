@@ -18,6 +18,7 @@ Current Status: __BETA__
 - Update `Novel`
 - Rules included for sites
   - `fanfiction.net`
+  - `scribblehub.com`
   - ~`webnovel.com`~ - no web-portal anymore - option is allowed for users with full web-access, otherwise chapters will be clipped
   - `novelupdates.com`
     - need to add rules related to external linked sites
