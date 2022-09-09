@@ -11,6 +11,8 @@ Provides extreme flexibility with the help of `Rule` system to `power-users`* in
 
 `Novice-users`** may only download `Novels` from site whose `Rule` is included.
 
+`Feel free to request for more website inclusions via issues`
+
 Current Status: __BETA__
 
 - Add new `Novel`
@@ -28,6 +30,7 @@ Current Status: __BETA__
   - `royalroad.com`
   - `wattpad.com`
   - `mtlnovel.com`
+  - and more... check `Rules` tab in-app to get the full list
 - `Rules Editor`
 - Novel `Reading Mode`
 - Novel `Details Editor`
