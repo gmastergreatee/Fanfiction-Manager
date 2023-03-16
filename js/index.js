@@ -151,9 +151,9 @@ const fileDownloader_2 = function (context) {
           let fileData = await app.mainWebView.executeJavaScript(
             app.getEvaluateJavascriptCode(
               fileDownloadScript +
-                "return await downloadFileArrayBuffer('" +
-                urlFileMaps[i].url +
-                "')"
+              "return await downloadFileArrayBuffer('" +
+              urlFileMaps[i].url +
+              "')"
             )
           );
 
@@ -164,9 +164,9 @@ const fileDownloader_2 = function (context) {
           console.error(ex);
           log(
             "Error downloading file (" +
-              ex.message +
-              ") -> " +
-              urlFileMaps[i].url
+            ex.message +
+            ") -> " +
+            urlFileMaps[i].url
           );
         }
       }
@@ -864,13 +864,13 @@ app = new Vue({
           try {
             targ.innerHTML = "Delete";
             targ.classList.remove("cr");
-          } catch {}
+          } catch { }
         }, 3000);
       } else {
         try {
           targ.innerHTML = "Delete";
           targ.classList.remove("cr");
-        } catch {}
+        } catch { }
         let t_rule_index = this.rules.indexOf(t_rule);
         if (t_rule_index >= 0) {
           this.rules.splice(t_rule_index, 1);
@@ -1125,13 +1125,13 @@ app = new Vue({
             try {
               targ.innerHTML = "Delete";
               targ.classList.remove("cr");
-            } catch {}
+            } catch { }
           }, 3000);
         } else {
           try {
             targ.innerHTML = "Delete";
             targ.classList.remove("cr");
-          } catch {}
+          } catch { }
           let cover_url_from_root_path = t_novel.CoverURL.replace(/^\.+/, "");
           if (cover_url_from_root_path) {
             pathExists(
@@ -1366,7 +1366,10 @@ app = new Vue({
 
           logVerbose("Running Chapter Script...");
           data = await this.mainWebView.executeJavaScript(
-            this.getEvaluateJavascriptCode(t_rule.chapter_code)
+            this.getEvaluateJavascriptCode(
+              ("let ndata = " + JSON.stringify(this.d_novel) + ";\n") +
+              t_rule.chapter_code
+            )
           );
 
           let t_c_url = urls_to_download[curr_url_index];
@@ -1420,11 +1423,11 @@ app = new Vue({
                 if (!this.stop_download_update_novel) {
                   log(
                     "[" +
-                      (t_novel.ChapterCount -
-                        (urls_to_download.length - curr_url_index - 1)) +
-                      "/" +
-                      t_novel.ChapterCount +
-                      "] Downloading chapter..."
+                    (t_novel.ChapterCount -
+                      (urls_to_download.length - curr_url_index - 1)) +
+                    "/" +
+                    t_novel.ChapterCount +
+                    "] Downloading chapter..."
                   );
                   t_url = next_url
                     ? next_url
@@ -1478,9 +1481,9 @@ app = new Vue({
             this.test_url = this.mainWebView.getURL();
             log(
               "No CHAPTER data received\n" +
-                (t_c_url.index + 1) +
-                " -> " +
-                t_c_url.url,
+              (t_c_url.index + 1) +
+              " -> " +
+              t_c_url.url,
               data
             );
             onMainWebViewLoadedEvent.clearAllListeners();
@@ -1513,11 +1516,11 @@ app = new Vue({
 
       log(
         "[" +
-          (t_novel.ChapterCount -
-            (urls_to_download.length - curr_url_index - 1)) +
-          "/" +
-          t_novel.ChapterCount +
-          "] Downloading chapter..."
+        (t_novel.ChapterCount -
+          (urls_to_download.length - curr_url_index - 1)) +
+        "/" +
+        t_novel.ChapterCount +
+        "] Downloading chapter..."
       );
       if (t_url != this.iframe_url) {
         this.iframe_url = t_url;
