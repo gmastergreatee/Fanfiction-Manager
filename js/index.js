@@ -1384,6 +1384,7 @@ app = new Vue({
             // check for chapter custom redirection
             // dataFormat -> { retry: 1, nextURL: '' }
             if (data.retry && data.nextURL) {
+              t_c_url.done = false;
               log("Chapter redirection detected, working...");
               t_url = data.nextURL;
               if (t_url != this.iframe_url) {
