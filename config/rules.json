@@ -1,5 +1,14 @@
 [
   {
+    "guid": "b35cbd36-87ef-45df-96c2-14ef14c0cc01",
+    "rule_name": "Hentai-Foundry.com",
+    "url_regex": "(?:https://)*(?:www\\.)*hentai-foundry.com/",
+    "pagetype_code": "// https://www.hentai-foundry.com/stories/user/NilioJ/17669/Harrys-Sex-Spellbook/page/all\n// https://www.hentai-foundry.com/stories/user/NilioJ/17669/Harrys-Sex-Spellbook/44630/Chapter-1/Camping\n\ninjectJquery();\n\nif ($('#frontPage').length > 0) {\n  $('#frontPage').click();\n  await sleep(10000);\n  throw 'Page should reload after a few seconds';\n}\n\nreturn 0;",
+    "toc_code": "\n// cleanup summary\n$('.storyDescript').find('div').remove()\n\n// chapter list\nlet chapterList = Array.from($('.boxbody p a')).map(x => x.href)\n\nlet retMe = {\n  'CoverURL': '',\n  'Title': $('h1.titleSemantic').first().text(),\n  'Summary': $('.storyDescript').html().replace(/<br>\\n/g, '<br><br>'),\n  'ChapterCount': chapterList.length,\n  'ChapterURLs': chapterList,\n};\n\nreturn retMe;",
+    "chapter_code": "let retMe = [\n  {\n    \"title\": $('#viewChapter .titleSemantic').text(),    // title of chapter\n    \"content\": $('#viewChapter .boxbody').html().trim('\\n'),  // content\n    \"nextURL\": \"\"\n  },\n];\n\nreturn retMe;",
+    "url_blocks": "subless.com\njquery\nfontawesome\n/themes/\ngoogle-analytics\navatars.hentai-foundry.com"
+  },
+  {
     "guid": "121a26eb-0d51-4539-91e6-3fe178d8cb21",
     "rule_name": "NovelGate.net",
     "url_regex": "(?:https://)*(?:www\\.)*novelgate.net/*(?:[a-zA-Z0-9\\-]*)-+([0-9]+)",
