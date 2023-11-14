@@ -138,10 +138,10 @@
     "guid": "bf04cf84-1bfc-4233-9fa7-19871eaca783",
     "rule_name": "Fanfiction.net",
     "url_regex": "(?:https://)*(?:www|m).fanfiction.net/([a-z]+)/([0-9]+)/([0-9]+)/(?:[a-zA-Z0-9-]+)",
-    "pagetype_code": "if (document.title.toLowerCase() == 'just a moment...') {\n    return -2;\n}\nif (document.querySelector('#chap_select'))\n    return 0;\nif (document.getElementById('profile_top'))\n    return 0;",
+    "pagetype_code": "injectJquery();\nif (document.title.toLowerCase() == 'just a moment...') {\n    return -2;\n}\nif (document.querySelector('#chap_select'))\n    return 0;\nif (document.getElementById('profile_top'))\n    return 0;",
     "toc_code": "let retMe = {\n  'CoverURL': '',\n  'Title': 'novel name here',\n  'Summary': '',\n  'ChapterCount': 1,\n  'ChapterURLs': [],\n};\n\nlet chaps = [];\nArray.from($('#chap_select').first().find('option')).forEach(el=>{\n    chaps.push(el.value);\n});\n\nlet matches = new RegExp('(?:https://)*(?:www|m).fanfiction.net/([a-z]+)/([0-9]+)/([0-9]+)/([a-zA-Z0-9-]+)').exec(window.location.href);\nchaps.forEach(el => {\n    retMe.ChapterURLs.push([window.location.origin, matches[1], matches[2], el, matches[4]].join('/'));\n});\n\nif (chaps.length <= 0) {\n    // meaning only one chapter found\n    retMe.ChapterURLs.push(window.location.href);\n}\n\nretMe.ChapterCount = retMe.ChapterURLs.length;\nretMe.Title = $('#profile_top b')[0].innerText;\nretMe.Summary = $('#profile_top div.xcontrast_txt').html();\nlet cover_url = $('#profile_top .cimage');\nif (cover_url.length > 0) {\n    let src = cover_url[0].src;\n    retMe.CoverURL = src.substr(0, src.length - 3) + '180/';\n}\n\nreturn retMe;",
     "chapter_code": "let retMe = [\n  {\n    \"title\": \"\",    // title of chapter\n    \"content\": $('.storytext').html(),  // content\n    \"nextURL\": \"\"\n  },\n];\n\nlet chap_select = document.getElementById('chap_select');\nif (chap_select != null) {\n    retMe[0].title = chap_select.options[chap_select.selectedIndex].text;\n}\n\nreturn retMe;",
-    "url_blocks": "adsbygoogle\n.css"
+    "url_blocks": "adsbygoogle\n.css\n/static/\ngoogleapis"
   },
   {
     "guid": "4795a493-2a6e-4234-8dec-307b06129cd6",
