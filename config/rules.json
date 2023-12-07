@@ -1,5 +1,14 @@
 [
   {
+    "guid": "c9b65e52-a0d3-4e84-b46a-e782f93e3c35",
+    "rule_name": "TechTeach4U.com",
+    "url_regex": "(?:https://)*(?:www\\.)*techteach4u.com/series/.*",
+    "pagetype_code": "// https://techteach4u.com/series/even-after-death-by-lilting-champ-novel-full/\n// https://techteach4u.com/chapter-1/\n\nreturn 0;",
+    "toc_code": "injectJquery();\n\nlet cover = $('img.wp-post-image').attr('src');\nlet _qIndex = cover.indexOf('?');\n\nlet chapterURLs = Array.from($('.eplister li a')).map(x => x.href).reverse();\n\nlet retMe = {\n  'CoverURL': _qIndex >= 0 ? cover.substr(0, _qIndex) : cover,\n  'Title': $('.entry-title').text(),\n  'Summary': $('.entry-content').text().replace(/\\t/g, '').trim().split('\\n').join('\\n<br>\\n'),\n  'ChapterCount': chapterURLs.length,           // chapter count here\n  'ChapterURLs': chapterURLs,\n};\n\nreturn retMe;",
+    "chapter_code": "injectJquery();\n\n$('.read-content > div').remove()\n\nlet retMe = [\n  {\n    \"title\": $('h1.title').text(),\n    \"content\": '<p>' + $('.read-content').text().trim().replace(/\\t/g, '').split('\\n').map(x => x.trim()).filter(x => x != '').join('</p><p>') + '</p>',\n    \"nextURL\": \"\"   // when \"ChapterCount\" <= 0 & \"nextURL\" always comes non-empty\n                    // will loop infinitely unless something else(javascript) breaks\n  },\n];\n\nreturn retMe;",
+    "url_blocks": ".js\n.css\n.woff\ncss2\nwp-content/uploads/"
+  },
+  {
     "guid": "fa543c87-06e1-438a-a8a8-7d86ac7b79fb",
     "rule_name": "DPASW - RIBSR | Dodging Prison & Stealing Witches - Revenge is best served raw",
     "url_regex": "(?:https://)*(?:www\\.)*dpasw.*",
