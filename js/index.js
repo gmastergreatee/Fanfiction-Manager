@@ -239,6 +239,7 @@ app = new Vue({
         showWebPage: false,
         showTestResults: false,
         showConsole: false,
+        isMaximized: false,
       },
 
       iframe_working: false,
@@ -2521,6 +2522,16 @@ window.electronAPI.log((event, text, more_text = "") => {
   }
 });
 
+window.electronAPI.onAppMaximized(() => {
+  appOptionsChanged = true;
+  app.app_options.isMaximized = true;
+});
+
+window.electronAPI.onAppUnMaximized(() => {
+  appOptionsChanged = true;
+  app.app_options.isMaximized = false;
+});
+
 //#endregion
 
 //#region Electron API wrappers
@@ -2543,6 +2554,10 @@ function urlIncludesToBlock(includes = []) {
 
 function toggleFullScreen() {
   window.electronAPI.toggleFullScreen();
+}
+
+function maximizeApp() {
+  window.electronAPI.maximizeApp();
 }
 
 /**
@@ -2652,7 +2667,7 @@ async function loadAllConfigs() {
     displayChapterNumbers: false,
   });
 
-  loadConfigData("app_options", {
+  await loadConfigData("app_options", {
     darkMode: true,
     showNewOnly: false,
     showCheckUpdatedOnly: false,
@@ -2661,7 +2676,11 @@ async function loadAllConfigs() {
     showWebPage: false,
     showTestResults: false,
     showConsole: false,
+    isMaximized: false,
   });
+  if (app.app_options.isMaximized) {
+    maximizeApp();
+  }
 
   await loadConfigArrayData("rules");
   app.loading_rules = false;
