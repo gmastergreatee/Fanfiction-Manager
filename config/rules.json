@@ -123,7 +123,7 @@
     "pagetype_code": "if (document.querySelector('.fic-header h1') != null) {\n    return 0;\n}",
     "toc_code": "let retMe = {\n  'CoverURL': window.fictionCover,\n  'Title': document.querySelector('.fic-header h1').innerText,\n  'Summary': document.querySelector('.fiction-info .description div').innerHTML.trim().replace(/\\n/g, ''),\n  'ChapterCount': window.chapters.length,\n  'ChapterURLs': window.chapters.map(i => window.location.origin + i.url),\n};\n\nreturn retMe;",
     "chapter_code": "let retMe = [\n  {\n    \"title\": document.querySelector('.fic-header h1').innerText,    // title of chapter\n    \"content\": document.querySelector('.chapter-content').innerHTML.trim().replace(/\\n/g,'').replace(/ data-original-margin=\"\"/g, ''),\n    \"nextURL\": \"\"   // when \"ChapterCount\" <= 0 & \"nextURL\" always comes non-empty\n                    // will loop infinitely unless something else(javascript) breaks\n  },\n];\n\nreturn retMe;",
-    "url_blocks": "/a/c?\nanalytics.google\nsentry.js\nsite.js\n.woff2\n/covers\n/gtag\n/img/\ngstatic.com\n.png\nwebfont\nelastic-rum\nsecurepubads\namazon\n/ads\n.css\nemail-decode\nfonts.googleapis"
+    "url_blocks": "/a/c?\nanalytics.google\nsentry.js\nsite.js\n.woff2\n/covers\n/gtag\n/img/\ngstatic.com\n.png\nwebfont\nelastic-rum\nsecurepubads\n/ads\n.css\nemail-decode\nfonts.googleapis"
   },
   {
     "guid": "1456f9af-ab7e-4f5f-b441-77a30ede82b5",
