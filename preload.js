@@ -21,6 +21,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
   urlIncludesToBlock: (includes) =>
     ipcRenderer.send("block-includes", includes),
   toggleFullScreen: () => ipcRenderer.send("toggle-fullscreen"),
+  startCheckCaptcha: () => ipcRenderer.send("start-check-captcha"),
+  stopCheckCaptcha: () => ipcRenderer.send("stop-check-captcha"),
 
   // --- renderer to main - 2 way
   rootDir: () => ipcRenderer.invoke("dir-root"),

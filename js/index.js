@@ -640,18 +640,22 @@ app = new Vue({
               onMainWebViewLoadedEvent.removeListener(
                 this.runTestPageTypeScript
               );
+              stopCheckCaptcha();
               break;
             case -1:
               this.test_result_page_type = "Auto Captcha";
+              startCheckCaptcha();
               break;
             case -2:
               this.test_result_page_type = "Manual Captcha";
+              startCheckCaptcha();
               break;
             default:
               this.test_result_page_type = "UNKNOWN";
               onMainWebViewLoadedEvent.removeListener(
                 this.runTestPageTypeScript
               );
+              stopCheckCaptcha();
               this.mainWebView.stop();
               break;
           }
@@ -1069,15 +1073,18 @@ app = new Vue({
                   onMainWebViewLoadedEvent.clearAllListeners();
                   this.iframe_url = dummyPageUrl;
                 }
+                stopCheckCaptcha();
                 break;
               case -1:
               case -2:
+                startCheckCaptcha();
                 break;
               default:
                 onMainWebViewLoadedEvent.clearAllListeners();
                 this.iframe_working = false;
                 this.mainWebView.stop();
                 this.iframe_url = dummyPageUrl;
+                stopCheckCaptcha();
                 break;
             }
             return;
@@ -1336,11 +1343,13 @@ app = new Vue({
               case 0:
                 logVerbose("TOC page found");
                 skipDownload = false;
+                stopCheckCaptcha();
                 break;
               case -1:
                 log("Auto-Captcha page");
               case -2:
                 log("Manual-Captcha page");
+                startCheckCaptcha();
                 break;
               default:
                 this.test_url = this.mainWebView.getURL();
@@ -1349,6 +1358,7 @@ app = new Vue({
                 onMainWebViewLoadedEvent.clearAllListeners();
                 this.d_novel = null;
                 this.iframe_working = false;
+                stopCheckCaptcha();
             }
             if (skipDownload) {
               return;
@@ -1738,9 +1748,11 @@ app = new Vue({
                   this.iframe_url = dummyPageUrl;
                 }
                 this.u_novel = null;
+                stopCheckCaptcha();
                 break;
               case -1:
               case -2:
+                startCheckCaptcha();
                 break;
               default:
                 onMainWebViewLoadedEvent.clearAllListeners();
@@ -1748,6 +1760,7 @@ app = new Vue({
                 this.mainWebView.stop();
                 this.iframe_url = dummyPageUrl;
                 this.u_novel = null;
+                stopCheckCaptcha();
                 break;
             }
             return;
@@ -2610,6 +2623,20 @@ async function updateApp(appZipUrl) {
 
 async function relaunchApp() {
   window.electronAPI.relaunchApp();
+}
+
+/**
+ * Starts checking for captcha page
+ */
+async function startCheckCaptcha() {
+  window.electronAPI.startCheckCaptcha();
+}
+
+/**
+ * Stops checking for captcha page
+ */
+async function stopCheckCaptcha() {
+  window.electronAPI.stopCheckCaptcha();
 }
 
 //#endregion

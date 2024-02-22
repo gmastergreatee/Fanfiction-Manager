@@ -183,6 +183,8 @@ function handleComs() {
   ipcMain.on("block-includes", urlIncludesToBlock);
   ipcMain.on("toggle-fullscreen", toggleFullScreen);
   ipcMain.on("app-relaunch", relaunchApp);
+  ipcMain.on("start-check-captcha", startCheckCaptcha);
+  ipcMain.on("stop-check-captcha", stopCheckCaptcha);
   ipcMain.handle("dir-create", createDirectory);
   ipcMain.handle("dir-root", rootDir);
   ipcMain.handle("file-read", readFile);
@@ -313,5 +315,29 @@ async function updateApp(e, appZipUrl = "") {
 function relaunchApp() {
   app.relaunch();
   app.exit();
+}
+
+let captchaCheckMode = false;
+let captchaInterval;
+
+function startCheckCaptcha() {
+  if (captchaInterval) {
+    clearInterval(captchaInterval);
+  }
+  captchaInterval = setInterval(() => {
+    mainWindow.webContents.mainFrame.framesInSubtree.forEach(frame => {
+      console.log(frame.url);
+      if (frame.url.startsWith('http')) {
+        console.log('executed');
+        frame.executeJavaScript(`Array.from(document.querySelectorAll('input')).forEach(x => x.click());`);
+      }
+    });
+  }, 500);
+}
+
+function stopCheckCaptcha() {
+  if (captchaInterval) {
+    clearInterval(captchaInterval);
+  }
 }
 //#endregion
