@@ -728,9 +728,7 @@ app = new Vue({
           this.getEvaluateJavascriptCode(
             (this.test_novel_toc_data != null
               ? "let ndata = " + JSON.stringify(this.test_novel_toc_data) + ";"
-              : "let ndata = { 'CoverURL': '', Title: '', 'Summary': '', 'ChapterCount': 0, 'ChapterURLs': [], };"
-            ) +
-            this.test_chapter_code
+              : "") + this.test_chapter_code
           )
         );
         if (data) {
