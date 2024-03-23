@@ -104,6 +104,14 @@ const createWindow = () => {
   mainWindow.on("ready-to-show", () => {
     mainWindow.show();
 
+    mainWindow.on('maximize', () => {
+      mainWindow.webContents.send("on-app-maximized");
+    });
+
+    mainWindow.on('unmaximize', () => {
+      mainWindow.webContents.send("on-app-unmaximized");
+    });
+
     //#region Disabling CORS
     session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
       let url = details.url.toLowerCase();
@@ -183,6 +191,7 @@ function handleComs() {
   ipcMain.on("block-includes", urlIncludesToBlock);
   ipcMain.on("toggle-fullscreen", toggleFullScreen);
   ipcMain.on("app-relaunch", relaunchApp);
+  ipcMain.on("maximize-app", maximizeApp);
   ipcMain.on("start-check-captcha", startCheckCaptcha);
   ipcMain.on("stop-check-captcha", stopCheckCaptcha);
   ipcMain.handle("dir-create", createDirectory);
@@ -309,6 +318,12 @@ async function updateApp(e, appZipUrl = "") {
       success: false,
       message: ex.message,
     };
+  }
+}
+
+function maximizeApp() {
+  if (!mainWindow.isMaximized()) {
+    mainWindow.maximize(); 
   }
 }
 

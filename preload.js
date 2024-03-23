@@ -21,6 +21,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
   urlIncludesToBlock: (includes) =>
     ipcRenderer.send("block-includes", includes),
   toggleFullScreen: () => ipcRenderer.send("toggle-fullscreen"),
+  maximizeApp: () => ipcRenderer.send("maximize-app"),
   startCheckCaptcha: () => ipcRenderer.send("start-check-captcha"),
   stopCheckCaptcha: () => ipcRenderer.send("stop-check-captcha"),
 
@@ -40,4 +41,6 @@ contextBridge.exposeInMainWorld("electronAPI", {
 
   // --- main to renderer
   log: (callback) => ipcRenderer.on("log-message", callback),
+  onAppMaximized: (callback) => ipcRenderer.on("on-app-maximized", callback),
+  onAppUnMaximized: (callback) => ipcRenderer.on("on-app-unmaximized", callback),
 });
