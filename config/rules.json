@@ -1,5 +1,14 @@
 [
   {
+    "guid": "c6f1562f-2f0a-441b-861c-9255b7192455",
+    "rule_name": "LightNovelWorld.com",
+    "url_regex": "(?:https://)*(?:www\\.)*(lightnovelworld).com/novel/",
+    "pagetype_code": "// https://www.lightnovelworld.com/novel/doomsday-spiritual-artifact-master-1676/chapter-5\n// https://www.lightnovelworld.com/novel/doomsday-spiritual-artifact-master\n\nif (document.title.toLowerCase().includes('just a moment')) {\n  return -2;\n}\n\nreturn 0;",
+    "toc_code": "injectJquery();\n\nif ($('#chapter-list-page').length) {\n  // means this is TOC page\n  return {\n    retry: 1,\n    nextURL: $('.booktitle').attr('href')\n  };\n}\n\nif ($('.booktitle').length) {\n  // means this is chapter page\n  return {\n    retry: 1,\n    nextURL: $('.booktitle').attr('href')\n  };\n}\n\n// only allow to go past if it is novel page\nif ($('.chapter-latest-container').length <= 0) {\n  throw Error('The page-type couldn\\'t be determined. Please re-check the URL.');\n}\n\n// compile list of chapters\nlet chListURL = $('.chapter-latest-container')[0].href;\nlet toc1 = await fetch(chListURL).then(x => x.text());\nlet tocPageCount = $(toc1).find('.pagination-container li').length - 1;\nlet tocs = [toc1];\nfor (let i = 1; i < tocPageCount; i++) {\n    tocs.push(await fetch(chListURL + '?page=' + (i + 1)).then(x => x.text()));\n}\nlet chapterURLs = [];\ntocs.forEach(x => {\n  chapterURLs.push(...Array.from($(x).find('li[data-chapterno] a')).map(x => x.href))\n});\n\nlet retMe = {\n  'CoverURL': $('.glass-background img')[0].src,\n  'Title': $('h1').text().trim(),\n  'Summary': Array.from($('.summary .content > p')).map(x => $(x).text().trim()).join('<br><br>'),\n  'ChapterCount': chapterURLs.length,\n  'ChapterURLs': chapterURLs,\n};\n\nreturn retMe;",
+    "chapter_code": "injectJquery();\n\n$('#chapter-container > div').remove();\n\nlet retMe = [\n  {\n    \"title\": $('.chapter-title').text().trim().replace(/^chapter\\s+/gi, ''),\n    \"content\": $('#chapter-container').html(),\n    \"nextURL\": \"\"\n  },\n];\n\nreturn retMe;",
+    "url_blocks": "fonts.google\n/content/\nvntsm.com\ncriteo.net\ninmobi.com\ngoogletagmanager\nstatic.lightnovelworld.com/lib/"
+  },
+  {
     "guid": "340044b7-321e-4fe8-8c15-9c59e22f6fc8",
     "rule_name": "Wattpad.com",
     "url_regex": "(?:https://)*(?:www|m|t)\\.wattpad\\.com/((?:text-)([0-9]*)-([0-9]*)-([a-z0-9]*)|(?:story/)([0-9]*)|([0-9]*)).*",
