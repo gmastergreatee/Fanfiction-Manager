@@ -2644,14 +2644,14 @@ async function relaunchApp() {
  * Starts checking for captcha page
  */
 async function startCheckCaptcha() {
-  window.electronAPI.startCheckCaptcha();
+  // window.electronAPI.startCheckCaptcha();
 }
 
 /**
  * Stops checking for captcha page
  */
 async function stopCheckCaptcha() {
-  window.electronAPI.stopCheckCaptcha();
+  // window.electronAPI.stopCheckCaptcha();
 }
 
 //#endregion
