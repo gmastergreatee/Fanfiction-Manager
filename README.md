@@ -70,11 +70,11 @@ Reading Mode
 
   > Rules may be outdated therefore update rules by clicking the `Update Rules` button on the top-right of `Rules` tab. Rules may be updated at random on the server, therefore do this regularly before adding/downloading/updating a novel.
 
-For windows 64bit, download [here](https://github.com/gmastergreatee/Fanfiction-Manager/releases/download/beta_3.0.5/Fanfiction-Manager_win_x86-64_beta_2022-07-15.zip)
+For windows 64bit, download [here](https://github.com/gmastergreatee/Fanfiction-Manager/releases/download/beta_3.0.1/Fanfiction-Manager_win_x86-64_2024-09-09_0213.zip)
 
 For others -
 
-- Download `electron` from [this](https://github.com/electron/electron/releases/tag/v19.0.5) page
+- Download `electron` from [this](https://github.com/electron/electron/releases/tag/v31.5.0) page
     - Example, for windows 64bit, you need to download `electron-v19.0.5-win32-x64.zip`
 - Extract the `electron` zip file to an empty directory
 - Delete `default_app.asar` file present in `.../[electron-dir]/resources`
