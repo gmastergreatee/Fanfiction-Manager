@@ -1,0 +1,43 @@
+name: Automated Multi-Platform Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write
+
+jobs:
+  test-and-package:
+    name: Test & Package Release
+    runs-on: windows-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Run Integrity Tests
+        working-directory: './Version 4'
+        run: npm run test:migration
+
+      - name: Build Release Bundle (app.zip)
+        working-directory: './Version 4'
+        run: npm run package:release
+
+      - name: Create GitHub Release & Upload Assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            Version 4/dist/app.zip
+            Version 4/dist/checksums.json
+          generate_release_notes: true
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+

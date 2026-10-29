@@ -30,6 +30,37 @@ _ReSharper*/
 .vs/
 #Nuget packages folder
 packages/
-node_modules
-/data
+node_modules/
+
+# ==========================================
+# User Downloaded Story Content & Covers
+# ==========================================
+# Legacy v3 Data
+/data/
+data/
+data/covers/
+data/novels/
 novels.json
+config/novels.json
+
+# Version 4 Data & Offline Caches
+v4_data/
+v4_data/covers/
+Version 4/v4_data/
+Version 4/v4_data/covers/
+*.db
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite3
+
+# Exported Books
+*.epub
+*.cbz
+*.pdf
+
+# Build & Release Bundles
+dist/
+Version 4/dist/
+temp_*/
+Version 4/temp_*/

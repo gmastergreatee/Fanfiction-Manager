@@ -1,0 +1,85 @@
+/* Version 4/src/ui/styles/tokens.css */
+:root {
+  /* Typography Stacks */
+  --font-system: -apple-system, BlinkMacSystemFont, "Segoe UI Variable", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-reader-serif: "Georgia", "Merriweather", "Charter", "Palatino", serif;
+  --font-reader-sans: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
+  --font-mono: "Cascadia Code", "SF Mono", "Fira Code", Consolas, monospace;
+
+  /* Default Dark Mode Color Tokens */
+  --bg-canvas: #0f1115;
+  --bg-surface: #181b21;
+  --bg-surface-elevated: #222630;
+  --bg-surface-glass: rgba(24, 27, 33, 0.78);
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.16);
+
+  --text-primary: #f3f4f6;
+  --text-secondary: #9ca3af;
+  --text-tertiary: #6b7280;
+  --text-inverse: #111827;
+
+  /* Brand Accents */
+  --accent-primary: #3b82f6;
+  --accent-primary-hover: #2563eb;
+  --accent-subtle: rgba(59, 130, 246, 0.15);
+  --accent-green: #10b981;
+  --accent-purple: #8b5cf6;
+  --accent-amber: #f59e0b;
+  --accent-red: #ef4444;
+
+  /* Elevation Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.5);
+  --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+
+  /* Border Radii */
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-full: 9999px;
+
+  /* Transitions */
+  --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Light Theme Tokens */
+[data-theme-mode="light"] {
+  --bg-canvas: #f8fafc;
+  --bg-surface: #ffffff;
+  --bg-surface-elevated: #f1f5f9;
+  --bg-surface-glass: rgba(255, 255, 255, 0.85);
+  --border-subtle: rgba(0, 0, 0, 0.08);
+  --border-strong: rgba(0, 0, 0, 0.16);
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-tertiary: #94a3b8;
+  --text-inverse: #ffffff;
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.1);
+}
+
+/* OLED Pure Black Theme Tokens (Superb for mobile OLED screens) */
+[data-theme-mode="oled"] {
+  --bg-canvas: #000000;
+  --bg-surface: #0a0a0a;
+  --bg-surface-elevated: #141414;
+  --bg-surface-glass: rgba(10, 10, 10, 0.9);
+  --border-subtle: #222222;
+  --border-strong: #333333;
+}
+
+/* Warm Sepia Reader Theme */
+[data-theme-mode="sepia"] {
+  --bg-canvas: #fbf0d9;
+  --bg-surface: #f4e5c8;
+  --bg-surface-elevated: #eedcba;
+  --text-primary: #433422;
+  --text-secondary: #6e5941;
+  --border-subtle: rgba(67, 52, 34, 0.1);
+  --border-strong: rgba(67, 52, 34, 0.2);
+}
+

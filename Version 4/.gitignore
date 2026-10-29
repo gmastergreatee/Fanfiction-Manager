@@ -1,0 +1,28 @@
+# Version 4 .gitignore
+
+# Dependencies
+node_modules/
+
+# Story Related Files & Local Offline Content
+v4_data/
+v4_data/covers/
+*.db
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite3
+
+# Exported Books
+*.epub
+*.cbz
+*.pdf
+
+# Build Outputs & Bundles
+dist/
+temp_*/
+
+# OS Artifacts
+Thumbs.db
+.DS_Store
+*.log
+

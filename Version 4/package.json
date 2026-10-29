@@ -1,0 +1,38 @@
+{
+  "name": "fanfiction-manager-v4",
+  "version": "4.0.0-alpha.1",
+  "description": "Next-Gen Multi-Platform Fanfiction Manager & Downloader with native MCP AI rule creation",
+  "main": "src/app.js",
+  "scripts": {
+    "start": "node src/app.js",
+    "migrate": "node src/migrator/cli.js",
+    "migrate:dry": "node src/migrator/cli.js --dry-run",
+    "mcp": "node src/mcp/server.js",
+    "package:release": "node src/updater/packager.js",
+    "release": "node src/updater/publish.js",
+    "release:patch": "node src/updater/publish.js patch",
+    "release:minor": "node src/updater/publish.js minor",
+    "release:major": "node src/updater/publish.js major",
+    "update:self": "node src/updater/self-update.js",
+    "rollback": "node src/updater/rollback.js",
+    "rollback:list": "node src/updater/rollback.js --list",
+    "switchover": "node scripts/switchover-to-root.js",
+    "switchover:dry": "node scripts/switchover-to-root.js --dry-run",
+    "test": "node tests/test-migration.js && node tests/test-rule-studio.js && node tests/test-theme-studio.js && node tests/test-mobile-ota.js && node tests/test-rollback.js",
+    "test:theme-studio": "node tests/test-theme-studio.js",
+    "test:rollback": "node tests/test-rollback.js",
+    "test:mobile-ota": "node tests/test-mobile-ota.js",
+    "test:rule-studio": "node tests/test-rule-studio.js",
+    "test:migration": "node tests/test-migration.js"
+  },
+  "keywords": [
+    "fanfiction",
+    "novel-downloader",
+    "mcp",
+    "cross-platform",
+    "sqlite"
+  ],
+  "author": "",
+  "license": "MIT"
+}
+
