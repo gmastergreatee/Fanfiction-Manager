@@ -1,359 +1,124 @@
-// main.js
+// Version 4/main.js
+/**
+ * Fanfiction Manager Version 4 — Main Desktop Bootstrap
+ * Handles:
+ * 1. Automatic data migration from legacy v3 on initial launch
+ * 2. Multi-Platform update checks
+ * 3. Native window lifecycle & MCP server initialization
+ */
 
-// Modules to control application life and create native browser window
-const {
-  app,
-  BrowserWindow,
-  ipcMain,
-  dialog,
-  session,
-  Menu,
-  shell,
-} = require("electron");
+const { app, BrowserWindow, ipcMain, dialog, shell } = require('electron');
+const path = require('path');
+const fs = require('fs');
+const { autoUpgradeIfRequired } = require('./src/migrator');
+const DatabaseClient = require('./src/core/db');
+const V4Updater = require('./src/updater/v4-updater');
 
-const gotTheLock = app.requestSingleInstanceLock();
-if (!gotTheLock) {
+// Single instance lock
+const gotLock = app.requestSingleInstanceLock();
+if (!gotLock) {
   app.quit();
 }
 
-app.commandLine.appendSwitch("disable-site-isolation-trials");
-app.commandLine.appendSwitch("disable-features", "OutOfBlinkCors");
+let mainWindow = null;
+let db = null;
+let updater = null;
 
-const path = require("path");
-var { http, https } = require("follow-redirects");
-const fs = require("fs");
-const extract = require("extract-zip");
+// Check if running in MCP mode via CLI flag
+if (process.argv.includes('--mcp')) {
+  const MCPServer = require('./src/mcp/server');
+  const server = new MCPServer();
+  server.start();
+  return;
+}
 
-let mainWindow;
-let url_includes_to_block = [
-  "adsbygoogle",
-  "googleads",
-  "wpdiscuz",
-  "amazon",
-  "/ads",
-  "googlesyndication",
-  "adservice",
-  "translate.google",
-];
-
-process.env["ELECTRON_DISABLE_SECURITY_WARNINGS"] = "true";
-
-const createWindow = () => {
-  // Create the browser window.
+async function createMainWindow() {
   mainWindow = new BrowserWindow({
-    width: 1000,
-    height: 600,
-    minWidth: 1000,
+    width: 1100,
+    height: 700,
+    minWidth: 900,
     minHeight: 600,
     darkTheme: true,
+    backgroundColor: '#121212',
     webPreferences: {
-      preload: path.join(__dirname, "preload.js"),
-      webSecurity: false,
-      webviewTag: true,
       nodeIntegration: true,
+      contextIsolation: false,
     },
     show: false,
-    autoHideMenuBar: true,
-  });
-  mainWindow.setIcon(path.join(__dirname, "Icon.png"));
-
-  // mainWindow.webContents.session.webRequest.onHeadersReceived(
-  //   (details, callback) => {
-  //     callback({
-  //       responseHeaders: Object.fromEntries(
-  //         Object.entries(details.responseHeaders).filter(
-  //           (header) =>
-  //             !/x-frame-options/i.test(header[0]) &&
-  //             !/content-security-policy/i.test(header[0])
-  //         )
-  //       ),
-  //     });
-  //   }
-  // );
-
-  let selectionMenu = Menu.buildFromTemplate([
-    { role: "copy" },
-    { type: "separator" },
-    { role: "selectall" },
-  ]);
-
-  let inputMenu = Menu.buildFromTemplate([
-    // { role: "undo" },
-    // { role: "redo" },
-    // { type: "separator" },
-    { role: "cut" },
-    { role: "copy" },
-    { role: "paste" },
-    { type: "separator" },
-    { role: "selectall" },
-  ]);
-
-  mainWindow.webContents.on("context-menu", (e, props) => {
-    const { selectionText, isEditable } = props;
-    if (isEditable) {
-      inputMenu.popup();
-    } else if (selectionText && selectionText.trim() !== "") {
-      selectionMenu.popup();
-    }
   });
 
-  mainWindow.webContents.on("new-window", function (event, url) {
-    event.preventDefault();
-    shell.openExternal(url);
-  });
+  const iconPath = path.join(__dirname, 'Icon.png');
+  if (fs.existsSync(iconPath)) {
+    mainWindow.setIcon(iconPath);
+  }
 
-  mainWindow.on("ready-to-show", () => {
+  // Load splash / loading view while initializing
+  mainWindow.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <style>
+        body { margin: 0; background: #121212; color: #e0e0e0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; }
+        .spinner { border: 4px solid rgba(255,255,255,0.1); width: 44px; height: 44px; border-radius: 50%; border-left-color: #3b82f6; animation: spin 1s linear infinite; margin-bottom: 20px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        h2 { font-weight: 500; font-size: 1.25rem; margin-bottom: 8px; }
+        p { color: #888; font-size: 0.9rem; margin: 0; }
+      </style>
+    </head>
+    <body>
+      <div class="spinner"></div>
+      <h2>Fanfiction Manager v4</h2>
+      <p id="status">Initializing & Checking Library...</p>
+    </body>
+    </html>
+  `)}`);
+
+  mainWindow.once('ready-to-show', async () => {
     mainWindow.show();
 
-    mainWindow.on('maximize', () => {
-      mainWindow.webContents.send("on-app-maximized");
-    });
-
-    mainWindow.on('unmaximize', () => {
-      mainWindow.webContents.send("on-app-unmaximized");
-    });
-
-    //#region Disabling CORS
-    session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
-      let url = details.url.toLowerCase();
-      if (!(url.startsWith("file://") || url.startsWith("devtools://"))) {
-        details.responseHeaders["access-control-allow-origin"] = "*";
-      }
-      callback({ responseHeaders: details.responseHeaders });
-    });
-    //#endregion
-
-    //#region URL blocking system
-    session.defaultSession.webRequest.onBeforeRequest(
-      // { urls: ["*://*./*"] },
-      function (details, callback) {
-        let blocked = false;
-        let url = details.url.toLowerCase();
-        if (
-          url.startsWith("file://") ||
-          url.startsWith("devtools://") ||
-          url.includes("gmastergreatee/Fanfiction-Manager")
-        ) {
-          callback({ cancel: false });
-          return;
-        }
-
-        url_includes_to_block.every((x) => {
-          if (url.includes(x.toLowerCase())) {
-            callback({ cancel: true });
-            blocked = true;
-            return false;
+    // Step 1: Perform automatic upgrade from v3 if needed
+    try {
+      const legacyPath = fs.existsSync(path.join(__dirname, 'Legacy'))
+        ? path.join(__dirname, 'Legacy')
+        : path.resolve(__dirname, '..');
+      const upgradeResult = await autoUpgradeIfRequired({
+        v3Path: legacyPath,
+        v4DataDir: path.join(__dirname, 'v4_data'),
+        onProgress: (p) => {
+          if (mainWindow && !mainWindow.isDestroyed()) {
+            mainWindow.webContents.executeJavaScript(`
+              document.getElementById('status').innerText = 'Migrating novel [${p.index}/${p.total}]: "${p.title.replace(/'/g, "\\'")}"';
+            `).catch(() => {});
           }
-          return true;
-        });
+        },
+      });
 
-        if (!blocked) callback({ cancel: false });
+      if (upgradeResult.status === 'SUCCESS') {
+        console.log(`[Auto-Upgrade] Migrated ${upgradeResult.novelCount} novels and ${upgradeResult.chapterCount} chapters.`);
       }
-    );
-    //#endregion
+    } catch (err) {
+      console.error('[Auto-Upgrade] Error during migration:', err);
+    }
+
+    // Step 2: Initialize Database & Updater
+    db = new DatabaseClient(path.join(__dirname, 'v4_data', 'fanfiction.db'));
+    updater = new V4Updater({ currentVersion: '4.0.0', db });
+
+    // Step 3: Check for updates in the background
+    updater.checkForUpdates().then((res) => {
+      if (res && res.updateAvailable) {
+        console.log(`[V4Updater] New update available: ${res.latestVersion}`);
+      }
+    }).catch(() => {});
+
+    // Load the modern native-themed UI
+    mainWindow.loadFile(path.join(__dirname, 'src', 'ui', 'index.html'));
   });
+}
 
-  // and load the index.html of the app.
-  // mainWindow.loadURL("http://localhost:5500/index.html");
-  mainWindow.loadFile(path.join(__dirname, "index.html"));
+app.whenReady().then(createMainWindow);
 
-  session.defaultSession.setProxy({ proxyRules: null });
-
-  // Open the DevTools.
-  // mainWindow.webContents.openDevTools();
-};
-
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
-app.whenReady().then(() => {
-  handleComs();
-
-  createWindow();
-
-  app.on("activate", () => {
-    // On macOS it's common to re-create a window in the app when the
-    // dock icon is clicked and there are no other windows open.
-    if (BrowserWindow.getAllWindows().length === 0) createWindow();
-  });
+app.on('window-all-closed', () => {
+  if (process.platform !== 'darwin') app.quit();
 });
 
-// Quit when all windows are closed, except on macOS. There, it's common
-// for applications and their menu bar to stay active until the user quits
-// explicitly with Cmd + Q.
-app.on("window-all-closed", () => {
-  if (process.platform !== "darwin") app.quit();
-});
-
-// In this file you can include the rest of your app's specific main process
-// code. You can also put them in separate files and require them here.
-function handleComs() {
-  ipcMain.on("show-msgbox", showMessageBox);
-  ipcMain.on("block-includes", urlIncludesToBlock);
-  ipcMain.on("toggle-fullscreen", toggleFullScreen);
-  ipcMain.on("app-relaunch", relaunchApp);
-  ipcMain.on("maximize-app", maximizeApp);
-  ipcMain.on("start-check-captcha", startCheckCaptcha);
-  ipcMain.on("stop-check-captcha", stopCheckCaptcha);
-  ipcMain.handle("dir-create", createDirectory);
-  ipcMain.handle("dir-root", rootDir);
-  ipcMain.handle("file-read", readFile);
-  ipcMain.handle("file-write", writeFile);
-  ipcMain.handle("path-exists", pathExists);
-  ipcMain.handle("path-delete", deletePath);
-  ipcMain.handle("send-input", sendInput);
-  ipcMain.handle("app-update-self", updateApp);
-}
-
-//#region APIS
-function showMessageBox(e, text = "", caption = "") {
-  if (text.trim() && caption.trim()) {
-    dialog.showMessageBoxSync(mainWindow, {
-      message: text,
-      title: caption,
-    });
-  }
-}
-
-function urlIncludesToBlock(e, includes = []) {
-  url_includes_to_block = includes;
-}
-
-function toggleFullScreen() {
-  if (mainWindow.isFullScreen()) {
-    mainWindow.setFullScreen(false);
-  } else {
-    mainWindow.setFullScreen(true);
-  }
-}
-
-function createDirectory(e, dirPath) {
-  if (!fs.existsSync(dirPath)) {
-    try {
-      fs.mkdirSync(dirPath, {
-        recursive: true,
-      });
-    } catch {
-      return null;
-    }
-  }
-  return dirPath;
-}
-
-function deletePath(e, somePath) {
-  fs.rmSync(somePath, {
-    recursive: true,
-    force: true,
-  });
-}
-
-function writeFile(e, filePath, contents) {
-  let dirPath = path.dirname(filePath);
-  if (!fs.existsSync(dirPath)) {
-    try {
-      fs.mkdirSync(dirPath, {
-        recursive: true,
-      });
-    } catch {
-      return null;
-    }
-  }
-  fs.writeFileSync(filePath, contents);
-}
-
-function pathExists(e, somePath) {
-  return fs.existsSync(somePath);
-}
-
-async function readFile(e, filePath) {
-  return fs.readFileSync(filePath, {
-    encoding: "utf8",
-  });
-}
-
-async function rootDir() {
-  return __dirname;
-}
-
-async function sendInput(e, type, accelerator) {
-  mainWindow.webContents.sendInputEvent({ type: type, keyCode: accelerator });
-}
-
-async function updateApp(e, appZipUrl = "") {
-  let dirPath = __dirname;
-  let dirPathExists = pathExists(null, dirPath);
-  if (!dirPathExists) {
-    createDirectory(null, dirPath);
-  }
-  let filePath = path.join(dirPath, "app.zip");
-  var file = fs.createWriteStream(filePath);
-
-  let request = new Promise((resolve, reject) => {
-    https
-      .get(appZipUrl, function (response) {
-        response.pipe(file);
-        file.on("finish", function () {
-          file.end(() => {
-            resolve(filePath);
-          });
-        });
-      })
-      .on("error", function (err) {
-        deletePath(e, filePath);
-        reject(err);
-      });
-  });
-
-  try {
-    let response = await request;
-    await extract(response, {
-      dir: dirPath,
-    });
-    deletePath(e, response);
-    return {
-      success: true,
-    };
-  } catch (ex) {
-    console.log(ex);
-    return {
-      success: false,
-      message: ex.message,
-    };
-  }
-}
-
-function maximizeApp() {
-  if (!mainWindow.isMaximized()) {
-    mainWindow.maximize(); 
-  }
-}
-
-function relaunchApp() {
-  app.relaunch();
-  app.exit();
-}
-
-let captchaCheckMode = false;
-let captchaInterval;
-
-function startCheckCaptcha() {
-  if (captchaInterval) {
-    clearInterval(captchaInterval);
-  }
-  captchaInterval = setInterval(() => {
-    mainWindow.webContents.mainFrame.framesInSubtree.forEach(frame => {
-      console.log(frame.url);
-      if (frame.url.startsWith('http')) {
-        console.log('executed');
-        frame.executeJavaScript(`Array.from(document.querySelectorAll('input')).forEach(x => x.click());`);
-      }
-    });
-  }, 500);
-}
-
-function stopCheckCaptcha() {
-  if (captchaInterval) {
-    clearInterval(captchaInterval);
-  }
-}
-//#endregion

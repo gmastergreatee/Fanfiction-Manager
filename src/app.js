@@ -14,9 +14,18 @@ async function initializeApp() {
 
   // Step 1: Auto-Upgrade legacy v3 data if needed
   console.log('\n[Init] Checking for legacy v3 data to auto-upgrade...');
+  const fs = require('fs');
+  const appRoot = path.resolve(__dirname, '..');
+  const legacyDir = path.join(appRoot, 'Legacy');
+  const v3Source = fs.existsSync(legacyDir)
+    ? legacyDir
+    : fs.existsSync(path.join(appRoot, 'config', 'novels.json'))
+    ? appRoot
+    : path.resolve(appRoot, '..');
+
   const upgradeResult = await autoUpgradeIfRequired({
-    v3Path: path.join(__dirname, '..', '..'),
-    v4DataDir: path.join(__dirname, '..', 'v4_data'),
+    v3Path: v3Source,
+    v4DataDir: path.join(appRoot, 'v4_data'),
     onProgress: (p) => {
       if (p.step === 'NOVEL_PROCESSED' && (p.index % 5 === 0 || p.index === p.total)) {
         console.log(`  [Migration] Processing [${p.index}/${p.total}]: "${p.title}"`);

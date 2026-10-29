@@ -1,0 +1,12 @@
+{
+  "name": "novel-downloader",
+  "version": "3.0.0",
+  "description": "Downloads novels",
+  "main": "main.js",
+  "author": "gmastergreatee",
+  "license": "MIT",
+  "dependencies": {
+    "extract-zip": "^2.0.1",
+    "follow-redirects": "^1.15.1"
+  }
+}

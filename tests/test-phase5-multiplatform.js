@@ -91,7 +91,9 @@ async function runPhase5Tests() {
 
   // --- 4. Test GitHub Actions CI/CD Multi-Platform Workflow ---
   console.log('  4. Testing GitHub Actions Multi-Platform Workflow Matrix...');
-  const workflowPath = path.join(__dirname, '..', '..', '.github', 'workflows', 'multi-platform-build.yml');
+  const workflowPath = fs.existsSync(path.join(__dirname, '..', '.github', 'workflows', 'multi-platform-build.yml'))
+    ? path.join(__dirname, '..', '.github', 'workflows', 'multi-platform-build.yml')
+    : path.join(__dirname, '..', '..', '.github', 'workflows', 'multi-platform-build.yml');
   assert.ok(fs.existsSync(workflowPath), 'multi-platform-build.yml must exist in .github/workflows');
 
   const workflowContent = fs.readFileSync(workflowPath, 'utf8');

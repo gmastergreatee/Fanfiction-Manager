@@ -12,7 +12,14 @@ const V3DataReader = require('./v3-reader');
 
 class DataMigrator {
   constructor(options = {}) {
-    this.v3Path = path.resolve(options.v3Path || path.join(__dirname, '..', '..', '..'));
+    const legacyCandidate = path.resolve(__dirname, '..', '..', 'Legacy');
+    const rootConfigCandidate = path.resolve(__dirname, '..', '..', 'config');
+    const defaultV3Path = fs.existsSync(legacyCandidate)
+      ? legacyCandidate
+      : fs.existsSync(rootConfigCandidate)
+      ? path.resolve(__dirname, '..', '..')
+      : path.resolve(__dirname, '..', '..', '..');
+    this.v3Path = path.resolve(options.v3Path || defaultV3Path);
     this.v4DataDir = path.resolve(options.v4DataDir || path.join(__dirname, '..', '..', 'v4_data'));
     this.dbPath = path.join(this.v4DataDir, options.dbName || 'fanfiction.db');
     this.coversDir = path.join(this.v4DataDir, 'covers');

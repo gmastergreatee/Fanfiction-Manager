@@ -50,6 +50,8 @@ data/covers/
 data/novels/
 novels.json
 config/novels.json
+Legacy/data/
+Legacy/config/novels.json
 
 # Version 4 Data & Offline Caches
 v4_data/

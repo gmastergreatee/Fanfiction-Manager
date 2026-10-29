@@ -27,15 +27,14 @@ jobs:
           node-version: 22
 
       - name: Install Frontend Dependencies
-        working-directory: './Version 4/frontend'
+        working-directory: './frontend'
         run: npm ci
 
       - name: Verify Frontend Build
-        working-directory: './Version 4/frontend'
+        working-directory: './frontend'
         run: npm run build
 
       - name: Run Full Version 4 Test Suite
-        working-directory: './Version 4'
         run: npm test
 
   build-desktop-and-mobile:
@@ -77,7 +76,7 @@ jobs:
           targets: ${{ matrix.platform.target }}
 
       - name: Build Frontend Assets
-        working-directory: './Version 4/frontend'
+        working-directory: './frontend'
         run: |
           npm ci
           npm run build
@@ -87,7 +86,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          projectPath: './Version 4'
+          projectPath: '.'
           tagName: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || '' }}
           releaseName: ${{ startsWith(github.ref, 'refs/tags/v') && format('Fanfiction Manager Version 4 - {0}', github.ref_name) || '' }}
           releaseBody: 'Automated release for Fanfiction Manager Version 4 across Windows, macOS, Linux, and Mobile.'
@@ -124,13 +123,12 @@ jobs:
           targets: aarch64-linux-android,armv7-linux-androideabi,x86_64-linux-android
 
       - name: Build Frontend Bundle
-        working-directory: './Version 4/frontend'
+        working-directory: './frontend'
         run: |
           npm ci
           npm run build
 
       - name: Build Android Release Bundle
-        working-directory: './Version 4'
         run: npm run package:release
 
       - name: Upload Android Artifacts
@@ -138,8 +136,8 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            Version 4/dist/app.zip
-            Version 4/dist/mobile-bundle.zip
-            Version 4/dist/checksums.json
+            dist/app.zip
+            dist/mobile-bundle.zip
+            dist/checksums.json
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

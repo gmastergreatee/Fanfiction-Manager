@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Version 4/scripts/switchover-to-root.js
+// scripts/switchover-to-root.js
 /**
  * Developer Switchover Tool: Promote Version 4 to Root & Archive v3 to 'Legacy/'
  *
@@ -17,7 +17,14 @@
 
 const fs = require('fs');
 const path = require('path');
-const { autoUpgradeIfRequired } = require('../src/migrator');
+
+const migratorPath = fs.existsSync(path.join(__dirname, '..', 'src', 'migrator'))
+  ? path.join(__dirname, '..', 'src', 'migrator')
+  : fs.existsSync(path.join(__dirname, '..', 'Version 4', 'src', 'migrator'))
+  ? path.join(__dirname, '..', 'Version 4', 'src', 'migrator')
+  : path.join(__dirname, '..', '..', 'Version 4', 'src', 'migrator');
+
+const { autoUpgradeIfRequired } = require(migratorPath);
 
 const LEGACY_ITEMS = [
   'config',
@@ -35,26 +42,35 @@ const LEGACY_ITEMS = [
   'pic_light_2022-07-15.png',
 ];
 
-const PRESERVED_ROOT_ITEMS = [
-  '.git',
-  '.gitignore',
-  '.github',
-  '.vscode',
-  'LICENSE',
-  'Icon.afdesign',
-  'Icon.ico',
-  'Icon.png',
-  'node_modules',
-  'Legacy',
-  'Version 4',
-];
+function moveItem(src, dest) {
+  if (!fs.existsSync(src)) return;
+  if (fs.existsSync(dest)) {
+    fs.rmSync(dest, { recursive: true, force: true });
+  }
+  try {
+    fs.renameSync(src, dest);
+  } catch (err) {
+    fs.cpSync(src, dest, { recursive: true });
+    try {
+      fs.rmSync(src, { recursive: true, force: true });
+    } catch {}
+  }
+}
 
 async function performSwitchover() {
   const args = process.argv.slice(2);
   const dryRun = args.includes('--dry-run');
 
-  const rootDir = path.resolve(__dirname, '..', '..');
-  const v4Dir = path.resolve(__dirname, '..');
+  let rootDir;
+  let v4Dir;
+  if (__dirname.includes('Version 4') || fs.existsSync(path.resolve(__dirname, '..', 'src-tauri'))) {
+    rootDir = path.resolve(__dirname, '..', '..');
+    v4Dir = path.resolve(__dirname, '..');
+  } else {
+    rootDir = path.resolve(__dirname, '..');
+    v4Dir = path.join(rootDir, 'Version 4');
+  }
+
   const legacyDir = path.join(rootDir, 'Legacy');
 
   console.log('='.repeat(70));
@@ -95,10 +111,7 @@ async function performSwitchover() {
     const destPath = path.join(legacyDir, item);
     console.log(`  📦 Archive: ${item} ──▶ Legacy/${item}`);
     if (!dryRun) {
-      if (fs.existsSync(destPath)) {
-        fs.rmSync(destPath, { recursive: true, force: true });
-      }
-      fs.renameSync(srcPath, destPath);
+      moveItem(srcPath, destPath);
     }
   }
 
@@ -113,7 +126,6 @@ async function performSwitchover() {
   const v4Items = fs.readdirSync(v4Dir);
 
   for (const item of v4Items) {
-    if (item === 'dist') continue; // Don't move build artifacts
     const srcPath = path.join(v4Dir, item);
     const destPath = path.join(rootDir, item);
 
@@ -131,12 +143,27 @@ async function performSwitchover() {
       continue;
     }
 
+    // Do not overwrite root .gitignore
+    if (item === '.gitignore') {
+      console.log(`  🚀 Promote: Version 4/.gitignore (merged with root .gitignore)`);
+      continue;
+    }
+
+    // If item is scripts and we are running scripts from root, don't clobber running dir
+    if (item === 'scripts') {
+      console.log(`  🚀 Promote: Version 4/scripts ──▶ scripts`);
+      if (!dryRun) {
+        const scriptFiles = fs.readdirSync(srcPath);
+        for (const sf of scriptFiles) {
+          fs.copyFileSync(path.join(srcPath, sf), path.join(destPath, sf));
+        }
+      }
+      continue;
+    }
+
     console.log(`  🚀 Promote: Version 4/${item} ──▶ ${item}`);
     if (!dryRun) {
-      if (fs.existsSync(destPath)) {
-        fs.rmSync(destPath, { recursive: true, force: true });
-      }
-      fs.renameSync(srcPath, destPath);
+      moveItem(srcPath, destPath);
     }
   }
 
@@ -147,7 +174,16 @@ async function performSwitchover() {
       fs.rmSync(v4Dir, { recursive: true, force: true });
       console.log('  🧹 Removed empty "Version 4" directory.');
     } catch (e) {
-      console.log('  ℹ️  Version 4 folder cleanup note: ' + e.message);
+      try {
+        const remaining = fs.readdirSync(v4Dir);
+        for (const rem of remaining) {
+          fs.rmSync(path.join(v4Dir, rem), { recursive: true, force: true });
+        }
+        fs.rmdirSync(v4Dir);
+        console.log('  🧹 Removed "Version 4" directory.');
+      } catch (e2) {
+        console.log('  ℹ️  Version 4 folder cleanup note: ' + e2.message);
+      }
     }
   } else {
     console.log('  ℹ️  [Dry Run] "Version 4/" directory would be removed after promotion.');
@@ -157,7 +193,7 @@ async function performSwitchover() {
   if (dryRun) {
     console.log('✅ DRY-RUN PREVIEW COMPLETE!');
     console.log('To execute this switchover for real, run:');
-    console.log('   npm run switchover');
+    console.log('   node scripts/switchover-to-root.js');
   } else {
     console.log('🎉 SWITCHOVER COMPLETE! VERSION 4 IS NOW ACTIVE IN ROOT DIRECTORY!');
     console.log('   • Legacy v3 files archived in: ./Legacy/');
@@ -175,4 +211,3 @@ if (require.main === module) {
 }
 
 module.exports = { performSwitchover };
-

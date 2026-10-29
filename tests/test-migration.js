@@ -18,7 +18,11 @@ async function runTests() {
   const testDbPath = path.join(testDataDir, 'test_fanfiction.db');
   fs.mkdirSync(testDataDir, { recursive: true });
 
-  const v3Root = path.join(__dirname, '..', '..');
+  const v3Root = fs.existsSync(path.join(__dirname, '..', 'Legacy', 'config', 'novels.json'))
+    ? path.join(__dirname, '..', 'Legacy')
+    : fs.existsSync(path.join(__dirname, '..', 'config', 'novels.json'))
+    ? path.join(__dirname, '..')
+    : path.join(__dirname, '..', '..');
   const hasLocalNovels =
     process.env.FORCE_CI_FIXTURE !== '1' &&
     fs.existsSync(path.join(v3Root, 'config', 'novels.json'));
@@ -40,7 +44,11 @@ async function runTests() {
     fs.mkdirSync(path.join(v3SourcePath, 'data', 'covers'), { recursive: true });
 
     // Copy rules.json if present in repo
-    const rulesSrc = path.join(v3Root, 'config', 'rules.json');
+    const rulesSrc = fs.existsSync(path.join(v3Root, 'config', 'rules.json'))
+      ? path.join(v3Root, 'config', 'rules.json')
+      : fs.existsSync(path.join(__dirname, '..', 'Legacy', 'config', 'rules.json'))
+      ? path.join(__dirname, '..', 'Legacy', 'config', 'rules.json')
+      : path.join(__dirname, '..', '..', 'config', 'rules.json');
     if (fs.existsSync(rulesSrc)) {
       fs.copyFileSync(rulesSrc, path.join(v3SourcePath, 'config', 'rules.json'));
     }

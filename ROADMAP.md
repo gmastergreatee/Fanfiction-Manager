@@ -54,9 +54,10 @@
 ### Phase 6: Local Switchover & Legacy Archival (Developer Dedicated)
 - [x] Implement automated promotion tool [`scripts/switchover-to-root.js`](./scripts/switchover-to-root.js).
 - [x] Provide `--dry-run` safe verification command.
-- [ ] Once Version 4 implementation is finalized by the user:
-  - Run `npm run switchover` inside `Version 4/`.
+- [x] Finalize Version 4 root promotion:
+  - Run `npm run switchover` to promote Version 4 to root.
   - Automatically moves all legacy v3 files (`main.js`, `index.html`, `config/`, `data/`, `js/`, `css/`) into `./Legacy/`.
   - Promotes `Version 4/` components directly to project root.
   - Cleans up the empty `Version 4/` directory.
+  - All CI/CD multi-platform matrices updated and verified green.
 
