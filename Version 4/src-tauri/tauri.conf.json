@@ -64,7 +64,6 @@
     },
     "android": {
       "minSdkVersion": 24,
-      "targetSdkVersion": 34,
       "versionCode": 400
     },
     "iOS": {

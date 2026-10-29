@@ -38,7 +38,7 @@ async function runPhase5Tests() {
   // Android
   assert.ok(bundle.android, 'Android bundle target must be configured');
   assert.strictEqual(bundle.android.minSdkVersion, 24);
-  assert.strictEqual(bundle.android.targetSdkVersion, 34);
+  assert.strictEqual(bundle.android.versionCode, 400);
 
   // iOS
   assert.ok(bundle.iOS, 'iOS bundle target must be configured');
@@ -62,6 +62,9 @@ async function runPhase5Tests() {
   assert.ok(fs.existsSync(appGradle), 'app/build.gradle.kts must exist');
   assert.ok(fs.existsSync(manifest), 'AndroidManifest.xml must exist');
   assert.ok(fs.existsSync(mainActivity), 'MainActivity.kt must exist');
+
+  const appGradleContent = fs.readFileSync(appGradle, 'utf8');
+  assert.ok(appGradleContent.includes('targetSdk = 34'), 'targetSdk 34 required in app/build.gradle.kts');
 
   const manifestContent = fs.readFileSync(manifest, 'utf8');
   assert.ok(manifestContent.includes('android.permission.INTERNET'), 'INTERNET permission required');
