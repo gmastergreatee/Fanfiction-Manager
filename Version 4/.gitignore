@@ -41,10 +41,8 @@ src-tauri/bin/
 *.lib
 *.obj
 
-# Tauri Generated Schemas & Manifests
+# Tauri Generated Schemas
 src-tauri/gen/schemas/
-src-tauri/gen/
-gen/
 
 # OTA Rollback Ring Buffer & Snapshots
 .rollback/

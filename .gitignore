@@ -87,12 +87,9 @@ Version 4/temp_*/
 src-tauri/bin/
 Version 4/src-tauri/bin/
 
-# Tauri Generated Schemas & Manifests
+# Tauri Generated Schemas
 src-tauri/gen/schemas/
 Version 4/src-tauri/gen/schemas/
-src-tauri/gen/
-Version 4/src-tauri/gen/
-gen/
 
 # OTA Rollback Ring Buffer & Snapshots
 .rollback/
