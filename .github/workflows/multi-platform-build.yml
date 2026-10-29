@@ -16,15 +16,19 @@ permissions:
 jobs:
   test-and-verify:
     name: Run Cross-Platform Test Suite
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
         uses: actions/checkout@v5
 
-      - name: Setup Node.js 22
+      - name: Setup Node.js 22 with Cache
         uses: actions/setup-node@v5
         with:
           node-version: 22
+          cache: 'npm'
+          cache-dependency-path: |
+            package-lock.json
+            frontend/package-lock.json
 
       - name: Install Project & Frontend Dependencies
         run: |
@@ -41,6 +45,9 @@ jobs:
     name: Build (${{ matrix.platform.name }})
     needs: test-and-verify
     runs-on: ${{ matrix.platform.os }}
+    env:
+      CARGO_INCREMENTAL: 0
+      CARGO_TERM_COLOR: always
     strategy:
       fail-fast: false
       matrix:
@@ -59,10 +66,21 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v5
 
-      - name: Setup Node.js 22
+      - name: Tune Windows Defender for Build Performance
+        if: matrix.platform.os == 'windows-latest'
+        run: |
+          Add-MpPreference -ExclusionPath "${{ github.workspace }}"
+          Add-MpPreference -ExclusionProcess "rustc.exe", "cargo.exe", "link.exe", "node.exe"
+        continue-on-error: true
+
+      - name: Setup Node.js 22 with Cache
         uses: actions/setup-node@v5
         with:
           node-version: 22
+          cache: 'npm'
+          cache-dependency-path: |
+            package-lock.json
+            frontend/package-lock.json
 
       - name: Install Linux System Dependencies
         if: matrix.platform.os == 'ubuntu-22.04'
@@ -74,6 +92,11 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
         with:
           targets: ${{ matrix.platform.target }}
+
+      - name: Rust Cache
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: './src-tauri -> target'
 
       - name: Install Project & Frontend Dependencies
         run: |
@@ -103,26 +126,14 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v5
 
-      - name: Setup Node.js 22
+      - name: Setup Node.js 22 with Cache
         uses: actions/setup-node@v5
         with:
           node-version: 22
-
-      - name: Setup Java 17
-        uses: actions/setup-java@v5
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-
-      - name: Configure Android SDK Environment
-        run: |
-          echo "ANDROID_HOME=/usr/local/lib/android/sdk" >> $GITHUB_ENV
-          yes | /usr/local/lib/android/sdk/cmdline-tools/latest/bin/sdkmanager --licenses || true
-
-      - name: Setup Rust Toolchain & Android Targets
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: aarch64-linux-android,armv7-linux-androideabi,x86_64-linux-android
+          cache: 'npm'
+          cache-dependency-path: |
+            package-lock.json
+            frontend/package-lock.json
 
       - name: Install Project & Frontend Dependencies
         run: |

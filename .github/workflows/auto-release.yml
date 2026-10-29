@@ -11,15 +11,19 @@ permissions:
 jobs:
   test-and-package:
     name: Test & Package Release
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
         uses: actions/checkout@v5
 
-      - name: Set up Node.js
+      - name: Set up Node.js 22 with Cache
         uses: actions/setup-node@v5
         with:
           node-version: 22
+          cache: 'npm'
+          cache-dependency-path: |
+            package-lock.json
+            frontend/package-lock.json
 
       - name: Install Project & Frontend Dependencies
         run: |
