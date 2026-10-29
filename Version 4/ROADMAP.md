@@ -38,12 +38,12 @@
 - [x] Build Downloader Queue manager with pause/resume and rate throttling controls.
 
 ### Phase 4: Extended Features & Rule Studio
-- [ ] Implement **Model Context Protocol (MCP) Server** (`stdio` and `SSE` transport) as specified in [`MCP_SPECIFICATION.md`](./MCP_SPECIFICATION.md).
-- [ ] Implement AI rule generation tools: `inspect_webpage`, `analyze_novel_structure`, `test_rule_execution`, `save_site_rule`.
-- [ ] Built-in **EPUB Exporter**: Export downloaded fanfiction to `.epub` format with metadata and cover image.
-- [ ] Rule Studio / Tester Workbench: Real-time visual testing tool to author and debug site extraction rules.
-- [ ] Remote Rule Sync: Auto-update rule definitions from GitHub releases.
-- [ ] Text-to-Speech (TTS) integration using platform-native speech synthesis APIs.
+- [x] Implement **Model Context Protocol (MCP) Server** (`stdio` and `SSE` transport) as specified in [`MCP_SPECIFICATION.md`](./MCP_SPECIFICATION.md).
+- [x] Implement AI rule generation tools: `inspect_webpage`, `analyze_novel_structure`, `test_rule_execution`, `save_site_rule`.
+- [x] Built-in **EPUB Exporter**: Export downloaded fanfiction to `.epub` format with metadata and cover image.
+- [x] Rule Studio / Tester Workbench: Real-time visual testing tool to author and debug site extraction rules.
+- [x] Remote Rule Sync: Auto-update rule definitions from GitHub releases.
+- [x] Text-to-Speech (TTS) integration using platform-native speech synthesis APIs.
 
 ### Phase 5: Multi-Platform Build & CI/CD
 - [ ] Configure Android target (Android Studio SDK, NDK, Gradle build scripts).

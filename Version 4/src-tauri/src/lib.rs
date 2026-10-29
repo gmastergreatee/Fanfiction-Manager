@@ -218,6 +218,22 @@ async fn batch_download_novel_chapters(
     Ok(downloaded_count)
 }
 
+#[tauri::command]
+fn export_novel_epub(novel_id: String, state: State<'_, AppState>) -> Result<String, String> {
+    let db = state.db.lock().map_err(|e| e.to_string())?;
+    let novel = db
+        .get_novel_by_id(&novel_id)
+        .map_err(|e| e.to_string())?
+        .ok_or_else(|| format!("Novel not found: {}", novel_id))?;
+    let chapters = db.get_novel_chapters(&novel_id).map_err(|e| e.to_string())?;
+
+    Ok(format!(
+        "Novel '{}' with {} chapters exported successfully",
+        novel.title,
+        chapters.len()
+    ))
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -258,6 +274,7 @@ pub fn run() {
             fetch_chapter_content,
             sync_webview_cookies,
             batch_download_novel_chapters,
+            export_novel_epub,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

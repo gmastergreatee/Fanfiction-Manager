@@ -35,8 +35,19 @@
         <span class="text-[10px] text-text-muted truncate">{{ store.currentChapter?.title }}</span>
       </div>
 
-      <!-- HUD Actions: Mode, Settings Dropdown, Fullscreen -->
+      <!-- HUD Actions: Mode, TTS, Settings Dropdown, Fullscreen -->
       <div class="flex items-center gap-2">
+        <!-- TTS Speech Audio Toggle -->
+        <button
+          @click="toggleTTSBar"
+          class="p-1.5 rounded-lg hover:bg-surface-elevated text-text-secondary hover:text-text-primary text-xs flex items-center gap-1"
+          :class="{ 'bg-surface-elevated text-accent': showTTS }"
+          title="Text-to-Speech (TTS)"
+        >
+          <Volume2 class="w-4 h-4 text-accent" />
+          <span class="hidden md:inline text-[11px]">TTS</span>
+        </button>
+
         <!-- Reading Layout Toggle (Vertical vs Paginated) -->
         <button
           @click="toggleLayoutMode"
@@ -263,8 +274,20 @@
       <div
         v-if="store.currentChapter?.content_html"
         class="chapter-content space-y-5"
-        v-html="store.currentChapter.content_html"
-      ></div>
+      >
+        <p
+          v-for="(p, pIdx) in chapterParagraphs"
+          :key="pIdx"
+          :id="`tts-para-${pIdx}`"
+          :class="[
+            'transition-all duration-300 rounded-xl',
+            showTTS && ttsParagraphIndex === pIdx
+              ? 'bg-accent/15 px-3 py-1 ring-1 ring-accent/40 font-medium'
+              : ''
+          ]"
+          v-html="p"
+        ></p>
+      </div>
 
       <div v-else class="text-center py-20 text-text-muted text-sm font-sans">
         No chapter content loaded. Please select a downloaded chapter.
@@ -345,6 +368,69 @@
         </button>
       </div>
     </main>
+
+    <!-- Floating Text-to-Speech (TTS) Control Bar -->
+    <div
+      v-if="showTTS"
+      class="absolute bottom-6 inset-x-4 md:inset-x-auto md:left-1/2 md:-translate-x-1/2 max-w-lg w-full bg-surface/95 backdrop-blur-md border border-border rounded-2xl shadow-2xl p-3 z-30 flex items-center justify-between gap-3 text-xs select-none animate-in slide-in-from-bottom-4"
+    >
+      <div class="flex items-center gap-1.5">
+        <button
+          @click="toggleTTSPlayback"
+          class="p-2 rounded-xl bg-accent text-white hover:bg-accent/90 transition-colors shadow-sm"
+          :title="isTTSPlaying ? 'Pause Speech' : 'Play Speech'"
+        >
+          <Pause v-if="isTTSPlaying" class="w-4 h-4" />
+          <Play v-else class="w-4 h-4 fill-white" />
+        </button>
+
+        <button
+          @click="stopTTS"
+          class="p-2 rounded-xl bg-surface-elevated hover:bg-border text-text-muted hover:text-text-primary transition-colors"
+          title="Stop Speech"
+        >
+          <Square class="w-4 h-4" />
+        </button>
+
+        <button
+          @click="skipTTSParagraph(-1)"
+          class="p-1.5 rounded-lg hover:bg-surface-elevated text-text-secondary hover:text-text-primary"
+          title="Previous Paragraph"
+        >
+          <SkipBack class="w-4 h-4" />
+        </button>
+
+        <button
+          @click="skipTTSParagraph(1)"
+          class="p-1.5 rounded-lg hover:bg-surface-elevated text-text-secondary hover:text-text-primary"
+          title="Next Paragraph"
+        >
+          <SkipForward class="w-4 h-4" />
+        </button>
+      </div>
+
+      <div class="text-center font-mono text-[11px] text-text-muted truncate">
+        <span>Para {{ ttsParagraphIndex + 1 }} / {{ chapterParagraphs.length }}</span>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <select
+          v-model="ttsRate"
+          @change="updateTTSRate"
+          class="bg-surface-elevated border border-border rounded-lg px-2 py-1 text-xs text-text-primary focus:outline-none focus:border-accent"
+        >
+          <option :value="0.8">0.8x</option>
+          <option :value="1.0">1.0x</option>
+          <option :value="1.25">1.25x</option>
+          <option :value="1.5">1.5x</option>
+          <option :value="2.0">2.0x</option>
+        </select>
+
+        <button @click="showTTS = false; stopTTS()" class="text-text-muted hover:text-text-primary p-1">
+          <X class="w-4 h-4" />
+        </button>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -364,6 +450,12 @@ import {
   ChevronRight,
   AlignLeft,
   AlignJustify,
+  Volume2,
+  Play,
+  Pause,
+  Square,
+  SkipBack,
+  SkipForward,
 } from 'lucide-vue-next';
 import type {
   ReaderTheme,
@@ -379,6 +471,12 @@ const showSettings = ref(false);
 const showChapterDrawer = ref(false);
 const isFullscreen = ref(false);
 const scrollContainer = ref<HTMLElement | null>(null);
+
+// TTS (Text-to-Speech) State
+const showTTS = ref(false);
+const isTTSPlaying = ref(false);
+const ttsParagraphIndex = ref(0);
+const ttsRate = ref(1.0);
 
 // Pagination state
 const currentPage = ref(1);
@@ -414,6 +512,108 @@ const widthOptions: { id: ReaderContainerWidth; label: string }[] = [
 ];
 
 // Computed styles
+const chapterParagraphs = computed(() => {
+  const content = store.currentChapter?.content_html || '';
+  if (!content) return [];
+  const pRegex = /<p>[\s\S]*?<\/p>/gi;
+  const matches = content.match(pRegex);
+  if (matches && matches.length > 0) {
+    return matches.map((p) => p.replace(/^<p>/i, '').replace(/<\/p>$/i, '').trim());
+  }
+  return content.split('\n').filter((l) => l.trim().length > 0);
+});
+
+function toggleTTSBar() {
+  showTTS.value = !showTTS.value;
+  if (showTTS.value && !isTTSPlaying.value) {
+    startTTS();
+  } else if (!showTTS.value) {
+    stopTTS();
+  }
+}
+
+function startTTS() {
+  if (typeof window === 'undefined' || !window.speechSynthesis) return;
+  if (ttsParagraphIndex.value >= chapterParagraphs.value.length) {
+    ttsParagraphIndex.value = 0;
+  }
+  isTTSPlaying.value = true;
+  speakParagraph(ttsParagraphIndex.value);
+}
+
+function speakParagraph(index: number) {
+  if (typeof window === 'undefined' || !window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+
+  if (index >= chapterParagraphs.value.length) {
+    isTTSPlaying.value = false;
+    return;
+  }
+
+  ttsParagraphIndex.value = index;
+  const rawText = chapterParagraphs.value[index].replace(/<[^>]+>/g, '').trim();
+  if (!rawText) {
+    skipTTSParagraph(1);
+    return;
+  }
+
+  // Auto-scroll highlighted paragraph into view
+  const el = document.getElementById(`tts-para-${index}`);
+  if (el) {
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  const utterance = new SpeechSynthesisUtterance(rawText);
+  utterance.rate = ttsRate.value;
+  utterance.onend = () => {
+    if (isTTSPlaying.value) {
+      if (ttsParagraphIndex.value + 1 < chapterParagraphs.value.length) {
+        speakParagraph(ttsParagraphIndex.value + 1);
+      } else {
+        isTTSPlaying.value = false;
+      }
+    }
+  };
+  utterance.onerror = () => {
+    isTTSPlaying.value = false;
+  };
+
+  window.speechSynthesis.speak(utterance);
+}
+
+function toggleTTSPlayback() {
+  if (typeof window === 'undefined' || !window.speechSynthesis) return;
+  if (isTTSPlaying.value) {
+    window.speechSynthesis.pause();
+    isTTSPlaying.value = false;
+  } else {
+    if (window.speechSynthesis.paused) {
+      window.speechSynthesis.resume();
+      isTTSPlaying.value = true;
+    } else {
+      startTTS();
+    }
+  }
+}
+
+function stopTTS() {
+  if (typeof window !== 'undefined' && window.speechSynthesis) {
+    window.speechSynthesis.cancel();
+  }
+  isTTSPlaying.value = false;
+}
+
+function skipTTSParagraph(delta: number) {
+  const target = Math.max(0, Math.min(chapterParagraphs.value.length - 1, ttsParagraphIndex.value + delta));
+  speakParagraph(target);
+}
+
+function updateTTSRate() {
+  if (isTTSPlaying.value) {
+    speakParagraph(ttsParagraphIndex.value);
+  }
+}
+
 const readerThemeClasses = computed(() => {
   switch (store.readerTheme) {
     case 'oled':
@@ -531,6 +731,7 @@ function toggleFullscreen() {
 
 // Chapter navigation
 function navigateChapter(delta: number) {
+  stopTTS();
   const targetIndex = currentIdx.value + delta;
   store.goToChapter(targetIndex);
   currentPage.value = 1;
@@ -540,6 +741,7 @@ function navigateChapter(delta: number) {
 }
 
 function selectChapterFromDrawer(chapterIndex: number) {
+  stopTTS();
   store.goToChapter(chapterIndex);
   showChapterDrawer.value = false;
   currentPage.value = 1;
@@ -619,6 +821,7 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
+  stopTTS();
   window.removeEventListener('keydown', handleKeydown);
   clearTimeout(scrollDebounceTimer);
 });

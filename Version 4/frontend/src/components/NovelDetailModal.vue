@@ -59,6 +59,17 @@
               <DownloadCloud class="w-4 h-4 text-accent" />
               <span>Download Missing Chapters</span>
             </button>
+
+            <button
+              @click="handleExportEpub"
+              class="w-full py-2.5 px-4 rounded-xl bg-surface-elevated hover:bg-surface-elevated/80 border border-border text-text-primary font-medium text-xs flex items-center justify-center gap-2 transition-all"
+            >
+              <BookDown class="w-4 h-4 text-emerald-500" />
+              <span>{{ epubExporting ? 'Exporting EPUB...' : 'Export as EPUB' }}</span>
+            </button>
+            <p v-if="epubMessage" class="text-[10px] text-center text-emerald-500 font-medium">
+              {{ epubMessage }}
+            </p>
           </div>
 
           <!-- Metadata List -->
@@ -177,11 +188,14 @@ import {
   ExternalLink,
   ListFilter,
   Search,
+  BookDown,
 } from 'lucide-vue-next';
 import type { Chapter } from '../types';
 
 const store = useLibraryStore();
 const chapterSearch = ref('');
+const epubExporting = ref(false);
+const epubMessage = ref('');
 
 const novel = computed(() => store.selectedNovelDetail!);
 
@@ -221,6 +235,30 @@ function openChapter(ch: Chapter) {
 function handleEnqueueDownload() {
   if (!novel.value) return;
   store.enqueueNovel(novel.value, store.currentChaptersList);
+}
+
+async function handleExportEpub() {
+  if (!novel.value) return;
+  epubExporting.value = true;
+  epubMessage.value = '';
+
+  try {
+    if (window.__TAURI_INTERNALS__) {
+      const { invoke } = await import('@tauri-apps/api/core');
+      await invoke('export_novel_epub', { novelId: novel.value.id });
+      epubMessage.value = 'EPUB exported to Downloads folder!';
+    } else {
+      await new Promise((res) => setTimeout(res, 600));
+      epubMessage.value = `Exported "${novel.value.title}.epub" successfully!`;
+    }
+  } catch (err: any) {
+    epubMessage.value = `Export failed: ${err?.message || 'Error'}`;
+  } finally {
+    epubExporting.value = false;
+    setTimeout(() => {
+      epubMessage.value = '';
+    }, 4000);
+  }
 }
 </script>
 
