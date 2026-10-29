@@ -42,10 +42,47 @@ Welcome to **Fanfiction Manager Version 4**. This repository houses the moderniz
 
 ---
 
+## 🛠️ Local Development & Debugging Across Platforms
+
+### 1. Desktop Debugging (macOS, Linux & Windows)
+The universal command to start the full desktop app in debug mode with hot reloading:
+```bash
+# macOS & Linux (in terminal)
+npm start
+
+# Or using the 1-click POSIX script:
+./start-debug.sh
+
+# Windows (Command Prompt, PowerShell, or 1-click)
+npm.cmd start
+# Or double-click start-debug.bat
+```
+*Note: Press **`F12`** or **Right-Click ➔ Inspect Element** anywhere in the opened desktop window to launch WebKit/Chromium DevTools.*
+
+### 2. Fast Frontend UI Development (Browser Only)
+Debug Vue 3 components, Themes, and Reader typography in Chrome/Firefox/Safari without compiling Rust:
+```bash
+npm run dev
+# Open http://localhost:5173
+```
+
+### 3. Mobile Device & Emulator Debugging (Android & iOS)
+Tauri 2.0 provides native mobile emulation commands:
+```bash
+# Android (Debugs in Android Studio Emulator or USB Device via ADB)
+npm run tauri:android
+
+# iOS (macOS only: Debugs in Xcode iOS Simulator or plugged iPhone/iPad)
+npm run tauri:ios
+```
+*Chrome Web Inspector is available at `chrome://inspect` for Android, and Safari Web Inspector via `Develop ➔ Simulator` for iOS.*
+
+---
+
 ## 🛠️ CLI Quick Reference
 
 ```bash
-# Run the application
+# Run desktop app in debug mode (macOS, Linux, Windows)
 npm start
 
 # Run all test suites

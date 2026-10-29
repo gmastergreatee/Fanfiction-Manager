@@ -10,6 +10,8 @@
     "tauri": "tauri",
     "tauri:dev": "node scripts/start-tauri.js",
     "tauri:build": "tauri build",
+    "tauri:android": "tauri android dev",
+    "tauri:ios": "tauri ios dev",
     "migrate": "node src/migrator/cli.js",
     "migrate:dry": "node src/migrator/cli.js --dry-run",
     "mcp": "node src/mcp/server.js",
