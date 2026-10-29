@@ -241,4 +241,83 @@ impl Database {
         }
         Ok(rules)
     }
+
+    pub fn upsert_novel(&self, novel: &Novel) -> Result<()> {
+        self.conn.execute(
+            r#"
+            INSERT INTO novels (id, title, author, cover_url, cover_local_path, summary, source_url, rule_guid, total_chapters, downloaded_chapters, check_updates, updated_at)
+            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, datetime('now'))
+            ON CONFLICT(id) DO UPDATE SET
+                title = excluded.title,
+                author = excluded.author,
+                cover_url = excluded.cover_url,
+                summary = excluded.summary,
+                rule_guid = excluded.rule_guid,
+                total_chapters = excluded.total_chapters,
+                downloaded_chapters = excluded.downloaded_chapters,
+                updated_at = datetime('now')
+            "#,
+            rusqlite::params![
+                novel.id,
+                novel.title,
+                novel.author,
+                novel.cover_url,
+                novel.cover_local_path,
+                novel.summary,
+                novel.source_url,
+                novel.rule_guid,
+                novel.total_chapters,
+                novel.downloaded_chapters,
+                if novel.check_updates { 1 } else { 0 },
+            ],
+        )?;
+        Ok(())
+    }
+
+    pub fn save_chapter_content(
+        &self,
+        novel_id: &str,
+        chapter_index: i64,
+        title: &str,
+        content_html: &str,
+        source_url: &str,
+        word_count: i64,
+    ) -> Result<()> {
+        let chapter_id = format!("{}_ch_{}", novel_id, chapter_index);
+        self.conn.execute(
+            r#"
+            INSERT INTO chapters (id, novel_id, chapter_index, title, content_html, source_url, word_count, is_downloaded, downloaded_at)
+            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, 1, datetime('now'))
+            ON CONFLICT(novel_id, chapter_index) DO UPDATE SET
+                title = excluded.title,
+                content_html = excluded.content_html,
+                source_url = excluded.source_url,
+                word_count = excluded.word_count,
+                is_downloaded = 1,
+                downloaded_at = datetime('now')
+            "#,
+            rusqlite::params![
+                chapter_id,
+                novel_id,
+                chapter_index,
+                title,
+                content_html,
+                source_url,
+                word_count,
+            ],
+        )?;
+
+        // Update novel's downloaded_chapters count
+        self.conn.execute(
+            r#"
+            UPDATE novels
+            SET downloaded_chapters = (SELECT COUNT(*) FROM chapters WHERE novel_id = ?1 AND is_downloaded = 1),
+                updated_at = datetime('now')
+            WHERE id = ?1
+            "#,
+            rusqlite::params![novel_id],
+        )?;
+
+        Ok(())
+    }
 }

@@ -1,7 +1,9 @@
-
-#Ignore thumbnails created by Windows
+# Ignore thumbnails created by Windows & macOS
 Thumbs.db
-#Ignore files built by Visual Studio
+.DS_Store
+desktop.ini
+
+# Ignore compiled binaries, objects, and libraries
 *.obj
 *.exe
 *.pdb
@@ -18,19 +20,25 @@ Thumbs.db
 *.bak
 *.cache
 *.ilk
-*.log
-[Bb]in
-[Dd]ebug*/
 *.lib
 *.sbr
+*.dll
+*.so
+*.dylib
+*.o
+*.a
 obj/
+[Bb]in/
+[Dd]ebug*/
 [Rr]elease*/
 _ReSharper*/
 [Tt]est[Rr]esult*
 .vs/
-#Nuget packages folder
+
+# Dependencies
 packages/
 node_modules/
+**/node_modules/
 
 # ==========================================
 # User Downloaded Story Content & Covers
@@ -58,12 +66,16 @@ Version 4/v4_data/covers/
 *.epub
 *.cbz
 *.pdf
+*.mobi
+*.azw3
 
 # Build & Release Bundles
 dist/
 Version 4/dist/
 dist_ui/
 Version 4/dist_ui/
+frontend/dist/
+Version 4/frontend/dist/
 target/
 src-tauri/target/
 Version 4/src-tauri/target/
@@ -71,14 +83,50 @@ Version 4/src-tauri/target/
 temp_*/
 Version 4/temp_*/
 
-# Tauri Generated Schemas
+# Native Compiled Binaries & Shims
+src-tauri/bin/
+Version 4/src-tauri/bin/
+
+# Tauri Generated Schemas & Manifests
 src-tauri/gen/schemas/
 Version 4/src-tauri/gen/schemas/
+src-tauri/gen/
+Version 4/src-tauri/gen/
 gen/
+
+# OTA Rollback Ring Buffer & Snapshots
+.rollback/
+Version 4/.rollback/
+snapshots/
+Version 4/snapshots/
+
+# Test & Coverage Outputs
+coverage/
+.nyc_output/
 
 # TypeScript & Vite Build Artifacts
 *.tsbuildinfo
 **/vite.config.js
 **/vite.config.d.ts
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Environment & Local Overrides
+.env
+.env.*
+!.env.example
 *.local
 .env*.local
+
+# Editor Artifacts
+.vscode/
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+*~

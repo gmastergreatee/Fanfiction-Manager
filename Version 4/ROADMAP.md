@@ -23,10 +23,10 @@
   - Ensures zero data loss for existing reading libraries.
 
 ### Phase 2: Hybrid Scraping Pipeline
-- [ ] Implement Rust HTTP client with cookie jar and browser impersonation headers.
-- [ ] Implement fast-path HTML parsing (Tier 1) for rapid batch chapter downloading.
-- [ ] Implement native WebView fallback (Tier 2 & 3) with dynamic cookie sync.
-- [ ] Port and validate existing rules from `rules.json` (Fanfiction.net, WebNovel, RoyalRoad, AO3, Wattpad, ScribbleHub, etc.).
+- [x] Implement Rust HTTP client with cookie jar and browser impersonation headers.
+- [x] Implement fast-path HTML parsing (Tier 1) for rapid batch chapter downloading.
+- [x] Implement native WebView fallback (Tier 2 & 3) with dynamic cookie sync.
+- [x] Port and validate existing rules from `rules.json` (Fanfiction.net, WebNovel, RoyalRoad, AO3, Wattpad, ScribbleHub, etc.).
 
 ### Phase 3: Modern Responsive UI & Reading Mode
 - [ ] Build responsive UI layouts (Desktop multi-column + Mobile bottom navigation & gesture drawer).

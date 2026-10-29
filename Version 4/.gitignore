@@ -4,7 +4,7 @@
 node_modules/
 **/node_modules/
 
-# Story Related Files & Local Offline Content
+# Story Related Files & Local Offline Content (User Data)
 v4_data/
 v4_data/covers/
 *.db
@@ -13,35 +13,72 @@ v4_data/covers/
 *.sqlite
 *.sqlite3
 
-# Exported Books
+# Exported E-Books & Comics
 *.epub
 *.cbz
 *.pdf
+*.mobi
+*.azw3
 
 # Build Outputs & Bundles
 dist/
 dist_ui/
+frontend/dist/
 target/
 src-tauri/target/
 .cargo-target/
 temp_*/
 
-# Tauri Generated Schemas
+# Native Compiled Binaries & Shims
+bin/
+src-tauri/bin/
+*.exe
+*.dll
+*.so
+*.dylib
+*.o
+*.a
+*.lib
+*.obj
+
+# Tauri Generated Schemas & Manifests
 src-tauri/gen/schemas/
+src-tauri/gen/
 gen/
+
+# OTA Rollback Ring Buffer & Snapshots
+.rollback/
+snapshots/
 
 # TypeScript & Vite Build Artifacts
 *.tsbuildinfo
 frontend/vite.config.js
 frontend/vite.config.d.ts
 
+# Test & Coverage Outputs
+coverage/
+.nyc_output/
+
 # Environment & Local Overrides
+.env
+.env.*
+!.env.example
 *.local
-.env*.local
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
 
 # OS & Editor Artifacts
 Thumbs.db
 .DS_Store
-*.log
+desktop.ini
 .vscode/
+!.vscode/extensions.json
 .idea/
+*.swp
+*.swo
+*~
