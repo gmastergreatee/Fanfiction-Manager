@@ -165,6 +165,13 @@ npm run tauri:ios
   ```
   *(Generates `dist/app.zip`, `dist/mobile-bundle.zip`, and SHA-256 `dist/checksums.json`)*
 
+- **Continuous Integration (CI/CD Performance)**:
+  - CI builds on GitHub Actions are automatically accelerated using:
+    - `swatinem/rust-cache@v2`: caches 468 Rust crate targets and cargo registries across macOS, Linux, and Windows.
+    - Windows Defender build exclusions for compiler tools and repository workspaces.
+    - Node.js npm dependency cache with dual `package-lock.json` hashes.
+    - Automated test runners on lightweight Ubuntu virtualization.
+
 ---
 
 ## 🛠️ CLI Quick Reference
