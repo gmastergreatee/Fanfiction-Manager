@@ -21,6 +21,11 @@ jobs:
         with:
           node-version: 22
 
+      - name: Install Project & Frontend Dependencies
+        run: |
+          npm ci
+          npm ci --prefix frontend
+
       - name: Run Integrity Tests
         run: npm run test:migration
 

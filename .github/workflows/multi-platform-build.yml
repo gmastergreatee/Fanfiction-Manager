@@ -26,13 +26,13 @@ jobs:
         with:
           node-version: 22
 
-      - name: Install Frontend Dependencies
-        working-directory: './frontend'
-        run: npm ci
+      - name: Install Project & Frontend Dependencies
+        run: |
+          npm ci
+          npm ci --prefix frontend
 
       - name: Verify Frontend Build
-        working-directory: './frontend'
-        run: npm run build
+        run: npm run build --prefix frontend
 
       - name: Run Full Version 4 Test Suite
         run: npm test
@@ -75,11 +75,13 @@ jobs:
         with:
           targets: ${{ matrix.platform.target }}
 
-      - name: Build Frontend Assets
-        working-directory: './frontend'
+      - name: Install Project & Frontend Dependencies
         run: |
           npm ci
-          npm run build
+          npm ci --prefix frontend
+
+      - name: Build Frontend Assets
+        run: npm run build --prefix frontend
 
       - name: Build Tauri 2.0 Native Application
         uses: tauri-apps/tauri-action@v0
@@ -122,11 +124,13 @@ jobs:
         with:
           targets: aarch64-linux-android,armv7-linux-androideabi,x86_64-linux-android
 
-      - name: Build Frontend Bundle
-        working-directory: './frontend'
+      - name: Install Project & Frontend Dependencies
         run: |
           npm ci
-          npm run build
+          npm ci --prefix frontend
+
+      - name: Build Frontend Bundle
+        run: npm run build --prefix frontend
 
       - name: Build Android Release Bundle
         run: npm run package:release
