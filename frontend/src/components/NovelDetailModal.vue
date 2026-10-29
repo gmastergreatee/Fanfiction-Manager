@@ -33,13 +33,15 @@
         <div class="md:col-span-4 flex flex-col items-center md:items-start space-y-4">
           <div class="relative w-44 aspect-[2/3] rounded-2xl overflow-hidden bg-surface-elevated shadow-md border border-border">
             <img
-              v-if="novel.cover_local_path"
-              :src="novel.cover_local_path"
+              v-if="!coverFailed && (novel.cover_local_path || novel.cover_url)"
+              :src="getCoverUrl()"
               :alt="novel.title"
+              @error="coverFailed = true"
               class="w-full h-full object-cover"
             />
-            <div v-else class="w-full h-full flex items-center justify-center p-4 text-center text-xs text-text-muted bg-gradient-to-br from-surface to-surface-elevated">
-              {{ novel.title }}
+            <div v-else class="w-full h-full flex flex-col items-center justify-center p-4 text-center text-xs text-text-muted bg-gradient-to-br from-surface to-surface-elevated">
+              <BookOpen class="w-10 h-10 text-accent/50 mb-2" />
+              <span class="font-medium text-text-primary line-clamp-3">{{ novel.title }}</span>
             </div>
           </div>
 
@@ -196,8 +198,23 @@ const store = useLibraryStore();
 const chapterSearch = ref('');
 const epubExporting = ref(false);
 const epubMessage = ref('');
+const coverFailed = ref(false);
 
 const novel = computed(() => store.selectedNovelDetail!);
+
+function getCoverUrl(): string {
+  if (!novel.value) return '';
+  const raw = novel.value.cover_local_path || novel.value.cover_url || '';
+  if (!raw) return '';
+  if (raw.startsWith('http://') || raw.startsWith('https://') || raw.startsWith('data:')) {
+    return raw;
+  }
+  let clean = raw.replace(/\\/g, '/').replace(/^\.?\/?(data\/)?/, '');
+  if (!clean.startsWith('covers/')) {
+    clean = 'covers/' + clean;
+  }
+  return '/' + clean;
+}
 
 const savedProgress = computed(() => {
   return novel.value ? store.readingProgress[novel.value.id] : null;

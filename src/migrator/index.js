@@ -142,7 +142,7 @@ class DataMigrator {
         if (legacyCoverPath) {
           const ext = path.extname(legacyCoverPath);
           const targetCoverName = `${novel.id}${ext}`;
-          newLocalCoverPath = path.join('covers', targetCoverName);
+          newLocalCoverPath = `/covers/${targetCoverName}`;
           if (!dryRun) {
             const destPath = path.join(this.coversDir, targetCoverName);
             fs.copyFileSync(legacyCoverPath, destPath);

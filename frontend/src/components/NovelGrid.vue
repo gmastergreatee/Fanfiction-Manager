@@ -50,20 +50,26 @@
         >
           <!-- Cover Image Container -->
           <div class="relative aspect-[2/3] w-full bg-surface-elevated overflow-hidden">
+            <!-- Downloaded Badge -->
+            <div class="absolute top-2 right-2 px-2 py-0.5 rounded-md bg-black/70 backdrop-blur-md text-[10px] font-semibold text-white z-10 shadow-sm pointer-events-none">
+              {{ novel.downloaded_chapters }} / {{ novel.total_chapters }} ch
+            </div>
+
             <img
-              v-if="novel.cover_local_path"
-              :src="novel.cover_local_path"
+              v-if="hasValidCover(novel)"
+              :src="getCoverUrl(novel)"
               :alt="novel.title"
+              @error="handleCoverError(novel.id)"
               class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
               loading="lazy"
             />
-            <div v-else class="w-full h-full flex items-center justify-center bg-gradient-to-br from-surface to-surface-elevated p-4 text-center">
-              <span class="text-xs font-medium text-text-muted line-clamp-3">{{ novel.title }}</span>
-            </div>
-
-            <!-- Downloaded Badge -->
-            <div class="absolute top-2 right-2 px-2 py-0.5 rounded-md bg-black/60 backdrop-blur-md text-[10px] font-semibold text-white">
-              {{ novel.downloaded_chapters }} / {{ novel.total_chapters }} ch
+            <div
+              v-else
+              class="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-surface-elevated via-surface to-surface-elevated p-4 text-center border-b border-border/40"
+            >
+              <BookOpen class="w-8 h-8 text-accent/60 mb-2.5 opacity-80" />
+              <span class="text-xs font-medium text-text-primary line-clamp-3 leading-snug">{{ novel.title }}</span>
+              <span class="text-[10px] text-text-muted mt-2 line-clamp-1 font-mono">{{ novel.author || 'Web Novel' }}</span>
             </div>
           </div>
 
@@ -73,7 +79,7 @@
               {{ novel.title }}
             </h3>
             <p class="text-[11px] text-text-muted line-clamp-1 mb-2">
-              {{ novel.author || 'Unknown Author' }}
+              {{ novel.author || 'Web Novel' }}
             </p>
 
             <!-- Progress Bar -->
@@ -91,11 +97,13 @@
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue';
 import { useLibraryStore } from '../stores/library';
 import { Search, BookOpen } from 'lucide-vue-next';
 import type { Novel } from '../types';
 
 const store = useLibraryStore();
+const failedCovers = ref<Record<string, boolean>>({});
 
 const filters = [
   { id: 'all' as const, label: 'All' },
@@ -103,9 +111,31 @@ const filters = [
   { id: 'updating' as const, label: 'Updating' },
 ];
 
+function hasValidCover(novel: Novel): boolean {
+  if (failedCovers.value[novel.id]) return false;
+  return Boolean(novel.cover_local_path || novel.cover_url);
+}
+
+function getCoverUrl(novel: Novel): string {
+  const raw = novel.cover_local_path || novel.cover_url || '';
+  if (!raw) return '';
+  if (raw.startsWith('http://') || raw.startsWith('https://') || raw.startsWith('data:')) {
+    return raw;
+  }
+  // Normalize Windows backslashes: covers\id.png -> /covers/id.png
+  let clean = raw.replace(/\\/g, '/').replace(/^\.?\/?(data\/)?/, '');
+  if (!clean.startsWith('covers/')) {
+    clean = 'covers/' + clean;
+  }
+  return '/' + clean;
+}
+
+function handleCoverError(novelId: string) {
+  failedCovers.value[novelId] = true;
+}
+
 function getProgress(novel: Novel): number {
   if (!novel.total_chapters || novel.total_chapters === 0) return 0;
   return Math.min(100, Math.round((novel.downloaded_chapters / novel.total_chapters) * 100));
 }
 </script>
-
