@@ -13,7 +13,49 @@ Provides extreme flexibility with the help of `Rule` system to `power-users`* in
 
 `Feel free to request for more website inclusions via issues`
 
-Current Status: __BETA__
+Current Status: **v3.2.0 (Stable Beta)** | **v4.0.0 (Next-Gen Alpha in Progress in [`Version 4/`](./Version%204/))**
+
+---
+
+## 🚀 Upcoming Version 4: Highlights & Modernization
+
+The next major generation of Fanfiction Manager is currently being built in the [`Version 4/`](./Version%204/) directory. When released, existing v3 installations will automatically upgrade without any data loss.
+
+### 🌟 Key Highlights of Version 4:
+1. **5 Platforms Supported**:
+   - **Desktop**: Windows 11 / 10, macOS (Apple Silicon & Intel), and Linux (GNOME Libadwaita / KDE Plasma).
+   - **Mobile**: Android (Phones & Tablets) and iOS (iPhone & iPad).
+2. **Zero-Loss Auto-Upgrade Engine**:
+   - Automatically migrates existing novels, 6,800+ downloaded chapters, site rules, reading history, and covers into embedded SQLite in ~11 seconds.
+3. **Multi-Mode Rule Studio (Mobile & Desktop)**:
+   - **Visual Tap-to-Select Picker**: Create scraping rules on phones, tablets, or desktop by simply tapping elements on web pages — no DevTools required!
+   - **AI Assistant (Model Context Protocol)**: In-app MCP server (`stdio` / `SSE`) enables Claude, Antigravity, and AI agents to autonomously inspect pages, synthesize rules, and test extraction.
+   - **Community Rule Hub & QR Sync**: 1-click install verified scraping rules; scan QR codes to instantly transfer rules across devices.
+   - **Desktop DevTools**: Native F12 Chrome/WebKit Inspector on Windows, Linux, and macOS for power users.
+4. **Adaptive Native UI & Live Theme Studio**:
+   - Native platform design language: **Windows 11 Fluent** (Mica/Acrylic), **Apple Cupertino** (macOS/iOS frosted glass), **Android Material 3**, and **Linux GNOME Libadwaita**.
+   - **Theme Swapping**: Mobile users can toggle between Android MD3 and iOS Cupertino styles. Desktop users can freely select any platform theme.
+   - **Live Color Customizer & Sharing**: Real-time CSS color adjustments, custom theme persistence, and sharing via JSON or QR code (`ffm-theme-v4`).
+5. **Silent Store-Bypass Updates (Android & iOS)**:
+   - **100% Silent OTA Updates**: Web assets hot-update over the air (`mobile-bundle.zip`) without App Store or Play Store review delays or manual clicks.
+   - **Unattended Native APK Installer**: Android 12+ background installation via `PackageInstaller.Session`.
+6. **3-Version Rollback Ring Buffer**:
+   - Automatic pre-update snapshot safeguard. Revert code and database up to 3 previous releases directly from the UI header (`⏪ Rollback`) or CLI (`npm run rollback`).
+7. **High-Performance Architecture**:
+   - **Embedded SQLite (ACID)**: Replaces monolithic 1.3MB `novels.json` and 6,800+ loose files with instant queries.
+   - **Hybrid 3-Tier Scraper**: High-speed headless fetching (50-100 ch/sec) with fallback to headless webview and interactive captcha resolution.
+   - **Distraction-Free Reader**: OLED pure black, Slate dark, warm sepia, and clean light modes with auto-hiding floating HUD.
+
+> 📖 **Read the Full Version 4 Documentation:**
+> - [Version 4 Readme](./Version%204/README.md)
+> - [Auto-Upgrade & Release Guide](./Version%204/AUTO_UPGRADE_GUIDE.md)
+> - [Technical Architecture](./Version%204/ARCHITECTURE.md)
+> - [MCP AI Rule Specification](./Version%204/MCP_SPECIFICATION.md)
+> - [Roadmap](./Version%204/ROADMAP.md)
+
+---
+
+### Legacy v3 Features
 
 - Add new `Novel`
 - Download `Novel`
