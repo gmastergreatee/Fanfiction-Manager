@@ -1,15 +1,21 @@
 <template>
   <div class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-    <div class="bg-surface border border-border w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+    <div
+      :class="[
+        'w-full max-w-lg overflow-hidden flex flex-col transition-all duration-200',
+        modalContainerClass
+      ]"
+    >
       <!-- Header -->
-      <div class="px-5 py-4 border-b border-border flex items-center justify-between">
+      <div :class="['px-5 py-4 flex items-center justify-between shrink-0', modalHeaderClass]">
         <div class="flex items-center gap-2">
           <Palette class="w-4 h-4 text-accent" />
-          <h3 class="text-sm font-semibold text-text-primary">Theme Studio & Customizer</h3>
+          <h3 :class="modalTitleClass">Theme Studio & Customizer</h3>
         </div>
         <button
           @click="$emit('close')"
-          class="p-1 rounded-lg text-text-muted hover:text-text-primary hover:bg-surface-elevated transition-colors"
+          :class="modalCloseBtnClass"
+          title="Close"
         >
           <X class="w-4 h-4" />
         </button>
@@ -22,19 +28,24 @@
           <label class="block text-xs font-semibold text-text-secondary mb-2 uppercase tracking-wider">
             Platform Design System
           </label>
-          <div class="grid grid-cols-2 gap-2">
+          <div class="grid grid-cols-2 gap-2.5">
             <button
               v-for="platform in platforms"
               :key="platform.id"
               @click="store.setPlatform(platform.id)"
               :class="[
-                'p-3 rounded-xl border text-left flex flex-col gap-1 transition-all',
-                store.platformStyle === platform.id
-                  ? 'border-accent bg-accent/10 shadow-sm'
-                  : 'border-border bg-surface-elevated hover:border-text-muted'
+                'p-3.5 text-left flex flex-col gap-1 transition-all',
+                modalCardClass,
+                store.platformStyle === platform.id ? activePlatformBorder : ''
               ]"
             >
-              <span class="text-xs font-semibold text-text-primary">{{ platform.name }}</span>
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-semibold text-text-primary">{{ platform.name }}</span>
+                <span
+                  v-if="store.platformStyle === platform.id"
+                  class="w-2 h-2 rounded-full bg-accent"
+                ></span>
+              </div>
               <span class="text-[10px] text-text-muted">{{ platform.desc }}</span>
             </button>
           </div>
@@ -51,10 +62,9 @@
               :key="mode.id"
               @click="store.setTheme(mode.id)"
               :class="[
-                'py-2 px-3 rounded-xl border text-xs font-semibold text-center transition-all',
-                store.themeMode === mode.id
-                  ? 'border-accent bg-accent text-white shadow-sm'
-                  : 'border-border bg-surface-elevated text-text-secondary hover:text-text-primary'
+                'py-2 px-3 text-xs font-semibold text-center transition-all',
+                modalSecondaryBtnClass,
+                store.themeMode === mode.id ? '!bg-accent !text-white shadow-sm !border-accent' : ''
               ]"
             >
               {{ mode.name }}
@@ -80,10 +90,10 @@
       </div>
 
       <!-- Footer -->
-      <div class="px-5 py-3 border-t border-border flex items-center justify-end bg-surface-elevated/50">
+      <div :class="['px-5 py-3 flex items-center justify-end shrink-0', modalFooterClass]">
         <button
           @click="$emit('close')"
-          class="px-4 py-2 rounded-xl bg-accent text-white text-xs font-semibold hover:bg-accent-hover transition-colors shadow-sm"
+          :class="['text-xs', modalPrimaryBtnClass]"
         >
           Done
         </button>
@@ -93,15 +103,26 @@
 </template>
 
 <script setup lang="ts">
-import { useLibraryStore } from '../stores/library';
+import { computed } from 'vue';
 import { Palette, X } from 'lucide-vue-next';
+import { usePlatformModal } from '../composables/usePlatformModal';
 import type { PlatformStyle, ThemeMode } from '../types';
 
 defineEmits<{
   (e: 'close'): void;
 }>();
 
-const store = useLibraryStore();
+const {
+  store,
+  modalContainerClass,
+  modalHeaderClass,
+  modalFooterClass,
+  modalTitleClass,
+  modalCloseBtnClass,
+  modalCardClass,
+  modalPrimaryBtnClass,
+  modalSecondaryBtnClass,
+} = usePlatformModal();
 
 const platforms: { id: PlatformStyle; name: string; desc: string }[] = [
   { id: 'windows', name: 'Windows 11 Fluent', desc: 'Mica, Acrylic glass & Segoe UI' },
@@ -118,8 +139,21 @@ const modes: { id: ThemeMode; name: string }[] = [
 
 const presetColors = ['#0078d4', '#0a84ff', '#3584e4', '#d0bcff', '#10b981', '#f59e0b', '#ec4899'];
 
+const activePlatformBorder = computed(() => {
+  switch (store.platformStyle) {
+    case 'windows':
+      return '!border-accent !bg-accent/15 ring-1 ring-accent';
+    case 'apple':
+      return '!border-[#007aff] !bg-[#007aff]/20 ring-1 ring-[#007aff] shadow-sm';
+    case 'android':
+      return '!border-accent !bg-accent/20 ring-2 ring-accent';
+    case 'linux':
+    default:
+      return '!border-[#3584e4] !bg-[#3584e4]/25 ring-1 ring-[#3584e4]';
+  }
+});
+
 function setAccent(color: string) {
   document.documentElement.style.setProperty('--accent-primary', color);
 }
 </script>
-

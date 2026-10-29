@@ -1,15 +1,21 @@
 <template>
   <div class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-    <div class="bg-surface border border-border w-full max-w-md rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+    <div
+      :class="[
+        'w-full max-w-md overflow-hidden flex flex-col transition-all duration-200',
+        modalContainerClass
+      ]"
+    >
       <!-- Header -->
-      <div class="px-5 py-4 border-b border-border flex items-center justify-between">
+      <div :class="['px-5 py-4 flex items-center justify-between shrink-0', modalHeaderClass]">
         <div class="flex items-center gap-2">
           <RotateCcw class="w-4 h-4 text-amber-500" />
-          <h3 class="text-sm font-semibold text-text-primary">Version Rollback Buffer</h3>
+          <h3 :class="modalTitleClass">Version Rollback Buffer</h3>
         </div>
         <button
           @click="$emit('close')"
-          class="p-1 rounded-lg text-text-muted hover:text-text-primary hover:bg-surface-elevated transition-colors"
+          :class="modalCloseBtnClass"
+          title="Close"
         >
           <X class="w-4 h-4" />
         </button>
@@ -26,7 +32,7 @@
           <div
             v-for="snap in snapshots"
             :key="snap.id"
-            class="p-3.5 rounded-xl bg-surface-elevated border border-border flex items-center justify-between"
+            :class="['p-3.5 flex items-center justify-between', modalCardClass]"
           >
             <div>
               <div class="flex items-center gap-2">
@@ -46,10 +52,10 @@
       </div>
 
       <!-- Footer -->
-      <div class="px-5 py-3 border-t border-border flex items-center justify-end bg-surface-elevated/50">
+      <div :class="['px-5 py-3 flex items-center justify-end shrink-0', modalFooterClass]">
         <button
           @click="$emit('close')"
-          class="px-4 py-2 rounded-xl bg-surface-elevated text-text-secondary text-xs font-semibold hover:text-text-primary transition-colors"
+          :class="['text-xs', modalSecondaryBtnClass]"
         >
           Close
         </button>
@@ -60,13 +66,23 @@
 
 <script setup lang="ts">
 import { RotateCcw, X } from 'lucide-vue-next';
+import { usePlatformModal } from '../composables/usePlatformModal';
 
 defineEmits<{
   (e: 'close'): void;
 }>();
 
+const {
+  modalContainerClass,
+  modalHeaderClass,
+  modalFooterClass,
+  modalTitleClass,
+  modalCloseBtnClass,
+  modalCardClass,
+  modalSecondaryBtnClass,
+} = usePlatformModal();
+
 const snapshots = [
   { id: 'v4.0.0_1793296000000', version: '4.0.0', date: 'Initial SQLite Upgrade' },
 ];
 </script>
-

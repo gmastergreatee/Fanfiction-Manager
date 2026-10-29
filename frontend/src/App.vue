@@ -1,6 +1,9 @@
 <template>
   <div
-    class="h-screen w-screen flex flex-col bg-canvas text-text-primary overflow-hidden select-none"
+    :class="[
+      'h-screen w-screen flex flex-col bg-canvas text-text-primary overflow-hidden select-none',
+      appFrameClass
+    ]"
     :data-platform="store.platformStyle"
   >
     <!-- Native Window Titlebar & Platform Chrome (Hidden in Reader mode) -->
@@ -84,7 +87,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useLibraryStore } from './stores/library';
 import TitleBar from './components/TitleBar.vue';
 import Sidebar from './components/Sidebar.vue';
@@ -101,6 +104,20 @@ import type { Novel, Rule } from './types';
 const store = useLibraryStore();
 const showThemeStudio = ref(false);
 const showRollback = ref(false);
+
+const appFrameClass = computed(() => {
+  switch (store.platformStyle) {
+    case 'windows':
+      return 'border border-white/10';
+    case 'apple':
+      return 'border border-white/15';
+    case 'linux':
+      return 'border border-white/10';
+    case 'android':
+    default:
+      return 'border border-white/5';
+  }
+});
 
 onMounted(async () => {
   // Check if running in Tauri 2.0 runtime

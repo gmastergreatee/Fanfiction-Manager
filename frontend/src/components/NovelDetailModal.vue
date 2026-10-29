@@ -6,22 +6,26 @@
   >
     <!-- Modal Container: Sheet on mobile, Centered Multi-Column Dialog on desktop -->
     <div
-      class="bg-surface border border-border w-full md:max-w-4xl max-h-[90vh] md:max-h-[85vh] h-[85vh] md:h-auto rounded-t-3xl md:rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200"
+      :class="[
+        'w-full md:max-w-4xl max-h-[90vh] md:max-h-[85vh] h-[85vh] md:h-auto flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200 transition-all',
+        modalContainerClass
+      ]"
     >
       <!-- Mobile Drag Handle indicator -->
       <div class="md:hidden flex justify-center pt-3 pb-1">
-        <div class="w-12 h-1.5 rounded-full bg-border"></div>
+        <div class="w-12 h-1.5 rounded-full bg-white/20"></div>
       </div>
 
       <!-- Header with Close Button -->
-      <div class="px-6 py-4 border-b border-border flex items-center justify-between shrink-0">
+      <div :class="['px-6 py-4 flex items-center justify-between shrink-0', modalHeaderClass]">
         <div class="flex items-center gap-2">
           <BookOpen class="w-5 h-5 text-accent" />
-          <h2 class="text-sm font-semibold text-text-primary">Novel Details</h2>
+          <h2 :class="modalTitleClass">Novel Details</h2>
         </div>
         <button
           @click="store.closeNovelDetail()"
-          class="p-2 rounded-xl text-text-muted hover:text-text-primary hover:bg-surface-elevated transition-colors"
+          :class="modalCloseBtnClass"
+          title="Close"
         >
           <X class="w-4 h-4" />
         </button>
@@ -31,7 +35,13 @@
       <div class="flex-1 overflow-y-auto p-6 grid grid-cols-1 md:grid-cols-12 gap-6">
         <!-- Left Column: Cover & Quick Stats (md:col-span-4) -->
         <div class="md:col-span-4 flex flex-col items-center md:items-start space-y-4">
-          <div class="relative w-44 aspect-[2/3] rounded-2xl overflow-hidden bg-surface-elevated shadow-md border border-border">
+          <div
+            :class="[
+              'relative w-44 aspect-[2/3] overflow-hidden shadow-md',
+              store.platformStyle === 'windows' ? 'rounded-md' : store.platformStyle === 'android' ? 'rounded-3xl' : 'rounded-2xl',
+              modalCardClass
+            ]"
+          >
             <img
               v-if="!coverFailed && (novel.cover_local_path || novel.cover_url)"
               :src="getCoverUrl()"
@@ -39,7 +49,10 @@
               @error="coverFailed = true"
               class="w-full h-full object-cover"
             />
-            <div v-else class="w-full h-full flex flex-col items-center justify-center p-4 text-center text-xs text-text-muted bg-gradient-to-br from-surface to-surface-elevated">
+            <div
+              v-else
+              class="w-full h-full flex flex-col items-center justify-center p-4 text-center text-xs text-text-muted bg-gradient-to-br from-surface to-surface-elevated"
+            >
               <BookOpen class="w-10 h-10 text-accent/50 mb-2" />
               <span class="font-medium text-text-primary line-clamp-3">{{ novel.title }}</span>
             </div>
@@ -48,7 +61,7 @@
           <div class="w-full space-y-2">
             <button
               @click="handleStartReading"
-              class="w-full py-2.5 px-4 rounded-xl bg-accent hover:bg-accent/90 text-white font-medium text-xs flex items-center justify-center gap-2 shadow-sm transition-all"
+              :class="['w-full py-2.5 px-4 text-xs flex items-center justify-center gap-2 shadow-sm transition-all', modalPrimaryBtnClass]"
             >
               <Play class="w-4 h-4 fill-white" />
               <span>{{ continueReadingLabel }}</span>
@@ -56,7 +69,7 @@
 
             <button
               @click="handleEnqueueDownload"
-              class="w-full py-2.5 px-4 rounded-xl bg-surface-elevated hover:bg-surface-elevated/80 border border-border text-text-primary font-medium text-xs flex items-center justify-center gap-2 transition-all"
+              :class="['w-full py-2.5 px-4 text-xs flex items-center justify-center gap-2 transition-all', modalSecondaryBtnClass]"
             >
               <DownloadCloud class="w-4 h-4 text-accent" />
               <span>Download Missing Chapters</span>
@@ -64,7 +77,7 @@
 
             <button
               @click="handleExportEpub"
-              class="w-full py-2.5 px-4 rounded-xl bg-surface-elevated hover:bg-surface-elevated/80 border border-border text-text-primary font-medium text-xs flex items-center justify-center gap-2 transition-all"
+              :class="['w-full py-2.5 px-4 text-xs flex items-center justify-center gap-2 transition-all', modalSecondaryBtnClass]"
             >
               <BookDown class="w-4 h-4 text-emerald-500" />
               <span>{{ epubExporting ? 'Exporting EPUB...' : 'Export as EPUB' }}</span>
@@ -75,16 +88,16 @@
           </div>
 
           <!-- Metadata List -->
-          <div class="w-full bg-surface-elevated/60 border border-border/80 rounded-2xl p-4 space-y-2 text-xs">
-            <div class="flex justify-between py-1 border-b border-border/40">
+          <div :class="['w-full p-4 space-y-2 text-xs', modalCardClass]">
+            <div class="flex justify-between py-1 border-b border-white/5">
               <span class="text-text-muted">Total Chapters</span>
               <span class="font-medium text-text-primary">{{ novel.total_chapters }}</span>
             </div>
-            <div class="flex justify-between py-1 border-b border-border/40">
+            <div class="flex justify-between py-1 border-b border-white/5">
               <span class="text-text-muted">Downloaded</span>
               <span class="font-medium text-accent">{{ novel.downloaded_chapters }}</span>
             </div>
-            <div class="flex justify-between py-1 border-b border-border/40">
+            <div class="flex justify-between py-1 border-b border-white/5">
               <span class="text-text-muted">Auto Updates</span>
               <span class="font-medium" :class="novel.check_updates ? 'text-emerald-500' : 'text-text-muted'">
                 {{ novel.check_updates ? 'Enabled' : 'Disabled' }}
@@ -119,7 +132,7 @@
           </div>
 
           <!-- Summary Box -->
-          <div class="bg-surface-elevated/40 border border-border/60 rounded-2xl p-4 text-xs leading-relaxed text-text-secondary max-h-36 overflow-y-auto">
+          <div :class="['p-4 text-xs leading-relaxed text-text-secondary max-h-36 overflow-y-auto', modalCardClass]">
             <h4 class="text-[11px] font-semibold text-text-primary uppercase tracking-wider mb-1">Synopsis</h4>
             <p class="whitespace-pre-line">{{ novel.summary || 'No synopsis available for this title.' }}</p>
           </div>
@@ -138,18 +151,18 @@
                   v-model="chapterSearch"
                   type="text"
                   placeholder="Filter chapters..."
-                  class="w-full pl-8 pr-3 py-1 bg-surface-elevated border border-border rounded-lg text-xs text-text-primary placeholder-text-muted focus:outline-none focus:border-accent"
+                  :class="['w-full pl-8 pr-3 py-1 text-xs focus:outline-none', modalInputClass]"
                 />
               </div>
             </div>
 
             <!-- Chapters Scroll Area -->
-            <div class="flex-1 overflow-y-auto border border-border/80 rounded-2xl bg-surface-elevated/30 divide-y divide-border/40 max-h-64">
+            <div :class="['flex-1 overflow-y-auto divide-y divide-white/5 max-h-64', modalCardClass]">
               <div
                 v-for="ch in filteredChapters"
                 :key="ch.id"
                 @click="openChapter(ch)"
-                class="px-4 py-2.5 flex items-center justify-between hover:bg-surface-elevated cursor-pointer transition-colors group"
+                class="px-4 py-2.5 flex items-center justify-between hover:bg-white/5 cursor-pointer transition-colors group"
               >
                 <div class="flex items-center gap-3 truncate">
                   <span class="text-xs font-mono text-text-muted w-8">#{{ ch.chapter_index }}</span>
@@ -181,7 +194,6 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import { useLibraryStore } from '../stores/library';
 import {
   X,
   BookOpen,
@@ -192,9 +204,21 @@ import {
   Search,
   BookDown,
 } from 'lucide-vue-next';
+import { usePlatformModal } from '../composables/usePlatformModal';
 import type { Chapter } from '../types';
 
-const store = useLibraryStore();
+const {
+  store,
+  modalContainerClass,
+  modalHeaderClass,
+  modalTitleClass,
+  modalCloseBtnClass,
+  modalCardClass,
+  modalPrimaryBtnClass,
+  modalSecondaryBtnClass,
+  modalInputClass,
+} = usePlatformModal();
+
 const chapterSearch = ref('');
 const epubExporting = ref(false);
 const epubMessage = ref('');
@@ -278,4 +302,3 @@ async function handleExportEpub() {
   }
 }
 </script>
-
