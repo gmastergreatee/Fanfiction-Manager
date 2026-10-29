@@ -38,7 +38,7 @@
     "windows": {
       "nsis": {
         "installMode": "currentUser",
-        "languages": ["en-US"]
+        "languages": ["English"]
       },
       "wix": {
         "language": "en-US"

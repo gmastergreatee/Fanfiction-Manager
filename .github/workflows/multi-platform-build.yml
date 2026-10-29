@@ -139,6 +139,7 @@ jobs:
         with:
           files: |
             Version 4/dist/app.zip
+            Version 4/dist/mobile-bundle.zip
             Version 4/dist/checksums.json
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
