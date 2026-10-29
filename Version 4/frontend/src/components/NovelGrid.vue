@@ -45,7 +45,7 @@
         <article
           v-for="novel in store.filteredNovels"
           :key="novel.id"
-          @click="store.openNovel(novel)"
+          @click="store.openNovelDetail(novel)"
           class="group flex flex-col bg-surface border border-border rounded-2xl overflow-hidden cursor-pointer hover:border-accent/50 hover:shadow-lg transition-all duration-200"
         >
           <!-- Cover Image Container -->

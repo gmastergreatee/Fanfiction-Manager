@@ -1,7 +1,7 @@
 pub mod db;
 pub mod scraper;
 
-use db::{Chapter, Database, Novel, Rule};
+use db::{Chapter, Database, Novel, ReadingProgress, Rule};
 use scraper::{ChapterContentExtraction, CookieEntry, NovelTocExtraction, ScrapingEngine};
 use std::sync::Mutex;
 use tauri::{Manager, State};
@@ -27,6 +27,38 @@ fn get_novel_by_id(id: String, state: State<'_, AppState>) -> Result<Option<Nove
 fn get_novel_chapters(novel_id: String, state: State<'_, AppState>) -> Result<Vec<Chapter>, String> {
     let db = state.db.lock().map_err(|e| e.to_string())?;
     db.get_novel_chapters(&novel_id).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+fn get_chapter_content(
+    novel_id: String,
+    chapter_index: i64,
+    state: State<'_, AppState>,
+) -> Result<Option<Chapter>, String> {
+    let db = state.db.lock().map_err(|e| e.to_string())?;
+    db.get_chapter_content(&novel_id, chapter_index).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+fn get_reading_progress(
+    novel_id: String,
+    state: State<'_, AppState>,
+) -> Result<Option<ReadingProgress>, String> {
+    let db = state.db.lock().map_err(|e| e.to_string())?;
+    db.get_reading_progress(&novel_id).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+fn save_reading_progress(
+    novel_id: String,
+    chapter_index: i64,
+    scroll_percentage: f64,
+    state: State<'_, AppState>,
+) -> Result<bool, String> {
+    let db = state.db.lock().map_err(|e| e.to_string())?;
+    db.save_reading_progress(&novel_id, chapter_index, scroll_percentage)
+        .map_err(|e| e.to_string())?;
+    Ok(true)
 }
 
 #[tauri::command]
@@ -218,6 +250,9 @@ pub fn run() {
             get_all_novels,
             get_novel_by_id,
             get_novel_chapters,
+            get_chapter_content,
+            get_reading_progress,
+            save_reading_progress,
             get_all_rules,
             fetch_novel_toc,
             fetch_chapter_content,

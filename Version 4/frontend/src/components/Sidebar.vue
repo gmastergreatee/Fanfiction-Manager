@@ -75,6 +75,12 @@
       >
         <DownloadCloud class="w-4 h-4" />
         <span>Downloader Queue</span>
+        <span
+          v-if="store.activeDownloadsCount > 0"
+          class="ml-auto text-xs px-2 py-0.5 rounded-full bg-accent text-white font-semibold animate-pulse"
+        >
+          {{ store.activeDownloadsCount }}
+        </span>
       </button>
     </nav>
 

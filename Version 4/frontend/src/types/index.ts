@@ -50,6 +50,41 @@ export interface Rule {
 export type PlatformStyle = 'windows' | 'apple' | 'android' | 'linux';
 export type ThemeMode = 'dark' | 'light' | 'oled';
 export type ReaderTheme = 'dark' | 'oled' | 'sepia' | 'light';
+export type ReaderFontFamily = 'serif' | 'sans' | 'mono' | 'dyslexic';
+export type ReaderLineHeight = 'compact' | 'normal' | 'relaxed' | 'loose';
+export type ReaderLayoutMode = 'vertical' | 'paginated';
+export type ReaderContainerWidth = 'narrow' | 'medium' | 'wide' | 'full';
+export type ReaderTextAlign = 'left' | 'justify';
+
+export interface ReaderSettings {
+  theme: ReaderTheme;
+  fontSize: number;
+  fontFamily: ReaderFontFamily;
+  lineHeight: ReaderLineHeight;
+  layoutMode: ReaderLayoutMode;
+  containerWidth: ReaderContainerWidth;
+  textAlign: ReaderTextAlign;
+}
+
+export interface DownloadTask {
+  id: string;
+  novelId: string;
+  novelTitle: string;
+  chapterIndex: number;
+  chapterTitle: string;
+  sourceUrl: string;
+  status: 'queued' | 'downloading' | 'paused' | 'completed' | 'error';
+  progress: number;
+  errorMessage?: string;
+  addedAt: number;
+  completedAt?: number;
+}
+
+export interface QueueSettings {
+  concurrency: number;
+  delayMs: number;
+  isPaused: boolean;
+}
 
 export interface CustomThemePalette {
   id: string;

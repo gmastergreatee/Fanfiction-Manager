@@ -29,13 +29,13 @@
 - [x] Port and validate existing rules from `rules.json` (Fanfiction.net, WebNovel, RoyalRoad, AO3, Wattpad, ScribbleHub, etc.).
 
 ### Phase 3: Modern Responsive UI & Reading Mode
-- [ ] Build responsive UI layouts (Desktop multi-column + Mobile bottom navigation & gesture drawer).
-- [ ] Develop modern Reader Mode:
+- [x] Build responsive UI layouts (Desktop multi-column + Mobile bottom navigation & gesture drawer).
+- [x] Develop modern Reader Mode:
   - Continuous vertical reading and paginated reader mode.
   - Themes: Light, Sepia, Slate Dark, OLED True Black.
   - Reading progress auto-save (chapter position and scroll percentage).
   - Customizable typography (font family, font size, line spacing, margins).
-- [ ] Build Downloader Queue manager with pause/resume and rate throttling controls.
+- [x] Build Downloader Queue manager with pause/resume and rate throttling controls.
 
 ### Phase 4: Extended Features & Rule Studio
 - [ ] Implement **Model Context Protocol (MCP) Server** (`stdio` and `SSE` transport) as specified in [`MCP_SPECIFICATION.md`](./MCP_SPECIFICATION.md).

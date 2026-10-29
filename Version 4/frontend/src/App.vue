@@ -38,13 +38,7 @@
       <RuleStudioView v-else-if="store.activeTab === 'studio'" />
 
       <!-- Downloader Queue View -->
-      <div v-else-if="store.activeTab === 'queue'" class="flex-1 p-6 overflow-y-auto">
-        <h2 class="text-base font-semibold mb-2">Downloader Queue</h2>
-        <p class="text-xs text-text-muted mb-6">Manage concurrent chapter downloads, pause, and rate-limiting.</p>
-        <div class="p-8 border border-dashed border-border rounded-2xl flex flex-col items-center justify-center text-center">
-          <span class="text-xs text-text-muted">No active download tasks. Select a novel to download chapters.</span>
-        </div>
-      </div>
+      <QueueView v-else-if="store.activeTab === 'queue'" />
 
       <!-- Reader Mode -->
       <ReaderView v-else-if="store.activeTab === 'reader'" />
@@ -56,7 +50,8 @@
       @open-theme-studio="showThemeStudio = true"
     />
 
-    <!-- Modals -->
+    <!-- Modals & Drawers -->
+    <NovelDetailModal />
     <ThemeStudioModal v-if="showThemeStudio" @close="showThemeStudio = false" />
     <RollbackModal v-if="showRollback" @close="showRollback = false" />
   </div>
@@ -70,6 +65,8 @@ import BottomNav from './components/BottomNav.vue';
 import NovelGrid from './components/NovelGrid.vue';
 import ReaderView from './components/ReaderView.vue';
 import RuleStudioView from './components/RuleStudioView.vue';
+import QueueView from './components/QueueView.vue';
+import NovelDetailModal from './components/NovelDetailModal.vue';
 import ThemeStudioModal from './components/ThemeStudioModal.vue';
 import RollbackModal from './components/RollbackModal.vue';
 import type { Novel, Rule } from './types';

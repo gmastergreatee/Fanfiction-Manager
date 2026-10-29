@@ -36,11 +36,19 @@
     <button
       @click="store.activeTab = 'queue'"
       :class="[
-        'flex flex-col items-center justify-center flex-1 py-1 rounded-xl transition-colors',
+        'flex flex-col items-center justify-center flex-1 py-1 rounded-xl transition-colors relative',
         store.activeTab === 'queue' ? 'text-accent' : 'text-text-muted hover:text-text-secondary'
       ]"
     >
-      <DownloadCloud class="w-5 h-5" />
+      <div class="relative">
+        <DownloadCloud class="w-5 h-5" />
+        <span
+          v-if="store.activeDownloadsCount > 0"
+          class="absolute -top-1 -right-2 px-1 text-[9px] font-bold rounded-full bg-accent text-white"
+        >
+          {{ store.activeDownloadsCount }}
+        </span>
+      </div>
       <span class="text-[11px] mt-0.5 font-medium">Queue</span>
     </button>
 

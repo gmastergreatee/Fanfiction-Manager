@@ -46,6 +46,14 @@ pub struct Rule {
     pub updated_at: Option<String>,
 }
 
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct ReadingProgress {
+    pub novel_id: String,
+    pub last_chapter_index: i64,
+    pub scroll_percentage: f64,
+    pub updated_at: Option<String>,
+}
+
 pub struct Database {
     conn: Connection,
 }
@@ -318,6 +326,76 @@ impl Database {
             rusqlite::params![novel_id],
         )?;
 
+        Ok(())
+    }
+
+    pub fn get_chapter_content(&self, novel_id: &str, chapter_index: i64) -> Result<Option<Chapter>> {
+        let mut stmt = self.conn.prepare(
+            "SELECT id, novel_id, chapter_index, title, content_html, source_url, word_count, is_downloaded, downloaded_at
+             FROM chapters WHERE novel_id = ? AND chapter_index = ?",
+        )?;
+
+        let mut rows = stmt.query_map(rusqlite::params![novel_id, chapter_index], |row| {
+            let is_dl: i64 = row.get(7)?;
+            Ok(Chapter {
+                id: row.get(0)?,
+                novel_id: row.get(1)?,
+                chapter_index: row.get(2)?,
+                title: row.get(3)?,
+                content_html: row.get(4)?,
+                source_url: row.get(5)?,
+                word_count: row.get(6)?,
+                is_downloaded: is_dl == 1,
+                downloaded_at: row.get(8)?,
+            })
+        })?;
+
+        if let Some(r) = rows.next() {
+            Ok(Some(r?))
+        } else {
+            Ok(None)
+        }
+    }
+
+    pub fn get_reading_progress(&self, novel_id: &str) -> Result<Option<ReadingProgress>> {
+        let mut stmt = self.conn.prepare(
+            "SELECT novel_id, last_chapter_index, scroll_percentage, updated_at
+             FROM reading_progress WHERE novel_id = ?",
+        )?;
+
+        let mut rows = stmt.query_map([novel_id], |row| {
+            Ok(ReadingProgress {
+                novel_id: row.get(0)?,
+                last_chapter_index: row.get(1)?,
+                scroll_percentage: row.get(2)?,
+                updated_at: row.get(3)?,
+            })
+        })?;
+
+        if let Some(r) = rows.next() {
+            Ok(Some(r?))
+        } else {
+            Ok(None)
+        }
+    }
+
+    pub fn save_reading_progress(
+        &self,
+        novel_id: &str,
+        chapter_index: i64,
+        scroll_percentage: f64,
+    ) -> Result<()> {
+        self.conn.execute(
+            r#"
+            INSERT INTO reading_progress (novel_id, last_chapter_index, scroll_percentage, updated_at)
+            VALUES (?1, ?2, ?3, datetime('now'))
+            ON CONFLICT(novel_id) DO UPDATE SET
+                last_chapter_index = excluded.last_chapter_index,
+                scroll_percentage = excluded.scroll_percentage,
+                updated_at = datetime('now')
+            "#,
+            rusqlite::params![novel_id, chapter_index, scroll_percentage],
+        )?;
         Ok(())
     }
 }
