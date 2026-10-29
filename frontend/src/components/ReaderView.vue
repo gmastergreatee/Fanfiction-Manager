@@ -3,16 +3,17 @@
     class="relative flex-1 flex flex-col h-full overflow-hidden select-text transition-colors duration-200"
     :class="readerThemeClasses"
   >
-    <!-- Floating Reader HUD (Auto-Hides on Scroll or User Click) -->
+    <!-- FLOATING READER HUD (Auto-Hides on Scroll or Center Tap) -->
     <header
       v-show="showHUD"
-      class="absolute top-0 inset-x-0 h-14 bg-surface/90 backdrop-blur-md border-b border-border px-4 md:px-6 flex items-center justify-between z-30 transition-transform duration-200 select-none shadow-sm"
+      class="absolute top-0 inset-x-0 h-14 bg-surface/90 backdrop-blur-xl border-b border-border/80 px-4 md:px-6 flex items-center justify-between z-30 transition-transform duration-200 select-none shadow-md"
+      :class="platformHUDClass"
     >
       <!-- Back to Library & Chapter Drawer Toggle -->
       <div class="flex items-center gap-2">
         <button
           @click="store.closeReader()"
-          class="flex items-center gap-1.5 text-xs font-medium text-text-secondary hover:text-text-primary px-2.5 py-1.5 rounded-lg hover:bg-surface-elevated transition-colors"
+          class="flex items-center gap-1.5 text-xs font-medium text-text-secondary hover:text-text-primary px-2.5 py-1.5 rounded-xl hover:bg-surface-elevated transition-colors"
           title="Exit to Library"
         >
           <ArrowLeft class="w-4 h-4" />
@@ -21,7 +22,7 @@
 
         <button
           @click="showChapterDrawer = true"
-          class="flex items-center gap-1.5 text-xs font-medium text-text-secondary hover:text-text-primary px-2.5 py-1.5 rounded-lg hover:bg-surface-elevated transition-colors"
+          class="flex items-center gap-1.5 text-xs font-medium text-text-secondary hover:text-text-primary px-2.5 py-1.5 rounded-xl hover:bg-surface-elevated transition-colors"
           title="Chapter Index"
         >
           <List class="w-4 h-4" />
@@ -29,18 +30,20 @@
         </button>
       </div>
 
-      <!-- Novel & Chapter Title in Center -->
-      <div class="text-center px-2 max-w-xs md:max-w-md truncate">
+      <!-- Novel & Active Chapter Title in Center -->
+      <div class="text-center px-3 max-w-xs md:max-w-md truncate">
         <h4 class="text-xs font-semibold truncate text-text-primary">{{ store.activeNovel?.title }}</h4>
-        <span class="text-[10px] text-text-muted truncate">{{ store.currentChapter?.title }}</span>
+        <span class="text-[10px] text-accent font-mono truncate block">
+          Ch. {{ activeVisibleChapter?.chapter_index || store.currentChapter?.chapter_index }}: {{ activeVisibleChapter?.title || store.currentChapter?.title }}
+        </span>
       </div>
 
       <!-- HUD Actions: Mode, TTS, Settings Dropdown, Fullscreen -->
-      <div class="flex items-center gap-2">
-        <!-- TTS Speech Audio Toggle -->
+      <div class="flex items-center gap-1.5">
+        <!-- TTS Toggle -->
         <button
           @click="toggleTTSBar"
-          class="p-1.5 rounded-lg hover:bg-surface-elevated text-text-secondary hover:text-text-primary text-xs flex items-center gap-1"
+          class="p-1.5 rounded-xl hover:bg-surface-elevated text-text-secondary hover:text-text-primary text-xs flex items-center gap-1"
           :class="{ 'bg-surface-elevated text-accent': showTTS }"
           title="Text-to-Speech (TTS)"
         >
@@ -48,32 +51,32 @@
           <span class="hidden md:inline text-[11px]">TTS</span>
         </button>
 
-        <!-- Reading Layout Toggle (Vertical vs Paginated) -->
+        <!-- Reading Mode Toggle (Continuous Vertical vs Paginated Drag) -->
         <button
           @click="toggleLayoutMode"
-          class="p-1.5 rounded-lg hover:bg-surface-elevated text-text-secondary hover:text-text-primary text-xs flex items-center gap-1"
-          :title="store.readerLayoutMode === 'vertical' ? 'Switch to Paginated Mode' : 'Switch to Vertical Mode'"
+          class="p-1.5 rounded-xl hover:bg-surface-elevated text-text-secondary hover:text-text-primary text-xs flex items-center gap-1"
+          :title="store.readerLayoutMode === 'vertical' ? 'Switch to Paginated Drag Mode' : 'Switch to Continuous Scroll Mode'"
         >
           <Columns v-if="store.readerLayoutMode === 'paginated'" class="w-4 h-4 text-accent" />
           <Scroll v-else class="w-4 h-4 text-accent" />
-          <span class="hidden md:inline capitalize text-[11px]">{{ store.readerLayoutMode }}</span>
+          <span class="hidden md:inline capitalize text-[11px] font-mono">{{ store.readerLayoutMode }}</span>
         </button>
 
-        <!-- Typography Settings Modal Toggle -->
+        <!-- Appearance Settings -->
         <button
           @click="showSettings = !showSettings"
-          class="p-1.5 rounded-lg hover:bg-surface-elevated text-text-secondary hover:text-text-primary"
+          class="p-1.5 rounded-xl hover:bg-surface-elevated text-text-secondary hover:text-text-primary"
           :class="{ 'bg-surface-elevated text-accent': showSettings }"
-          title="Reader Typography & Themes"
+          title="Appearance"
         >
           <Settings2 class="w-4 h-4" />
         </button>
 
-        <!-- Fullscreen Toggle -->
+        <!-- Fullscreen -->
         <button
           @click="toggleFullscreen"
-          class="p-1.5 rounded-lg hover:bg-surface-elevated text-text-secondary hover:text-text-primary"
-          title="Toggle Fullscreen"
+          class="p-1.5 rounded-xl hover:bg-surface-elevated text-text-secondary hover:text-text-primary"
+          title="Fullscreen"
         >
           <Maximize v-if="!isFullscreen" class="w-4 h-4" />
           <Minimize v-else class="w-4 h-4" />
@@ -84,7 +87,7 @@
     <!-- Typography & Appearance Settings Popover -->
     <div
       v-if="showSettings"
-      class="absolute top-16 right-4 md:right-6 z-40 w-80 bg-surface border border-border rounded-2xl shadow-2xl p-4 space-y-4 animate-in fade-in zoom-in-95 select-none"
+      class="absolute top-16 right-4 md:right-6 z-40 w-80 bg-surface/95 backdrop-blur-xl border border-border rounded-2xl shadow-2xl p-4 space-y-4 animate-in fade-in zoom-in-95 select-none"
     >
       <div class="flex items-center justify-between pb-2 border-b border-border">
         <span class="text-xs font-semibold text-text-primary">Reader Appearance</span>
@@ -98,50 +101,40 @@
         <label class="text-[11px] font-medium text-text-muted mb-2 block">Theme</label>
         <div class="grid grid-cols-4 gap-2">
           <button
-            v-for="t in themeOptions"
-            :key="t.id"
-            @click="store.setReaderTheme(t.id)"
+            v-for="th in themeOptions"
+            :key="th.id"
+            @click="store.setReaderTheme(th.id)"
             :class="[
-              'py-1.5 px-2 rounded-xl text-xs font-medium border flex flex-col items-center gap-1 transition-all',
-              store.readerTheme === t.id
-                ? 'border-accent ring-1 ring-accent'
-                : 'border-border hover:border-accent/40'
+              'h-9 rounded-xl border flex items-center justify-center text-xs font-semibold transition-all shadow-xs',
+              store.readerTheme === th.id
+                ? 'ring-2 ring-accent border-transparent scale-105'
+                : 'border-border/60 hover:scale-102'
             ]"
-            :style="{ backgroundColor: t.bg, color: t.color }"
+            :style="{ backgroundColor: th.bg, color: th.color }"
           >
-            <span class="w-3 h-3 rounded-full border border-black/20" :style="{ backgroundColor: t.bg }"></span>
-            <span class="text-[10px]">{{ t.label }}</span>
+            {{ th.label }}
           </button>
         </div>
       </div>
 
-      <!-- Font Size Stepper -->
+      <!-- Font Size Slider -->
       <div>
-        <div class="flex items-center justify-between mb-1.5">
-          <span class="text-[11px] font-medium text-text-muted">Font Size</span>
-          <span class="text-xs font-semibold text-text-primary">{{ store.readerFontSize }}px</span>
+        <div class="flex items-center justify-between text-[11px] font-medium text-text-muted mb-1.5">
+          <span>Font Size</span>
+          <span class="font-mono text-accent">{{ store.readerFontSize }}px</span>
         </div>
-        <div class="flex items-center gap-2">
-          <button
-            @click="store.setReaderFontSize(store.readerFontSize - 1)"
-            class="flex-1 py-1 bg-surface-elevated rounded-lg hover:bg-border text-xs font-semibold flex items-center justify-center text-text-primary"
-          >
-            A-
-          </button>
+        <div class="flex items-center gap-3">
+          <span class="text-xs text-text-muted font-bold">A</span>
           <input
             type="range"
-            min="12"
-            max="36"
+            min="14"
+            max="28"
+            step="1"
             :value="store.readerFontSize"
-            @input="(e: any) => store.setReaderFontSize(parseInt(e.target.value))"
-            class="flex-1 accent-accent"
+            @input="handleFontSizeInput"
+            class="flex-1 accent-accent h-1.5 bg-surface-elevated rounded-lg cursor-pointer"
           />
-          <button
-            @click="store.setReaderFontSize(store.readerFontSize + 1)"
-            class="flex-1 py-1 bg-surface-elevated rounded-lg hover:bg-border text-xs font-semibold flex items-center justify-center text-text-primary"
-          >
-            A+
-          </button>
+          <span class="text-base text-text-primary font-bold">A</span>
         </div>
       </div>
 
@@ -166,7 +159,7 @@
         </div>
       </div>
 
-      <!-- Line Height & Margins -->
+      <!-- Line Spacing & Width -->
       <div class="grid grid-cols-2 gap-3">
         <div>
           <label class="text-[11px] font-medium text-text-muted mb-1 block">Line Spacing</label>
@@ -240,16 +233,19 @@
           <button
             v-for="ch in store.currentChaptersList"
             :key="ch.id"
-            @click="selectChapterFromDrawer(ch.chapter_index)"
+            @click="jumpToChapter(ch.chapter_index)"
             :class="[
               'w-full text-left px-4 py-3 flex items-center justify-between text-xs transition-colors',
-              ch.chapter_index === store.currentChapter?.chapter_index
-                ? 'bg-accent/10 text-accent font-semibold'
+              ch.chapter_index === (activeVisibleChapter?.chapter_index || store.currentChapter?.chapter_index)
+                ? 'bg-accent/15 text-accent font-bold'
                 : 'text-text-secondary hover:bg-surface-elevated hover:text-text-primary'
             ]"
           >
             <span class="truncate pr-2">Ch. {{ ch.chapter_index }}: {{ ch.title }}</span>
-            <span v-if="ch.chapter_index === store.currentChapter?.chapter_index" class="w-2 h-2 rounded-full bg-accent shrink-0"></span>
+            <span
+              v-if="ch.chapter_index === (activeVisibleChapter?.chapter_index || store.currentChapter?.chapter_index)"
+              class="w-2 h-2 rounded-full bg-accent shrink-0"
+            ></span>
           </button>
         </div>
       </div>
@@ -257,85 +253,121 @@
 
     <!-- MAIN READING CONTAINER -->
 
-    <!-- MODE A: Continuous Vertical Reading -->
+    <!-- MODE A: Continuous Seamless Infinite Scrolling -->
     <main
       v-if="store.readerLayoutMode === 'vertical'"
       ref="scrollContainer"
       @click="handleContentTap"
       @scroll="handleScroll"
-      class="flex-1 overflow-y-auto px-6 md:px-12 py-20 mx-auto w-full transition-all"
+      class="flex-1 overflow-y-auto px-6 md:px-12 py-20 mx-auto w-full transition-all scroll-smooth"
       :class="[containerWidthClass, textAlignClass]"
       :style="typographyStyle"
     >
-      <h1 class="text-xl md:text-2xl font-bold mb-8 text-center font-sans tracking-tight">
-        {{ store.currentChapter?.title || 'Chapter Title' }}
-      </h1>
-
+      <!-- Sequentially rendered continuous chapters -->
       <div
-        v-if="store.currentChapter?.content_html"
-        class="chapter-content space-y-5"
+        v-for="ch in loadedChapters"
+        :key="ch.chapter_index"
+        :id="`chapter-anchor-${ch.chapter_index}`"
+        :data-chapter-index="ch.chapter_index"
+        class="chapter-section mb-16"
       >
-        <p
-          v-for="(p, pIdx) in chapterParagraphs"
-          :key="pIdx"
-          :id="`tts-para-${pIdx}`"
-          :class="[
-            'transition-all duration-300 rounded-xl',
-            showTTS && ttsParagraphIndex === pIdx
-              ? 'bg-accent/15 px-3 py-1 ring-1 ring-accent/40 font-medium'
-              : ''
-          ]"
-          v-html="p"
-        ></p>
+        <!-- Chapter Header Divider (Shown for subsequent chapters) -->
+        <div class="my-14 py-8 flex flex-col items-center justify-center border-t border-b border-border/40 text-center select-none">
+          <span class="text-[10px] font-mono tracking-widest text-accent uppercase font-bold mb-1">
+            Chapter {{ ch.chapter_index }}
+          </span>
+          <h2 class="text-xl md:text-2xl font-bold font-sans tracking-tight text-text-primary">
+            {{ ch.title }}
+          </h2>
+        </div>
+
+        <!-- Chapter Paragraphs -->
+        <div
+          v-if="ch.content_html"
+          class="chapter-content space-y-5"
+        >
+          <p
+            v-for="(p, pIdx) in getParagraphsForChapter(ch)"
+            :key="pIdx"
+            :id="`tts-para-${ch.chapter_index}-${pIdx}`"
+            :class="[
+              'transition-all duration-300 rounded-xl leading-relaxed',
+              showTTS && ttsChapterIndex === ch.chapter_index && ttsParagraphIndex === pIdx
+                ? 'bg-accent/15 px-3 py-1 ring-1 ring-accent/40 font-medium'
+                : ''
+            ]"
+            v-html="p"
+          ></p>
+        </div>
+
+        <div v-else class="text-center py-12 text-text-muted text-sm font-sans">
+          Loading chapter content...
+        </div>
       </div>
 
-      <div v-else class="text-center py-20 text-text-muted text-sm font-sans">
-        No chapter content loaded. Please select a downloaded chapter.
+      <!-- Loading Next Chapter Indicator -->
+      <div v-if="isLoadingMoreNext" class="py-12 flex flex-col items-center justify-center gap-2 text-text-muted">
+        <div class="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin"></div>
+        <span class="text-xs font-mono">Loading next chapter seamlessly...</span>
       </div>
 
-      <!-- Bottom Next / Prev Navigation -->
-      <nav class="flex items-center justify-between pt-12 pb-16 border-t border-border/40 mt-16 font-sans select-none">
-        <button
-          @click="navigateChapter(-1)"
-          :disabled="!hasPrevChapter"
-          class="flex items-center gap-2 px-4 py-2 rounded-xl bg-surface-elevated border border-border text-xs font-medium text-text-secondary hover:text-text-primary disabled:opacity-30 disabled:pointer-events-none transition-colors"
-        >
-          <ChevronLeft class="w-4 h-4" />
-          <span>Previous Chapter</span>
-        </button>
-
-        <span class="text-xs text-text-muted font-mono">
-          Chapter {{ store.currentChapter?.chapter_index || 1 }}
-        </span>
-
-        <button
-          @click="navigateChapter(1)"
-          :disabled="!hasNextChapter"
-          class="flex items-center gap-2 px-4 py-2 rounded-xl bg-surface-elevated border border-border text-xs font-medium text-text-secondary hover:text-text-primary disabled:opacity-30 disabled:pointer-events-none transition-colors"
-        >
-          <span>Next Chapter</span>
-          <ChevronRight class="w-4 h-4" />
-        </button>
-      </nav>
+      <!-- End of Novel Notice -->
+      <div
+        v-else-if="!hasNextChapterToAppend"
+        class="py-16 text-center border-t border-border/40 text-text-muted space-y-3"
+      >
+        <BookOpen class="w-8 h-8 text-accent mx-auto opacity-70" />
+        <h3 class="text-sm font-bold text-text-primary">You've reached the end of downloaded chapters!</h3>
+        <p class="text-xs max-w-sm mx-auto">Check the Downloader Queue or Site Rules to fetch new updates.</p>
+      </div>
     </main>
 
-    <!-- MODE B: Paginated Reader Mode -->
+    <!-- MODE B: Seamless Dragging & Horizontal Paginated Mode -->
     <main
       v-else
-      @click="handleContentTap"
-      class="flex-1 overflow-hidden px-6 md:px-16 py-18 mx-auto w-full flex flex-col justify-between"
+      class="flex-1 overflow-hidden px-6 md:px-16 py-16 mx-auto w-full flex flex-col justify-between relative touch-none select-none"
       :class="[containerWidthClass, textAlignClass]"
       :style="typographyStyle"
+      @pointerdown="onDragStart"
+      @pointermove="onDragMove"
+      @pointerup="onDragEnd"
+      @pointercancel="onDragEnd"
+      @wheel.passive="onWheelPaging"
     >
-      <div class="flex-1 overflow-hidden flex flex-col">
-        <h2 class="text-base md:text-lg font-bold mb-4 text-center font-sans">
-          {{ store.currentChapter?.title }}
-        </h2>
+      <!-- Click Edge Zones for Instant Page Turn -->
+      <div
+        class="absolute left-0 top-14 bottom-14 w-1/4 z-10 cursor-w-resize"
+        @click.stop="prevPage"
+        title="Tap or drag right for Previous Page"
+      ></div>
+      <div
+        class="absolute right-0 top-14 bottom-14 w-1/4 z-10 cursor-e-resize"
+        @click.stop="nextPage"
+        title="Tap or drag left for Next Page"
+      ></div>
+      <div
+        class="absolute inset-x-1/4 top-14 bottom-14 z-10"
+        @click.stop="handleContentTap"
+      ></div>
+
+      <!-- Interactive Dragging Page Container -->
+      <div
+        class="flex-1 overflow-hidden flex flex-col justify-start transition-transform"
+        :style="pageDragStyle"
+      >
+        <div class="text-center mb-6 shrink-0">
+          <span class="text-[10px] font-mono text-accent uppercase tracking-widest block font-bold">
+            Chapter {{ store.currentChapter?.chapter_index }}
+          </span>
+          <h2 class="text-base md:text-lg font-bold font-sans text-text-primary truncate">
+            {{ store.currentChapter?.title }}
+          </h2>
+        </div>
 
         <!-- Paginated Content Chunk -->
         <div
           v-if="currentPaginatedChunk"
-          class="chapter-content flex-1 space-y-4 overflow-hidden"
+          class="chapter-content flex-1 space-y-5 overflow-hidden text-left"
           v-html="currentPaginatedChunk"
         ></div>
         <div v-else class="text-center py-20 text-text-muted text-sm">
@@ -343,42 +375,35 @@
         </div>
       </div>
 
-      <!-- Bottom Pagination Bar -->
-      <div class="h-14 border-t border-border/40 flex items-center justify-between pt-2 select-none font-sans">
-        <button
-          @click.stop="prevPage"
-          :disabled="currentPage === 1 && !hasPrevChapter"
-          class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface-elevated text-xs font-medium text-text-secondary hover:text-text-primary disabled:opacity-30"
-        >
-          <ChevronLeft class="w-4 h-4" />
-          <span>{{ currentPage === 1 ? 'Prev Chapter' : 'Prev Page' }}</span>
-        </button>
-
-        <span class="text-xs text-text-muted font-mono">
-          Page {{ currentPage }} of {{ totalPages }}
+      <!-- Elegant Floating Bottom Status Pill -->
+      <div class="h-10 flex items-center justify-between select-none font-sans text-xs text-text-muted px-2 shrink-0 border-t border-border/30 pt-2 z-20">
+        <span class="font-mono text-[11px] truncate">
+          {{ store.currentChapter?.title }}
         </span>
 
-        <button
-          @click.stop="nextPage"
-          :disabled="currentPage === totalPages && !hasNextChapter"
-          class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface-elevated text-xs font-medium text-text-secondary hover:text-text-primary disabled:opacity-30"
-        >
-          <span>{{ currentPage === totalPages ? 'Next Chapter' : 'Next Page' }}</span>
-          <ChevronRight class="w-4 h-4" />
-        </button>
+        <!-- Page Capsule -->
+        <div class="flex items-center gap-2 bg-surface-elevated/70 backdrop-blur-md px-3 py-1 rounded-full border border-border/60 shadow-xs">
+          <span class="font-mono font-medium text-text-primary text-[11px]">
+            Page {{ currentPage }} / {{ totalPages }}
+          </span>
+          <span class="text-border">|</span>
+          <span class="font-mono text-accent text-[11px] font-bold">
+            {{ currentChapterPct }}%
+          </span>
+        </div>
       </div>
     </main>
 
     <!-- Floating Text-to-Speech (TTS) Control Bar -->
     <div
       v-if="showTTS"
-      class="absolute bottom-6 inset-x-4 md:inset-x-auto md:left-1/2 md:-translate-x-1/2 max-w-lg w-full bg-surface/95 backdrop-blur-md border border-border rounded-2xl shadow-2xl p-3 z-30 flex items-center justify-between gap-3 text-xs select-none animate-in slide-in-from-bottom-4"
+      class="absolute bottom-6 inset-x-4 md:inset-x-auto md:left-1/2 md:-translate-x-1/2 max-w-lg w-full bg-surface/95 backdrop-blur-xl border border-border rounded-2xl shadow-2xl p-3 z-30 flex items-center justify-between gap-3 text-xs select-none animate-in slide-in-from-bottom-4"
     >
       <div class="flex items-center gap-1.5">
         <button
           @click="toggleTTSPlayback"
           class="p-2 rounded-xl bg-accent text-white hover:bg-accent/90 transition-colors shadow-sm"
-          :title="isTTSPlaying ? 'Pause Speech' : 'Play Speech'"
+          :title="isTTSPlaying ? 'Pause' : 'Play'"
         >
           <Pause v-if="isTTSPlaying" class="w-4 h-4" />
           <Play v-else class="w-4 h-4 fill-white" />
@@ -386,38 +411,22 @@
 
         <button
           @click="stopTTS"
-          class="p-2 rounded-xl bg-surface-elevated hover:bg-border text-text-muted hover:text-text-primary transition-colors"
-          title="Stop Speech"
+          class="p-2 rounded-xl hover:bg-surface-elevated text-text-secondary hover:text-text-primary transition-colors"
+          title="Stop"
         >
           <Square class="w-4 h-4" />
-        </button>
-
-        <button
-          @click="skipTTSParagraph(-1)"
-          class="p-1.5 rounded-lg hover:bg-surface-elevated text-text-secondary hover:text-text-primary"
-          title="Previous Paragraph"
-        >
-          <SkipBack class="w-4 h-4" />
-        </button>
-
-        <button
-          @click="skipTTSParagraph(1)"
-          class="p-1.5 rounded-lg hover:bg-surface-elevated text-text-secondary hover:text-text-primary"
-          title="Next Paragraph"
-        >
-          <SkipForward class="w-4 h-4" />
         </button>
       </div>
 
       <div class="text-center font-mono text-[11px] text-text-muted truncate">
-        <span>Para {{ ttsParagraphIndex + 1 }} / {{ chapterParagraphs.length }}</span>
+        <span>Ch. {{ ttsChapterIndex }} · Para {{ ttsParagraphIndex + 1 }}</span>
       </div>
 
       <div class="flex items-center gap-2">
         <select
           v-model="ttsRate"
           @change="updateTTSRate"
-          class="bg-surface-elevated border border-border rounded-lg px-2 py-1 text-xs text-text-primary focus:outline-none focus:border-accent"
+          class="bg-surface-elevated border border-border rounded-lg px-2 py-1 text-xs text-text-primary focus:outline-none focus:border-accent font-mono"
         >
           <option :value="0.8">0.8x</option>
           <option :value="1.0">1.0x</option>
@@ -435,7 +444,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import { useLibraryStore } from '../stores/library';
 import {
   ArrowLeft,
@@ -446,18 +455,16 @@ import {
   Maximize,
   Minimize,
   X,
-  ChevronLeft,
-  ChevronRight,
   AlignLeft,
   AlignJustify,
   Volume2,
   Play,
   Pause,
   Square,
-  SkipBack,
-  SkipForward,
+  BookOpen,
 } from 'lucide-vue-next';
 import type {
+  Chapter,
   ReaderTheme,
   ReaderFontFamily,
   ReaderLineHeight,
@@ -472,17 +479,28 @@ const showChapterDrawer = ref(false);
 const isFullscreen = ref(false);
 const scrollContainer = ref<HTMLElement | null>(null);
 
-// TTS (Text-to-Speech) State
+// Continuous Infinite Scrolling state
+const loadedChapters = ref<Chapter[]>([]);
+const activeVisibleChapter = ref<Chapter | null>(null);
+const isLoadingMoreNext = ref(false);
+
+// Paginated Drag & Swipe state
+const currentPage = ref(1);
+const pageSize = 1200;
+const isDragging = ref(false);
+const dragStartX = ref(0);
+const dragDeltaX = ref(0);
+const dragStartTime = ref(0);
+let wheelDebounceTimer: any = null;
+
+// TTS state
 const showTTS = ref(false);
 const isTTSPlaying = ref(false);
+const ttsChapterIndex = ref(1);
 const ttsParagraphIndex = ref(0);
 const ttsRate = ref(1.0);
 
-// Pagination state
-const currentPage = ref(1);
-const pageSize = 1200; // Characters per paginated page chunk
-
-// Themes
+// Appearance options
 const themeOptions: { id: ReaderTheme; label: string; bg: string; color: string }[] = [
   { id: 'dark', label: 'Slate', bg: '#18181b', color: '#e2e8f0' },
   { id: 'oled', label: 'OLED', bg: '#000000', color: '#e5e5e5' },
@@ -512,107 +530,19 @@ const widthOptions: { id: ReaderContainerWidth; label: string }[] = [
 ];
 
 // Computed styles
-const chapterParagraphs = computed(() => {
-  const content = store.currentChapter?.content_html || '';
-  if (!content) return [];
-  const pRegex = /<p>[\s\S]*?<\/p>/gi;
-  const matches = content.match(pRegex);
-  if (matches && matches.length > 0) {
-    return matches.map((p) => p.replace(/^<p>/i, '').replace(/<\/p>$/i, '').trim());
+const platformHUDClass = computed(() => {
+  switch (store.platformStyle) {
+    case 'windows':
+      return 'bg-[#202020]/90 backdrop-blur-xl border-white/10';
+    case 'apple':
+      return 'bg-surface/70 backdrop-blur-2xl border-white/15';
+    case 'android':
+      return 'bg-[#1d1b20] border-white/5';
+    case 'linux':
+    default:
+      return 'bg-[#242424] border-white/10';
   }
-  return content.split('\n').filter((l) => l.trim().length > 0);
 });
-
-function toggleTTSBar() {
-  showTTS.value = !showTTS.value;
-  if (showTTS.value && !isTTSPlaying.value) {
-    startTTS();
-  } else if (!showTTS.value) {
-    stopTTS();
-  }
-}
-
-function startTTS() {
-  if (typeof window === 'undefined' || !window.speechSynthesis) return;
-  if (ttsParagraphIndex.value >= chapterParagraphs.value.length) {
-    ttsParagraphIndex.value = 0;
-  }
-  isTTSPlaying.value = true;
-  speakParagraph(ttsParagraphIndex.value);
-}
-
-function speakParagraph(index: number) {
-  if (typeof window === 'undefined' || !window.speechSynthesis) return;
-  window.speechSynthesis.cancel();
-
-  if (index >= chapterParagraphs.value.length) {
-    isTTSPlaying.value = false;
-    return;
-  }
-
-  ttsParagraphIndex.value = index;
-  const rawText = chapterParagraphs.value[index].replace(/<[^>]+>/g, '').trim();
-  if (!rawText) {
-    skipTTSParagraph(1);
-    return;
-  }
-
-  // Auto-scroll highlighted paragraph into view
-  const el = document.getElementById(`tts-para-${index}`);
-  if (el) {
-    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  }
-
-  const utterance = new SpeechSynthesisUtterance(rawText);
-  utterance.rate = ttsRate.value;
-  utterance.onend = () => {
-    if (isTTSPlaying.value) {
-      if (ttsParagraphIndex.value + 1 < chapterParagraphs.value.length) {
-        speakParagraph(ttsParagraphIndex.value + 1);
-      } else {
-        isTTSPlaying.value = false;
-      }
-    }
-  };
-  utterance.onerror = () => {
-    isTTSPlaying.value = false;
-  };
-
-  window.speechSynthesis.speak(utterance);
-}
-
-function toggleTTSPlayback() {
-  if (typeof window === 'undefined' || !window.speechSynthesis) return;
-  if (isTTSPlaying.value) {
-    window.speechSynthesis.pause();
-    isTTSPlaying.value = false;
-  } else {
-    if (window.speechSynthesis.paused) {
-      window.speechSynthesis.resume();
-      isTTSPlaying.value = true;
-    } else {
-      startTTS();
-    }
-  }
-}
-
-function stopTTS() {
-  if (typeof window !== 'undefined' && window.speechSynthesis) {
-    window.speechSynthesis.cancel();
-  }
-  isTTSPlaying.value = false;
-}
-
-function skipTTSParagraph(delta: number) {
-  const target = Math.max(0, Math.min(chapterParagraphs.value.length - 1, ttsParagraphIndex.value + delta));
-  speakParagraph(target);
-}
-
-function updateTTSRate() {
-  if (isTTSPlaying.value) {
-    speakParagraph(ttsParagraphIndex.value);
-  }
-}
 
 const readerThemeClasses = computed(() => {
   switch (store.readerTheme) {
@@ -664,11 +594,117 @@ const typographyStyle = computed(() => {
   };
 });
 
-// Pagination computed
+// Check if more chapters are available to append
+const hasNextChapterToAppend = computed(() => {
+  if (!store.currentChaptersList.length || !loadedChapters.value.length) return false;
+  const lastLoaded = loadedChapters.value[loadedChapters.value.length - 1];
+  return store.currentChaptersList.some((c) => c.chapter_index > lastLoaded.chapter_index);
+});
+
+// Helper to get paragraphs from a chapter
+function getParagraphsForChapter(ch: Chapter): string[] {
+  const content = ch.content_html || '';
+  if (!content) return [];
+  const pRegex = /<p>[\s\S]*?<\/p>/gi;
+  const matches = content.match(pRegex);
+  if (matches && matches.length > 0) {
+    return matches.map((p) => p.replace(/^<p>/i, '').replace(/<\/p>$/i, '').trim());
+  }
+  return content.split('\n').filter((l) => l.trim().length > 0);
+}
+
+// ==========================================
+// CONTINUOUS INFINITE SCROLLING LOGIC
+// ==========================================
+
+async function fetchChapterData(chapterIndex: number): Promise<Chapter | null> {
+  if (!store.activeNovel) return null;
+  const target = store.currentChaptersList.find((c) => c.chapter_index === chapterIndex);
+  if (!target) return null;
+
+  if (target.content_html) return target;
+
+  if (window.__TAURI_INTERNALS__) {
+    try {
+      const { invoke } = await import('@tauri-apps/api/core');
+      const loaded = await invoke<Chapter | null>('get_chapter_content', {
+        novelId: store.activeNovel.id,
+        chapterIndex: target.chapter_index,
+      });
+      if (loaded && loaded.content_html) {
+        target.content_html = loaded.content_html;
+        return target;
+      }
+    } catch (e) {
+      console.warn('Error fetching chapter content in reader:', e);
+    }
+  }
+
+  // Fallback demo content if offline/mock
+  target.content_html = `
+    <p>The dawn broke over the horizon, casting crimson light upon the ancient towers.</p>
+    <p>"We have reached the boundary of the forbidden district," a whispered warning came through the chill air.</p>
+    <p>Runes etched along the masonry flared with sapphire intensity, answering the call of an ancient lineage long forgotten by modern chronicles.</p>
+    <p>Every step was deliberate. When power demands sacrifice, destiny offers no compromises.</p>
+  `;
+  return target;
+}
+
+let scrollDebounceTimer: any = null;
+async function handleScroll() {
+  if (!scrollContainer.value || !store.activeNovel) return;
+  const el = scrollContainer.value;
+
+  // 1. Infinite Scroll: append next chapter when within 700px of bottom
+  const distanceToBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
+  if (distanceToBottom < 700 && !isLoadingMoreNext.value && hasNextChapterToAppend.value) {
+    isLoadingMoreNext.value = true;
+    const lastLoaded = loadedChapters.value[loadedChapters.value.length - 1];
+    const nextChapter = await fetchChapterData(lastLoaded.chapter_index + 1);
+    if (nextChapter) {
+      loadedChapters.value.push(nextChapter);
+    }
+    isLoadingMoreNext.value = false;
+  }
+
+  // 2. Scroll Spy: Detect visible chapter
+  clearTimeout(scrollDebounceTimer);
+  scrollDebounceTimer = setTimeout(() => {
+    updateVisibleChapterAndProgress();
+  }, 200);
+}
+
+function updateVisibleChapterAndProgress() {
+  if (!scrollContainer.value || !store.activeNovel) return;
+  const container = scrollContainer.value;
+  const midPoint = container.scrollTop + container.clientHeight / 3;
+
+  for (const ch of loadedChapters.value) {
+    const sectionEl = document.getElementById(`chapter-anchor-${ch.chapter_index}`);
+    if (sectionEl) {
+      const top = sectionEl.offsetTop;
+      const bottom = top + sectionEl.offsetHeight;
+      if (midPoint >= top && midPoint <= bottom) {
+        activeVisibleChapter.value = ch;
+        store.currentChapter = ch;
+        ttsChapterIndex.value = ch.chapter_index;
+
+        const maxScroll = container.scrollHeight - container.clientHeight;
+        const pct = maxScroll > 0 ? (container.scrollTop / maxScroll) * 100 : 0;
+        store.saveProgress(store.activeNovel.id, ch.chapter_index, pct);
+        break;
+      }
+    }
+  }
+}
+
+// ==========================================
+// PAGINATED DRAG & HORIZONTAL SWIPE LOGIC
+// ==========================================
+
 const contentChunks = computed(() => {
   const content = store.currentChapter?.content_html || '';
   if (!content) return [];
-  // Split by paragraph tags or length
   const pRegex = /<p>[\s\S]*?<\/p>/gi;
   const matches = content.match(pRegex);
   if (!matches || matches.length === 0) {
@@ -691,19 +727,117 @@ const contentChunks = computed(() => {
 
 const totalPages = computed(() => Math.max(1, contentChunks.value.length));
 const currentPaginatedChunk = computed(() => contentChunks.value[currentPage.value - 1] || '');
-
-// Navigation computed
-const currentIdx = computed(() => store.currentChapter?.chapter_index || 1);
-const hasPrevChapter = computed(() => {
-  return store.currentChaptersList.some((c) => c.chapter_index < currentIdx.value);
-});
-const hasNextChapter = computed(() => {
-  return store.currentChaptersList.some((c) => c.chapter_index > currentIdx.value);
+const currentChapterPct = computed(() => {
+  return Math.min(100, Math.round((currentPage.value / totalPages.value) * 100));
 });
 
-// HUD & Content tap
+const pageDragStyle = computed(() => {
+  if (isDragging.value) {
+    return {
+      transform: `translateX(${dragDeltaX.value * 0.85}px)`,
+      transition: 'none',
+    };
+  }
+  return {
+    transform: 'translateX(0px)',
+    transition: 'transform 0.25s cubic-bezier(0.2, 0, 0, 1)',
+  };
+});
+
+function onDragStart(e: PointerEvent) {
+  isDragging.value = true;
+  dragStartX.value = e.clientX;
+  dragDeltaX.value = 0;
+  dragStartTime.value = Date.now();
+}
+
+function onDragMove(e: PointerEvent) {
+  if (!isDragging.value) return;
+  dragDeltaX.value = e.clientX - dragStartX.value;
+}
+
+function onDragEnd() {
+  if (!isDragging.value) return;
+  isDragging.value = false;
+  const duration = Math.max(1, Date.now() - dragStartTime.value);
+  const velocity = dragDeltaX.value / duration;
+
+  // Swipe left: Next page / Next chapter
+  if (dragDeltaX.value < -60 || velocity < -0.4) {
+    nextPage();
+  }
+  // Swipe right: Previous page / Previous chapter
+  else if (dragDeltaX.value > 60 || velocity > 0.4) {
+    prevPage();
+  }
+
+  dragDeltaX.value = 0;
+}
+
+function onWheelPaging(e: WheelEvent) {
+  if (store.readerLayoutMode !== 'paginated') return;
+  clearTimeout(wheelDebounceTimer);
+  wheelDebounceTimer = setTimeout(() => {
+    if (e.deltaY > 30 || e.deltaX > 30) {
+      nextPage();
+    } else if (e.deltaY < -30 || e.deltaX < -30) {
+      prevPage();
+    }
+  }, 100);
+}
+
+async function nextPage() {
+  if (currentPage.value < totalPages.value) {
+    currentPage.value++;
+    savePaginatedProgress();
+  } else {
+    // Seamlessly transition into Page 1 of the NEXT chapter!
+    const nextIdx = (store.currentChapter?.chapter_index || 1) + 1;
+    const nextCh = await fetchChapterData(nextIdx);
+    if (nextCh) {
+      store.currentChapter = nextCh;
+      activeVisibleChapter.value = nextCh;
+      currentPage.value = 1;
+      savePaginatedProgress();
+    }
+  }
+}
+
+async function prevPage() {
+  if (currentPage.value > 1) {
+    currentPage.value--;
+    savePaginatedProgress();
+  } else {
+    // Seamlessly transition into last page of PREVIOUS chapter!
+    const prevIdx = (store.currentChapter?.chapter_index || 1) - 1;
+    if (prevIdx >= 1) {
+      const prevCh = await fetchChapterData(prevIdx);
+      if (prevCh) {
+        store.currentChapter = prevCh;
+        activeVisibleChapter.value = prevCh;
+        currentPage.value = totalPages.value;
+        savePaginatedProgress();
+      }
+    }
+  }
+}
+
+function savePaginatedProgress() {
+  if (!store.activeNovel || !store.currentChapter) return;
+  const percentage = (currentPage.value / totalPages.value) * 100;
+  store.saveProgress(store.activeNovel.id, store.currentChapter.chapter_index, percentage);
+}
+
+// ==========================================
+// COMMON ACTIONS & CONTROLS
+// ==========================================
+
+function handleFontSizeInput(e: Event) {
+  const target = e.target as HTMLInputElement;
+  store.setReaderFontSize(parseInt(target.value, 10));
+}
+
 function handleContentTap(e: MouseEvent) {
-  // If clicked on an interactive link, don't toggle HUD
   if ((e.target as HTMLElement).tagName === 'A' || (e.target as HTMLElement).tagName === 'BUTTON') {
     return;
   }
@@ -729,66 +863,125 @@ function toggleFullscreen() {
   }
 }
 
-// Chapter navigation
-function navigateChapter(delta: number) {
+async function jumpToChapter(chapterIndex: number) {
   stopTTS();
-  const targetIndex = currentIdx.value + delta;
-  store.goToChapter(targetIndex);
-  currentPage.value = 1;
-  if (scrollContainer.value) {
-    scrollContainer.value.scrollTop = 0;
-  }
-}
-
-function selectChapterFromDrawer(chapterIndex: number) {
-  stopTTS();
-  store.goToChapter(chapterIndex);
   showChapterDrawer.value = false;
-  currentPage.value = 1;
-  if (scrollContainer.value) {
-    scrollContainer.value.scrollTop = 0;
+  const ch = await fetchChapterData(chapterIndex);
+  if (ch) {
+    store.currentChapter = ch;
+    activeVisibleChapter.value = ch;
+    loadedChapters.value = [ch];
+    currentPage.value = 1;
+    if (scrollContainer.value) {
+      scrollContainer.value.scrollTop = 0;
+    }
   }
 }
 
-function nextPage() {
-  if (currentPage.value < totalPages.value) {
-    currentPage.value++;
-    savePaginatedProgress();
-  } else if (hasNextChapter.value) {
-    navigateChapter(1);
+// ==========================================
+// TEXT TO SPEECH (TTS)
+// ==========================================
+
+function toggleTTSBar() {
+  showTTS.value = !showTTS.value;
+  if (showTTS.value && !isTTSPlaying.value) {
+    startTTS();
+  } else if (!showTTS.value) {
+    stopTTS();
   }
 }
 
-function prevPage() {
-  if (currentPage.value > 1) {
-    currentPage.value--;
-    savePaginatedProgress();
-  } else if (hasPrevChapter.value) {
-    navigateChapter(-1);
+function startTTS() {
+  if (typeof window === 'undefined' || !window.speechSynthesis) return;
+  const currentParas = getParagraphsForChapter(store.currentChapter || loadedChapters.value[0]);
+  if (ttsParagraphIndex.value >= currentParas.length) {
+    ttsParagraphIndex.value = 0;
+  }
+  isTTSPlaying.value = true;
+  speakCurrentParagraph();
+}
+
+function speakCurrentParagraph() {
+  if (typeof window === 'undefined' || !window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+
+  const targetCh = loadedChapters.value.find((c) => c.chapter_index === ttsChapterIndex.value) || store.currentChapter;
+  if (!targetCh) return;
+  const paras = getParagraphsForChapter(targetCh);
+
+  if (ttsParagraphIndex.value >= paras.length) {
+    // Move to next chapter in TTS if available
+    const nextIdx = ttsChapterIndex.value + 1;
+    const nextCh = loadedChapters.value.find((c) => c.chapter_index === nextIdx);
+    if (nextCh) {
+      ttsChapterIndex.value = nextIdx;
+      ttsParagraphIndex.value = 0;
+      speakCurrentParagraph();
+      return;
+    }
+    isTTSPlaying.value = false;
+    return;
+  }
+
+  const rawText = paras[ttsParagraphIndex.value].replace(/<[^>]+>/g, '').trim();
+  if (!rawText) {
+    ttsParagraphIndex.value++;
+    speakCurrentParagraph();
+    return;
+  }
+
+  const el = document.getElementById(`tts-para-${targetCh.chapter_index}-${ttsParagraphIndex.value}`);
+  if (el) {
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  const utterance = new SpeechSynthesisUtterance(rawText);
+  utterance.rate = ttsRate.value;
+  utterance.onend = () => {
+    if (isTTSPlaying.value) {
+      ttsParagraphIndex.value++;
+      speakCurrentParagraph();
+    }
+  };
+  utterance.onerror = () => {
+    isTTSPlaying.value = false;
+  };
+
+  window.speechSynthesis.speak(utterance);
+}
+
+function toggleTTSPlayback() {
+  if (typeof window === 'undefined' || !window.speechSynthesis) return;
+  if (isTTSPlaying.value) {
+    window.speechSynthesis.pause();
+    isTTSPlaying.value = false;
+  } else {
+    if (window.speechSynthesis.paused) {
+      window.speechSynthesis.resume();
+      isTTSPlaying.value = true;
+    } else {
+      startTTS();
+    }
   }
 }
 
-// Progress Auto-Saving
-let scrollDebounceTimer: any = null;
-function handleScroll() {
-  if (!scrollContainer.value || !store.activeNovel || !store.currentChapter) return;
-  const el = scrollContainer.value;
-  const maxScroll = el.scrollHeight - el.clientHeight;
-  const percentage = maxScroll > 0 ? (el.scrollTop / maxScroll) * 100 : 0;
-
-  clearTimeout(scrollDebounceTimer);
-  scrollDebounceTimer = setTimeout(() => {
-    store.saveProgress(store.activeNovel!.id, store.currentChapter!.chapter_index, percentage);
-  }, 300);
+function stopTTS() {
+  if (typeof window !== 'undefined' && window.speechSynthesis) {
+    window.speechSynthesis.cancel();
+  }
+  isTTSPlaying.value = false;
 }
 
-function savePaginatedProgress() {
-  if (!store.activeNovel || !store.currentChapter) return;
-  const percentage = (currentPage.value / totalPages.value) * 100;
-  store.saveProgress(store.activeNovel.id, store.currentChapter.chapter_index, percentage);
+function updateTTSRate() {
+  if (isTTSPlaying.value) {
+    speakCurrentParagraph();
+  }
 }
 
-// Keyboard navigation (Left / Right arrow for paginated mode)
+// ==========================================
+// LIFECYCLE & KEYBOARD
+// ==========================================
+
 function handleKeydown(e: KeyboardEvent) {
   if (store.readerLayoutMode === 'paginated') {
     if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') {
@@ -804,19 +997,24 @@ function handleKeydown(e: KeyboardEvent) {
   }
 }
 
+watch(
+  () => store.currentChapter,
+  (newCh) => {
+    if (newCh && !loadedChapters.value.some((c) => c.chapter_index === newCh.chapter_index)) {
+      loadedChapters.value = [newCh];
+      activeVisibleChapter.value = newCh;
+      ttsChapterIndex.value = newCh.chapter_index;
+    }
+  },
+  { immediate: true }
+);
+
 onMounted(() => {
   window.addEventListener('keydown', handleKeydown);
-  // Restore scroll position if saved
-  if (store.activeNovel && scrollContainer.value) {
-    const saved = store.readingProgress[store.activeNovel.id];
-    if (saved && saved.last_chapter_index === currentIdx.value && saved.scroll_percentage > 0) {
-      setTimeout(() => {
-        if (scrollContainer.value) {
-          const maxScroll = scrollContainer.value.scrollHeight - scrollContainer.value.clientHeight;
-          scrollContainer.value.scrollTop = (saved.scroll_percentage / 100) * maxScroll;
-        }
-      }, 100);
-    }
+  if (store.currentChapter) {
+    loadedChapters.value = [store.currentChapter];
+    activeVisibleChapter.value = store.currentChapter;
+    ttsChapterIndex.value = store.currentChapter.chapter_index;
   }
 });
 
@@ -824,5 +1022,6 @@ onUnmounted(() => {
   stopTTS();
   window.removeEventListener('keydown', handleKeydown);
   clearTimeout(scrollDebounceTimer);
+  clearTimeout(wheelDebounceTimer);
 });
 </script>

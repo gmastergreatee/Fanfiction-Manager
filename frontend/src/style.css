@@ -18,29 +18,39 @@
   --border-subtle: rgba(255, 255, 255, 0.08);
 }
 
-/* Windows 11 Fluent Theme */
+/* Windows 11 WinUI 3 / Fluent Design System */
 [data-platform="windows"] {
   --font-system: "Segoe UI Variable Display", "Segoe UI", Tahoma, sans-serif;
   --bg-canvas: #181818;
-  --bg-surface: rgba(36, 36, 36, 0.85);
+  --bg-surface: #202020;
   --bg-surface-elevated: #2d2d2d;
   --accent-primary: #0078d4;
   --accent-hover: #0086f0;
-  --border-subtle: rgba(255, 255, 255, 0.09);
+  --border-subtle: rgba(255, 255, 255, 0.08);
 }
 
-/* Apple Cupertino Theme */
+[data-platform="windows"] button,
+[data-platform="windows"] input {
+  font-family: "Segoe UI Variable Display", "Segoe UI", Tahoma, sans-serif;
+}
+
+/* Apple macOS Sonoma / Sequoia Liquid Glass */
 [data-platform="apple"] {
   --font-system: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", sans-serif;
-  --bg-canvas: #000000;
-  --bg-surface: rgba(28, 28, 30, 0.85);
-  --bg-surface-elevated: #2c2c2e;
-  --accent-primary: #0a84ff;
-  --accent-hover: #409cff;
+  --bg-canvas: #0a0a0c;
+  --bg-surface: rgba(26, 26, 30, 0.75);
+  --bg-surface-elevated: #28282e;
+  --accent-primary: #007aff;
+  --accent-hover: #0a84ff;
   --border-subtle: rgba(255, 255, 255, 0.12);
 }
 
-/* Android Material Design 3 Theme */
+[data-platform="apple"] button,
+[data-platform="apple"] input {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", sans-serif;
+}
+
+/* Android Material You / Material Design 3 */
 [data-platform="android"] {
   --font-system: "Roboto", sans-serif;
   --bg-canvas: #141218;
@@ -51,7 +61,12 @@
   --border-subtle: rgba(208, 188, 255, 0.12);
 }
 
-/* Linux GNOME Libadwaita Theme */
+[data-platform="android"] button,
+[data-platform="android"] input {
+  font-family: "Roboto", sans-serif;
+}
+
+/* Linux GNOME Libadwaita */
 [data-platform="linux"] {
   --font-system: "Cantarell", "Inter", "Ubuntu", sans-serif;
   --bg-canvas: #1e1e1e;
@@ -59,7 +74,12 @@
   --bg-surface-elevated: #303030;
   --accent-primary: #3584e4;
   --accent-hover: #599cf0;
-  --border-subtle: rgba(255, 255, 255, 0.07);
+  --border-subtle: rgba(255, 255, 255, 0.1);
+}
+
+[data-platform="linux"] button,
+[data-platform="linux"] input {
+  font-family: "Cantarell", "Inter", "Ubuntu", sans-serif;
 }
 
 /* OLED Pure Black */
@@ -67,7 +87,14 @@
   --bg-canvas: #000000 !important;
   --bg-surface: #0a0a0a !important;
   --bg-surface-elevated: #141414 !important;
-  --border-subtle: rgba(255, 255, 255, 0.1) !important;
+  --border-subtle: rgba(255, 255, 255, 0.12) !important;
+}
+
+/* Global Smooth Touch & Scrolling */
+html, body {
+  overscroll-behavior-y: none;
+  touch-action: pan-x pan-y;
+  user-select: none;
 }
 
 /* Custom Scrollbars */
@@ -79,10 +106,13 @@
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.15);
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.3);
 }
 
+[data-platform="windows"] ::-webkit-scrollbar-thumb {
+  border-radius: 4px;
+}
