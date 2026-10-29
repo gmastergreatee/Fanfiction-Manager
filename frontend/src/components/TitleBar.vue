@@ -3,9 +3,11 @@
   <header
     v-if="store.platformStyle === 'windows'"
     data-tauri-drag-region
-    class="h-10 bg-[#1f1f1f]/90 backdrop-blur-xl border-b border-white/10 flex items-center justify-between px-3 shrink-0 select-none text-xs text-text-secondary z-30"
+    @mousedown="handleMouseDown"
+    @dblclick="maximizeWindow"
+    class="h-10 bg-[#1f1f1f]/90 backdrop-blur-xl border-b border-white/10 flex items-center justify-between px-3 shrink-0 select-none text-xs text-text-secondary z-30 cursor-default"
   >
-    <div class="flex items-center gap-2.5 pointer-events-none">
+    <div class="flex items-center gap-2.5 pointer-events-none" data-tauri-drag-region>
       <div class="w-5 h-5 rounded bg-accent flex items-center justify-center text-[10px] font-bold text-white shadow-sm">
         FF
       </div>
@@ -15,7 +17,7 @@
 
     <!-- Center Drag Region -->
     <div data-tauri-drag-region class="flex-1 h-full mx-4 flex items-center justify-center cursor-default">
-      <div class="flex items-center gap-2 px-3 py-1 rounded-md bg-white/5 border border-white/5 text-[11px] text-text-muted pointer-events-none">
+      <div class="flex items-center gap-2 px-3 py-1 rounded-md bg-white/5 border border-white/5 text-[11px] text-text-muted pointer-events-none" data-tauri-drag-region>
         <Sparkles class="w-3 h-3 text-accent" />
         <span>WinUI 3 Fluent Experience</span>
       </div>
@@ -51,7 +53,9 @@
   <header
     v-else-if="store.platformStyle === 'apple'"
     data-tauri-drag-region
-    class="h-12 bg-surface/70 backdrop-blur-2xl border-b border-white/15 flex items-center justify-between px-4 shrink-0 select-none text-xs text-text-secondary z-30"
+    @mousedown="handleMouseDown"
+    @dblclick="maximizeWindow"
+    class="h-12 bg-surface/70 backdrop-blur-2xl border-b border-white/15 flex items-center justify-between px-4 shrink-0 select-none text-xs text-text-secondary z-30 cursor-default"
   >
     <!-- Left: Traffic Light Buttons -->
     <div class="flex items-center gap-2 w-28 group">
@@ -86,16 +90,18 @@
     </div>
 
     <!-- Right: Spacer balancing traffic lights -->
-    <div class="w-28"></div>
+    <div class="w-28" data-tauri-drag-region></div>
   </header>
 
   <!-- ANDROID MATERIAL 3 TOP APP BAR -->
   <header
     v-else-if="store.platformStyle === 'android'"
     data-tauri-drag-region
-    class="h-16 bg-[#1d1b20] border-b border-white/5 flex items-center justify-between px-5 shrink-0 select-none text-text-primary z-30 shadow-md"
+    @mousedown="handleMouseDown"
+    @dblclick="maximizeWindow"
+    class="h-16 bg-[#1d1b20] border-b border-white/5 flex items-center justify-between px-5 shrink-0 select-none text-text-primary z-30 shadow-md cursor-default"
   >
-    <div class="flex items-center gap-3 pointer-events-none">
+    <div class="flex items-center gap-3 pointer-events-none" data-tauri-drag-region>
       <div class="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center text-accent">
         <BookOpen class="w-5 h-5" />
       </div>
@@ -138,9 +144,11 @@
   <header
     v-else
     data-tauri-drag-region
-    class="h-12 bg-[#242424] border-b border-white/10 flex items-center justify-between px-4 shrink-0 select-none text-xs text-text-secondary z-30"
+    @mousedown="handleMouseDown"
+    @dblclick="maximizeWindow"
+    class="h-12 bg-[#242424] border-b border-white/10 flex items-center justify-between px-4 shrink-0 select-none text-xs text-text-secondary z-30 cursor-default"
   >
-    <div class="flex items-center gap-2 w-32 pointer-events-none">
+    <div class="flex items-center gap-2 w-32 pointer-events-none" data-tauri-drag-region>
       <span class="w-2.5 h-2.5 rounded-full bg-accent"></span>
       <span class="font-semibold text-text-primary text-xs">Libadwaita</span>
     </div>
@@ -211,6 +219,23 @@ const activeTabLabel = computed(() => {
       return 'Dashboard';
   }
 });
+
+async function handleMouseDown(e: MouseEvent) {
+  // Only trigger on primary left click
+  if (e.button !== 0) return;
+  const target = e.target as HTMLElement | null;
+  if (target?.closest('button') || target?.closest('input') || target?.closest('a')) {
+    return;
+  }
+  if (window.__TAURI_INTERNALS__) {
+    try {
+      const { getCurrentWindow } = await import('@tauri-apps/api/window');
+      await getCurrentWindow().startDragging();
+    } catch (e) {
+      console.warn('Tauri startDragging error:', e);
+    }
+  }
+}
 
 async function minimizeWindow() {
   if (window.__TAURI_INTERNALS__) {

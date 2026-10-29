@@ -116,3 +116,20 @@ html, body {
 [data-platform="windows"] ::-webkit-scrollbar-thumb {
   border-radius: 4px;
 }
+
+/* Draggable regions for borderless custom titlebar */
+[data-tauri-drag-region] {
+  -webkit-app-region: drag;
+  app-region: drag;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+[data-tauri-drag-region] button,
+[data-tauri-drag-region] a,
+[data-tauri-drag-region] input,
+button, a, input {
+  -webkit-app-region: no-drag;
+  app-region: no-drag;
+}
+
