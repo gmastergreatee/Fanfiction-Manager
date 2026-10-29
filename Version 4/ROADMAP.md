@@ -46,10 +46,10 @@
 - [x] Text-to-Speech (TTS) integration using platform-native speech synthesis APIs.
 
 ### Phase 5: Multi-Platform Build & CI/CD
-- [ ] Configure Android target (Android Studio SDK, NDK, Gradle build scripts).
-- [ ] Configure iOS target (Xcode project, provisioning, WKWebView configuration).
-- [ ] Configure Windows, macOS, and Linux desktop packaging targets.
-- [ ] Set up GitHub Actions workflow for automated multi-platform builds and release artifacts.
+- [x] Configure Android target (Android Studio SDK, NDK, Gradle build scripts).
+- [x] Configure iOS target (Xcode project, provisioning, WKWebView configuration).
+- [x] Configure Windows, macOS, and Linux desktop packaging targets.
+- [x] Set up GitHub Actions workflow for automated multi-platform builds and release artifacts.
 
 ### Phase 6: Local Switchover & Legacy Archival (Developer Dedicated)
 - [x] Implement automated promotion tool [`scripts/switchover-to-root.js`](./scripts/switchover-to-root.js).

@@ -34,7 +34,42 @@
       "icons/128x128@2x.png",
       "icons/icon.icns",
       "icons/icon.ico"
-    ]
+    ],
+    "windows": {
+      "nsis": {
+        "installMode": "currentUser",
+        "languages": ["en-US"]
+      },
+      "wix": {
+        "language": "en-US"
+      }
+    },
+    "macOS": {
+      "minimumSystemVersion": "10.15",
+      "frameworks": [],
+      "entitlements": null,
+      "exceptionDomain": ""
+    },
+    "linux": {
+      "deb": {
+        "depends": [
+          "libwebkit2gtk-4.1-0",
+          "libayatana-appindicator3-1",
+          "librsvg2-common"
+        ]
+      },
+      "appimage": {
+        "bundleMediaFramework": true
+      }
+    },
+    "android": {
+      "minSdkVersion": 24,
+      "targetSdkVersion": 34,
+      "versionCode": 400
+    },
+    "iOS": {
+      "minimumSystemVersion": "14.0",
+      "developmentTeam": ""
+    }
   }
 }
-

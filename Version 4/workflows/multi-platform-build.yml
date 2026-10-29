@@ -1,0 +1,148 @@
+name: Multi-Platform Build & Release Matrix
+
+on:
+  push:
+    branches:
+      - master
+    tags:
+      - 'v*.*.*'
+  pull_request:
+    branches:
+      - master
+
+permissions:
+  contents: write
+
+jobs:
+  test-and-verify:
+    name: Run Cross-Platform Test Suite
+    runs-on: windows-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+          cache-dependency-path: 'Version 4/frontend/package-lock.json'
+
+      - name: Install Frontend Dependencies
+        working-directory: './Version 4/frontend'
+        run: npm ci
+
+      - name: Verify Frontend Build
+        working-directory: './Version 4/frontend'
+        run: npm run build
+
+      - name: Run Full Version 4 Test Suite
+        working-directory: './Version 4'
+        run: npm test
+
+  build-desktop-and-mobile:
+    name: Build (${{ matrix.platform.name }})
+    needs: test-and-verify
+    runs-on: ${{ matrix.platform.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - name: Windows (x64)
+            os: windows-latest
+            target: x86_64-pc-windows-msvc
+            args: ''
+          - name: macOS (Universal / arm64)
+            os: macos-latest
+            target: aarch64-apple-darwin
+            args: ''
+          - name: Linux (AppImage & deb)
+            os: ubuntu-22.04
+            target: x86_64-unknown-linux-gnu
+            args: ''
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install Linux System Dependencies
+        if: matrix.platform.os == 'ubuntu-22.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf libssl-dev
+
+      - name: Setup Rust Stable Toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.platform.target }}
+
+      - name: Build Frontend Assets
+        working-directory: './Version 4/frontend'
+        run: |
+          npm ci
+          npm run build
+
+      - name: Build Tauri 2.0 Native Application
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          projectPath: './Version 4'
+          tagName: ${{ github.ref_name }}
+          releaseName: 'Fanfiction Manager Version 4 - ${{ github.ref_name }}'
+          releaseBody: 'Automated release for Fanfiction Manager Version 4 across Windows, macOS, Linux, and Mobile.'
+          releaseDraft: false
+          prerelease: false
+
+  build-android:
+    name: Build Android APK
+    needs: test-and-verify
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Setup Rust Toolchain & Android Targets
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-linux-android,armv7-linux-androideabi,x86_64-linux-android
+
+      - name: Build Frontend Bundle
+        working-directory: './Version 4/frontend'
+        run: |
+          npm ci
+          npm run build
+
+      - name: Build Android Release Bundle
+        working-directory: './Version 4'
+        run: npm run package:release
+
+      - name: Upload Android Artifacts
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            Version 4/dist/app.zip
+            Version 4/dist/checksums.json
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
