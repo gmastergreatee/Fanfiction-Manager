@@ -5,6 +5,7 @@
   "main": "src/app.js",
   "scripts": {
     "start": "node scripts/start-tauri.js",
+    "start:cli": "node src/app.js",
     "dev": "npm run dev --prefix frontend",
     "build:ui": "npm run build --prefix frontend",
     "tauri": "tauri",

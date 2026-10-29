@@ -5,3 +5,4 @@
 export PATH="$HOME/.cargo/bin:$PATH"
 echo "🚀 Starting Fanfiction Manager v4 in Tauri Debug Mode..."
 npm start
+

@@ -42,40 +42,128 @@ Welcome to **Fanfiction Manager Version 4**. This repository houses the moderniz
 
 ---
 
-## 🛠️ Local Development & Debugging Across Platforms
+## 🛠️ Local Development & Debugging Guide
 
-### 1. Desktop Debugging (macOS, Linux & Windows)
-The universal command to start the full desktop app in debug mode with hot reloading:
-```bash
-# macOS & Linux (in terminal)
-npm start
+### 1. Prerequisites by Platform
 
-# Or using the 1-click POSIX script:
-./start-debug.sh
+Before starting local development, ensure your environment has the required toolchains:
 
-# Windows (Command Prompt, PowerShell, or 1-click)
-npm.cmd start
-# Or double-click start-debug.bat
-```
-*Note: Press **`F12`** or **Right-Click ➔ Inspect Element** anywhere in the opened desktop window to launch WebKit/Chromium DevTools.*
+| Platform | Node.js | Rust & Cargo | Native Build Tools |
+| :--- | :--- | :--- | :--- |
+| **Windows** | Node 20+ / 22+ | `rustup` (`stable-x86_64-pc-windows-msvc` or `gnu`) | WebView2 (built-in on Win 10/11) + VS Build Tools / MinGW |
+| **macOS** | Node 20+ / 22+ | `rustup` (`stable-aarch64-apple-darwin` or `x86_64`) | Xcode Command Line Tools (`xcode-select --install`) |
+| **Linux (Ubuntu/Debian)** | Node 20+ / 22+ | `rustup` (`stable-x86_64-unknown-linux-gnu`) | `libwebkit2gtk-4.1-dev`, `libappindicator3-dev`, `librsvg2-dev`, `libssl-dev` |
+| **Android** | Node 20+ / 22+ | Rust Android targets (`aarch64`, `armv7`, `x86_64`) | Android Studio SDK (API 34), NDK, Java 17 |
+| **iOS** | Node 20+ / 22+ | Rust iOS targets (`aarch64-apple-ios`) | macOS with Xcode 15+ |
 
-### 2. Fast Frontend UI Development (Browser Only)
-Debug Vue 3 components, Themes, and Reader typography in Chrome/Firefox/Safari without compiling Rust:
+---
+
+### 2. Launching Desktop Debug Mode
+
+Desktop debug mode boots the native Tauri window, mounts the local SQLite database from [`v4_data/fanfiction.db`](file:///d:/Softwares/Fanfiction%20Manager/resources/app/v4_data/fanfiction.db), and starts the Vite frontend dev server with instant Hot Module Replacement (HMR).
+
+#### On Windows:
+- **Option A (1-Click Launcher)**: Double-click **[`start-debug.bat`](file:///d:/Softwares/Fanfiction%20Manager/resources/app/start-debug.bat)** in the root folder.
+- **Option B (PowerShell / Command Prompt)**:
+  ```powershell
+  npm.cmd start
+  ```
+  *(Or run `npm.cmd run tauri:dev`)*
+
+> [!TIP]
+> **Windows PowerShell Execution Policy Note**:
+> If you see `File ... npm.ps1 cannot be loaded because running scripts is disabled on this system`, either run `npm.cmd start` instead of `npm`, or run `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass` in your PowerShell session.
+
+#### On macOS & Linux:
+- **Option A (POSIX Shell Launcher)**:
+  ```bash
+  ./start-debug.sh
+  ```
+- **Option B (Standard npm)**:
+  ```bash
+  npm start
+  ```
+
+---
+
+### 3. Inspecting & Debugging the Live UI
+
+Once the application window opens, use native DevTools to debug code, state, network requests, and DOM elements:
+
+| OS | DevTools Shortcut | How to Access |
+| :--- | :--- | :--- |
+| **Windows** | `F12` | Right-click anywhere in the window ➔ **Inspect Element** |
+| **Linux** | `F12` | Right-click anywhere in the window ➔ **Inspect Element** |
+| **macOS** | `Cmd + Option + I` | Right-click anywhere in the window ➔ **Inspect Element** |
+| **Android** | `chrome://inspect` | Open Google Chrome on your desktop and inspect the connected device/emulator |
+| **iOS** | Safari Develop Menu | Safari ➔ **Develop** ➔ **[Simulator / iPhone]** ➔ **Fanfiction Manager** |
+
+---
+
+### 4. Browser-Only UI Debugging (No Rust Compilation Needed)
+
+If you only want to develop or tweak Vue 3 components, Reader mode typography, Tailwind styles, or Theme presets without compiling the Rust backend:
 ```bash
 npm run dev
-# Open http://localhost:5173
 ```
+Open [`http://localhost:5173`](http://localhost:5173) in your browser. The frontend store ([`frontend/src/stores/library.ts`](file:///d:/Softwares/Fanfiction%20Manager/resources/app/frontend/src/stores/library.ts)) automatically detects when Tauri is absent and activates mock fallback data for instant interactive testing.
 
-### 3. Mobile Device & Emulator Debugging (Android & iOS)
-Tauri 2.0 provides native mobile emulation commands:
+---
+
+### 5. Mobile Emulation & Device Debugging
+
+#### Android Debug Mode:
 ```bash
-# Android (Debugs in Android Studio Emulator or USB Device via ADB)
 npm run tauri:android
+```
+- Compiles the Android Rust JNI library and APK.
+- Deploys and launches the app on your running Android Studio Emulator or physical USB phone (via `adb`).
+- Inspect web elements via Chrome: navigate to `chrome://inspect/#devices`.
 
-# iOS (macOS only: Debugs in Xcode iOS Simulator or plugged iPhone/iPad)
+#### iOS Debug Mode (macOS only):
+```bash
 npm run tauri:ios
 ```
-*Chrome Web Inspector is available at `chrome://inspect` for Android, and Safari Web Inspector via `Develop ➔ Simulator` for iOS.*
+- Compiles the iOS binary and boots the Xcode iOS Simulator.
+- Inspect web elements via Safari: **Develop ➔ Simulator ➔ Fanfiction Manager**.
+
+---
+
+### 6. Core Services, Tests, and MCP Debugging
+
+- **Run All Automated Test Suites (9 Suites)**:
+  ```bash
+  npm test
+  ```
+- **Start the AI Model Context Protocol (MCP) Server**:
+  ```bash
+  npm run mcp
+  ```
+  *(Listens on SSE port `4455` and `stdio` for AI-assisted rule creation with Claude / Antigravity / Cursor)*
+- **Inspect SQLite Library Status via CLI**:
+  ```bash
+  npm run start:cli
+  ```
+- **Test v3 ➔ v4 SQLite Data Migration**:
+  ```bash
+  npm run migrate:dry    # Safe preview
+  npm run migrate        # Execute migration
+  ```
+
+---
+
+### 7. Production Packaging & Release Building
+
+- **Compile Desktop Release Installers (Windows NSIS `.exe`, macOS `.dmg/.app`, Linux `.AppImage/.deb`)**:
+  ```bash
+  npm run build:ui       # Builds frontend into dist_ui/
+  npm run tauri:build    # Generates native bundles in src-tauri/target/release/bundle/
+  ```
+- **Generate Multi-Platform Release Archives**:
+  ```bash
+  npm run package:release
+  ```
+  *(Generates `dist/app.zip`, `dist/mobile-bundle.zip`, and SHA-256 `dist/checksums.json`)*
 
 ---
 
