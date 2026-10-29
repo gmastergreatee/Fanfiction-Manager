@@ -62,5 +62,23 @@ Version 4/v4_data/covers/
 # Build & Release Bundles
 dist/
 Version 4/dist/
+dist_ui/
+Version 4/dist_ui/
+target/
+src-tauri/target/
+Version 4/src-tauri/target/
+.cargo-target/
 temp_*/
 Version 4/temp_*/
+
+# Tauri Generated Schemas
+src-tauri/gen/schemas/
+Version 4/src-tauri/gen/schemas/
+gen/
+
+# TypeScript & Vite Build Artifacts
+*.tsbuildinfo
+**/vite.config.js
+**/vite.config.d.ts
+*.local
+.env*.local

@@ -1,0 +1,88 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Dynamic CSS variables mapped to Platform Themes */
+  --font-system: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-reader-serif: "Georgia", "Merriweather", "Charter", serif;
+  
+  --bg-canvas: #0f172a;
+  --bg-surface: #1e293b;
+  --bg-surface-elevated: #334155;
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --accent-primary: #3b82f6;
+  --accent-hover: #2563eb;
+  --border-subtle: rgba(255, 255, 255, 0.08);
+}
+
+/* Windows 11 Fluent Theme */
+[data-platform="windows"] {
+  --font-system: "Segoe UI Variable Display", "Segoe UI", Tahoma, sans-serif;
+  --bg-canvas: #181818;
+  --bg-surface: rgba(36, 36, 36, 0.85);
+  --bg-surface-elevated: #2d2d2d;
+  --accent-primary: #0078d4;
+  --accent-hover: #0086f0;
+  --border-subtle: rgba(255, 255, 255, 0.09);
+}
+
+/* Apple Cupertino Theme */
+[data-platform="apple"] {
+  --font-system: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", sans-serif;
+  --bg-canvas: #000000;
+  --bg-surface: rgba(28, 28, 30, 0.85);
+  --bg-surface-elevated: #2c2c2e;
+  --accent-primary: #0a84ff;
+  --accent-hover: #409cff;
+  --border-subtle: rgba(255, 255, 255, 0.12);
+}
+
+/* Android Material Design 3 Theme */
+[data-platform="android"] {
+  --font-system: "Roboto", sans-serif;
+  --bg-canvas: #141218;
+  --bg-surface: #1d1b20;
+  --bg-surface-elevated: #2b2930;
+  --accent-primary: #d0bcff;
+  --accent-hover: #b69df8;
+  --border-subtle: rgba(208, 188, 255, 0.12);
+}
+
+/* Linux GNOME Libadwaita Theme */
+[data-platform="linux"] {
+  --font-system: "Cantarell", "Inter", "Ubuntu", sans-serif;
+  --bg-canvas: #1e1e1e;
+  --bg-surface: #242424;
+  --bg-surface-elevated: #303030;
+  --accent-primary: #3584e4;
+  --accent-hover: #599cf0;
+  --border-subtle: rgba(255, 255, 255, 0.07);
+}
+
+/* OLED Pure Black */
+[data-theme-mode="oled"] {
+  --bg-canvas: #000000 !important;
+  --bg-surface: #0a0a0a !important;
+  --bg-surface-elevated: #141414 !important;
+  --border-subtle: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.35);
+}
+

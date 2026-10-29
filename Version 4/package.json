@@ -5,6 +5,11 @@
   "main": "src/app.js",
   "scripts": {
     "start": "node src/app.js",
+    "dev": "npm run dev --prefix frontend",
+    "build:ui": "npm run build --prefix frontend",
+    "tauri": "tauri",
+    "tauri:dev": "tauri dev",
+    "tauri:build": "tauri build",
     "migrate": "node src/migrator/cli.js",
     "migrate:dry": "node src/migrator/cli.js --dry-run",
     "mcp": "node src/mcp/server.js",

@@ -2,6 +2,7 @@
 
 # Dependencies
 node_modules/
+**/node_modules/
 
 # Story Related Files & Local Offline Content
 v4_data/
@@ -19,10 +20,28 @@ v4_data/covers/
 
 # Build Outputs & Bundles
 dist/
+dist_ui/
+target/
+src-tauri/target/
+.cargo-target/
 temp_*/
 
-# OS Artifacts
+# Tauri Generated Schemas
+src-tauri/gen/schemas/
+gen/
+
+# TypeScript & Vite Build Artifacts
+*.tsbuildinfo
+frontend/vite.config.js
+frontend/vite.config.d.ts
+
+# Environment & Local Overrides
+*.local
+.env*.local
+
+# OS & Editor Artifacts
 Thumbs.db
 .DS_Store
 *.log
-
+.vscode/
+.idea/

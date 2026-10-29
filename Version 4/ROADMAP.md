@@ -14,9 +14,9 @@
 ---
 
 ### Phase 1: Foundation & Data Migration
-- [ ] Initialize Tauri 2.0 multi-platform workspace (`src-tauri` with Rust, `src` with Vue 3 / Vite / TypeScript / Tailwind CSS).
-- [ ] Configure SQLite with `rusqlite` / `sqlx` and implement the schema defined in [`ARCHITECTURE.md`](./ARCHITECTURE.md).
-- [ ] Develop automated **Migration Script**:
+- [x] Initialize Tauri 2.0 multi-platform workspace (`src-tauri` with Rust, `frontend` with Vue 3 / Vite / TypeScript / Tailwind CSS).
+- [x] Configure SQLite with `rusqlite` / `sqlx` and implement the schema defined in [`ARCHITECTURE.md`](./ARCHITECTURE.md).
+- [x] Develop automated **Migration Script**:
   - Scans `../config/novels.json`, `../config/rules.json`, and `../data/novels/`.
   - Converts existing novels and downloaded chapters into SQLite records.
   - Copies covers into the new sandboxed asset directory.
