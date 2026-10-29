@@ -4,11 +4,11 @@
   "description": "Next-Gen Multi-Platform Fanfiction Manager & Downloader with native MCP AI rule creation",
   "main": "src/app.js",
   "scripts": {
-    "start": "node src/app.js",
+    "start": "node scripts/start-tauri.js",
     "dev": "npm run dev --prefix frontend",
     "build:ui": "npm run build --prefix frontend",
     "tauri": "tauri",
-    "tauri:dev": "tauri dev",
+    "tauri:dev": "node scripts/start-tauri.js",
     "tauri:build": "tauri build",
     "migrate": "node src/migrator/cli.js",
     "migrate:dry": "node src/migrator/cli.js --dry-run",
@@ -42,6 +42,9 @@
     "sqlite"
   ],
   "author": "",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.1.0"
+  }
 }
 
