@@ -1,20 +1,20 @@
 <template>
   <div class="flex-1 flex flex-col h-full overflow-hidden bg-canvas">
     <!-- Header with 4 Studio Modes -->
-    <header class="h-16 px-6 border-b border-border flex items-center justify-between gap-4 bg-surface/50 backdrop-blur-sm shrink-0 select-none">
+    <header class="min-h-16 py-3 px-4 sm:px-6 border-b border-border flex flex-col md:flex-row md:items-center justify-between gap-3 bg-surface/50 backdrop-blur-sm shrink-0 select-none">
       <div>
         <h2 class="text-sm font-semibold text-text-primary">Rule Studio & Workbench</h2>
         <span class="text-xs text-text-muted">Author, test, and generate extraction rules</span>
       </div>
 
       <!-- Mode Selector -->
-      <div class="flex items-center gap-1.5 bg-surface-elevated/60 p-1 rounded-xl border border-border">
+      <div class="flex items-center gap-1 bg-surface-elevated/60 p-1 rounded-xl border border-border flex-wrap">
         <button
           v-for="mode in modes"
           :key="mode.id"
           @click="activeMode = mode.id"
           :class="[
-            'flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors',
+            'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap',
             activeMode === mode.id
               ? 'bg-accent text-white shadow-sm'
               : 'text-text-secondary hover:text-text-primary'
@@ -201,15 +201,21 @@
       <!-- Mode 4: Desktop Code Studio & Tester Workbench -->
       <div v-else-if="activeMode === 'code'" class="max-w-4xl mx-auto space-y-4">
         <div class="p-5 rounded-2xl bg-surface border border-border space-y-4">
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div>
-              <h3 class="text-sm font-semibold text-text-primary">Extraction Rule Tester Workbench</h3>
-              <div class="flex items-center gap-2 mt-1">
-                <span class="text-[11px] text-text-muted">Active Rule:</span>
+          <!-- Top Bar: Title, Active Rule & Responsive Action Toolbar -->
+          <div class="flex flex-col gap-3 pb-3 border-b border-border">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <h3 class="text-sm font-semibold text-text-primary">Extraction Rule Tester Workbench</h3>
+                <p class="text-[11px] text-text-muted">Select an existing rule to test live against target web pages</p>
+              </div>
+
+              <!-- Rule Picker -->
+              <div class="flex items-center gap-2 min-w-0">
+                <span class="text-[11px] text-text-muted whitespace-nowrap font-medium">Active Rule:</span>
                 <select
                   v-model="selectedRuleGuid"
                   @change="handleSelectExistingRule"
-                  class="px-2.5 py-1 rounded-lg bg-surface-elevated border border-border text-xs text-text-primary font-medium focus:outline-none focus:border-accent"
+                  class="w-full sm:w-auto min-w-[200px] max-w-full sm:max-w-xs px-2.5 py-1.5 rounded-lg bg-surface-elevated border border-border text-xs text-text-primary font-medium focus:outline-none focus:border-accent truncate"
                 >
                   <option value="" disabled>-- Pick an existing rule to test --</option>
                   <option v-for="r in store.rules" :key="r.guid" :value="r.guid">
@@ -218,11 +224,13 @@
                 </select>
               </div>
             </div>
-            <div class="flex items-center gap-2 flex-wrap">
+
+            <!-- Action Toolbar (Horizontal wrapping pills) -->
+            <div class="flex items-center gap-2 flex-wrap pt-1">
               <button
                 @click="handleOpenWebview"
                 :disabled="openingWebview"
-                class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow-sm transition-colors"
+                class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow-sm transition-colors whitespace-nowrap"
                 title="Open native Webview window for testing"
               >
                 <Globe class="w-3.5 h-3.5" :class="{ 'animate-spin': openingWebview }" />
@@ -230,7 +238,7 @@
               </button>
               <button
                 @click="handleOpenDevTools"
-                class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface-elevated hover:bg-white/10 border border-border text-xs font-semibold text-text-primary transition-colors"
+                class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface-elevated hover:bg-white/10 border border-border text-xs font-semibold text-text-primary transition-colors whitespace-nowrap"
                 title="Open Webview DevTools"
               >
                 <Terminal class="w-3.5 h-3.5 text-accent" />
@@ -239,7 +247,7 @@
               <button
                 @click="showRendererPane = !showRendererPane"
                 :class="[
-                  'flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-semibold transition-colors',
+                  'flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-semibold transition-colors whitespace-nowrap',
                   showRendererPane
                     ? 'bg-accent/20 border-accent text-accent'
                     : 'bg-surface-elevated border-border text-text-muted hover:text-text-primary'
@@ -252,14 +260,14 @@
               <button
                 @click="handleTestExecution"
                 :disabled="testingExecution"
-                class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-accent text-white text-xs font-semibold hover:bg-accent/90 transition-colors shadow-sm"
+                class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-accent text-white text-xs font-semibold hover:bg-accent/90 transition-colors shadow-sm whitespace-nowrap"
               >
                 <Play class="w-3.5 h-3.5 fill-white" />
                 <span>{{ testingExecution ? 'Testing...' : 'Test Execution' }}</span>
               </button>
               <button
                 @click="handleSaveWorkbenchRule"
-                class="px-3 py-1.5 rounded-xl bg-surface-elevated hover:bg-border text-xs font-semibold text-text-primary transition-colors"
+                class="px-3 py-1.5 rounded-xl bg-surface-elevated hover:bg-border text-xs font-semibold text-text-primary transition-colors whitespace-nowrap"
               >
                 Save Rule
               </button>
@@ -422,16 +430,16 @@
               </div>
 
               <!-- Live Extraction Quick Actions -->
-              <div class="p-3.5 rounded-xl bg-surface-elevated border border-border flex items-center justify-between gap-3 flex-wrap">
+              <div class="p-3.5 rounded-xl bg-surface-elevated border border-border flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div class="text-xs">
                   <span class="font-semibold text-accent block">Live Extraction Bridge</span>
                   <span class="text-[11px] text-text-muted">Execute your active rule code directly inside the live companion Webview:</span>
                 </div>
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-2 flex-wrap">
                   <button
                     @click="handleExtractLiveTOC"
                     :disabled="testingExecution"
-                    class="px-3 py-1.5 rounded-lg bg-accent text-white text-xs font-semibold hover:bg-accent/90 shadow-sm flex items-center gap-1.5 disabled:opacity-50"
+                    class="px-3 py-1.5 rounded-lg bg-accent text-white text-xs font-semibold hover:bg-accent/90 shadow-sm flex items-center gap-1.5 disabled:opacity-50 whitespace-nowrap"
                   >
                     <Play class="w-3.5 h-3.5 fill-white" />
                     <span>Extract TOC Live</span>
@@ -439,7 +447,7 @@
                   <button
                     @click="handleExtractLiveChapter"
                     :disabled="testingExecution"
-                    class="px-3 py-1.5 rounded-lg bg-surface hover:bg-white/10 border border-border text-text-primary text-xs font-medium flex items-center gap-1.5 disabled:opacity-50"
+                    class="px-3 py-1.5 rounded-lg bg-surface hover:bg-white/10 border border-border text-text-primary text-xs font-medium flex items-center gap-1.5 disabled:opacity-50 whitespace-nowrap"
                   >
                     <Play class="w-3.5 h-3.5 text-accent" />
                     <span>Extract Chapter Live</span>
