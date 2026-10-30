@@ -427,11 +427,11 @@
               </button>
             </div>
 
-            <!-- Challenge Warning if detected -->
-            <div v-if="previewHasChallenge" class="px-4 py-2 bg-amber-950/50 border-b border-amber-500/30 flex items-center justify-between text-xs text-amber-300">
+            <!-- Challenge Warning: only show if Native Webview is NOT active -->
+            <div v-if="previewHasChallenge && !isWebviewActive" class="px-4 py-2 bg-amber-950/50 border-b border-amber-500/30 flex items-center justify-between text-xs text-amber-300">
               <div class="flex items-center gap-2">
                 <AlertCircle class="w-4 h-4 text-amber-400 shrink-0" />
-                <span>Cloudflare challenge detected on this site. Use the <strong>Native Window</strong> to solve the challenge.</span>
+                <span>Site returned challenge to direct HTTP requests. Launch the <strong>Native Window</strong> to browse with zero blocks.</span>
               </div>
               <button
                 @click="handleOpenWebview"
@@ -441,8 +441,63 @@
               </button>
             </div>
 
-            <!-- Renderer Preview Area -->
-            <div class="relative bg-black/40 min-h-[280px] max-h-[460px] flex flex-col items-center justify-center p-3">
+            <!-- Renderer Preview Area: Shows Active Webview Deck when Native Webview is open -->
+            <div v-if="isWebviewActive" class="p-5 bg-surface border-b border-border space-y-4">
+              <div class="flex items-center justify-between flex-wrap gap-3">
+                <div class="flex items-center gap-2.5">
+                  <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                  <div>
+                    <h5 class="text-xs font-semibold text-text-primary">Native Webview Online (Desktop Side-by-Side)</h5>
+                    <p class="text-[11px] text-text-muted">Viewing live site in companion window with full JavaScript execution & session cookies.</p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-2">
+                  <button
+                    @click="handleSnapWebview"
+                    class="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-medium flex items-center gap-1.5 shadow-sm"
+                  >
+                    <Columns class="w-3.5 h-3.5" />
+                    <span>Re-Snap Windows</span>
+                  </button>
+                  <button
+                    @click="handleOpenDevTools"
+                    class="px-3 py-1.5 rounded-lg bg-surface-elevated hover:bg-white/10 border border-border text-text-primary text-xs font-medium flex items-center gap-1.5"
+                  >
+                    <Terminal class="w-3.5 h-3.5 text-accent" />
+                    <span>F12 DevTools</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Live Extraction Quick Actions -->
+              <div class="p-3.5 rounded-xl bg-surface-elevated border border-border flex items-center justify-between gap-3 flex-wrap">
+                <div class="text-xs">
+                  <span class="font-semibold text-accent block">Live Extraction Bridge</span>
+                  <span class="text-[11px] text-text-muted">Execute your active rule code directly inside the live companion Webview:</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <button
+                    @click="handleExtractLiveTOC"
+                    :disabled="testingExecution"
+                    class="px-3 py-1.5 rounded-lg bg-accent text-white text-xs font-semibold hover:bg-accent/90 shadow-sm flex items-center gap-1.5 disabled:opacity-50"
+                  >
+                    <Play class="w-3.5 h-3.5 fill-white" />
+                    <span>Extract TOC Live</span>
+                  </button>
+                  <button
+                    @click="handleExtractLiveChapter"
+                    :disabled="testingExecution"
+                    class="px-3 py-1.5 rounded-lg bg-surface hover:bg-white/10 border border-border text-text-primary text-xs font-medium flex items-center gap-1.5 disabled:opacity-50"
+                  >
+                    <Play class="w-3.5 h-3.5 text-accent" />
+                    <span>Extract Chapter Live</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- In-App Frame Area (Shown when Native Webview is NOT active) -->
+            <div v-else class="relative bg-black/40 min-h-[280px] max-h-[460px] flex flex-col items-center justify-center p-3">
               <!-- Loading spinner -->
               <div v-if="loadingPreview" class="absolute inset-0 bg-black/60 backdrop-blur-xs flex flex-col items-center justify-center z-10 space-y-2">
                 <RefreshCw class="w-6 h-6 text-accent animate-spin" />
@@ -816,7 +871,72 @@ function copyRuleJson(rule: Rule) {
   alert(`Rule "${rule.rule_name}" JSON copied to clipboard!`);
 }
 
+async function handleExtractLiveTOC() {
+  testingExecution.value = true;
+  executionResult.value = null;
+  addWebLog(`Extracting TOC directly from live Webview for ${rendererUrl.value}...`, 'info');
+  const start = Date.now();
+  try {
+    const res = await store.extractFromTestWebview(editorRule.value.toc_code || '');
+    const elapsed = Date.now() - start;
+    if (res && res.success) {
+      executionResult.value = {
+        status: 'SUCCESS (Live Webview)',
+        execution_time_ms: elapsed,
+        output: res.data,
+      };
+      addWebLog(`Live Webview Extraction SUCCESS: Extracted in ${elapsed}ms`, 'success');
+    } else {
+      executionResult.value = {
+        status: 'ERROR (Live Webview)',
+        execution_time_ms: elapsed,
+        output: { error: res?.error || 'Script returned no data' },
+      };
+      addWebLog(`Extraction script error in Webview: ${res?.error || 'No data'}`, 'error');
+    }
+  } catch (err: any) {
+    addWebLog(`Live extraction failed: ${err?.message || err}`, 'error');
+  } finally {
+    testingExecution.value = false;
+  }
+}
+
+async function handleExtractLiveChapter() {
+  testingExecution.value = true;
+  executionResult.value = null;
+  addWebLog(`Extracting Chapter directly from live Webview for ${rendererUrl.value}...`, 'info');
+  const start = Date.now();
+  try {
+    const res = await store.extractFromTestWebview(editorRule.value.chapter_code || '');
+    const elapsed = Date.now() - start;
+    if (res && res.success) {
+      executionResult.value = {
+        status: 'SUCCESS (Live Webview)',
+        execution_time_ms: elapsed,
+        output: res.data,
+      };
+      addWebLog(`Live Chapter Extraction SUCCESS: Extracted in ${elapsed}ms`, 'success');
+    } else {
+      executionResult.value = {
+        status: 'ERROR (Live Webview)',
+        execution_time_ms: elapsed,
+        output: { error: res?.error || 'Script returned no data' },
+      };
+      addWebLog(`Chapter script error in Webview: ${res?.error || 'No data'}`, 'error');
+    }
+  } catch (err: any) {
+    addWebLog(`Live chapter extraction failed: ${err?.message || err}`, 'error');
+  } finally {
+    testingExecution.value = false;
+  }
+}
+
 async function handleTestExecution() {
+  if (isWebviewActive.value) {
+    await handleExtractLiveTOC();
+    return;
+  }
+
   testingExecution.value = true;
   executionResult.value = null;
   addWebLog(`Starting extraction test on: ${workbenchTestUrl.value}...`, 'info');

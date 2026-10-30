@@ -336,12 +336,21 @@ class ScrapingPipeline {
   detectChallenge(status, body) {
     const lower = (body || '').toLowerCase();
     if (status === 429) return 'rate_limited';
-    if (lower.includes('cf-turnstile') || lower.includes('challenges.cloudflare.com')) {
+
+    const isChallengeScreen =
+      lower.includes('just a moment...') ||
+      lower.includes('checking your browser before accessing') ||
+      lower.includes('cf-browser-verification') ||
+      lower.includes('challenge-running');
+
+    if (
+      (status === 403 || status === 503 || isChallengeScreen) &&
+      (lower.includes('cf-turnstile') || lower.includes('challenges.cloudflare.com'))
+    ) {
       return 'cloudflare_turnstile';
     }
     if (
-      lower.includes('just a moment...') ||
-      lower.includes('checking your browser before accessing') ||
+      isChallengeScreen ||
       lower.includes('enable javascript and cookies to continue')
     ) {
       return 'cloudflare_ray';

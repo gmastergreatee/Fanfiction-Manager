@@ -629,6 +629,14 @@ export const useLibraryStore = defineStore('library', () => {
     return 'Snapped';
   }
 
+  async function extractFromTestWebview(script: string): Promise<any> {
+    if (window.__TAURI_INTERNALS__) {
+      const { invoke } = await import('@tauri-apps/api/core');
+      return await invoke('extract_from_test_webview', { script });
+    }
+    return { success: true, data: { Title: 'Mock Webview Title', ChapterCount: 15 } };
+  }
+
   return {
     novels,
     rules,
@@ -692,5 +700,6 @@ export const useLibraryStore = defineStore('library', () => {
     evalInWebview,
     fetchPreviewHtml,
     snapTestWebview,
+    extractFromTestWebview,
   };
 });

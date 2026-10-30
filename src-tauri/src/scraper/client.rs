@@ -130,15 +130,18 @@ impl ScraperHttpClient {
             return ChallengeType::RateLimited;
         }
 
-        if body_lower.contains("cf-turnstile") || body_lower.contains("challenges.cloudflare.com") {
+        let is_challenge_screen = body_lower.contains("just a moment...")
+            || body_lower.contains("checking your browser before accessing")
+            || body_lower.contains("cf-browser-verification")
+            || body_lower.contains("challenge-running");
+
+        if (status == 403 || status == 503 || is_challenge_screen)
+            && (body_lower.contains("cf-turnstile") || body_lower.contains("challenges.cloudflare.com"))
+        {
             return ChallengeType::CloudflareTurnstile;
         }
 
-        if body_lower.contains("just a moment...")
-            || body_lower.contains("checking your browser before accessing")
-            || body_lower.contains("enable javascript and cookies to continue")
-            || body_lower.contains("cf-browser-verification")
-        {
+        if is_challenge_screen || body_lower.contains("enable javascript and cookies to continue") {
             return ChallengeType::CloudflareRay;
         }
 

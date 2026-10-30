@@ -59,6 +59,7 @@ async fn open_test_webview(
 #[tauri::command]
 fn open_devtools_for_webview(app: tauri::AppHandle) -> Result<String, String> {
     if let Some(win) = app.get_webview_window("rule-tester-webview") {
+        let _ = win.url();
         win.open_devtools();
         Ok("DevTools opened".to_string())
     } else {
@@ -166,6 +167,90 @@ async fn snap_test_webview(app: tauri::AppHandle) -> Result<String, String> {
         }
     }
     Err("Could not find both main window and test webview window".to_string())
+}
+
+fn url_decode_simple(s: &str) -> String {
+    let mut result = Vec::new();
+    let bytes = s.as_bytes();
+    let mut i = 0;
+    while i < bytes.len() {
+        if bytes[i] == b'%' && i + 2 < bytes.len() {
+            if let Ok(byte) = u8::from_str_radix(std::str::from_utf8(&bytes[i + 1..i + 3]).unwrap_or(""), 16) {
+                result.push(byte);
+                i += 3;
+                continue;
+            }
+        }
+        result.push(bytes[i]);
+        i += 1;
+    }
+    String::from_utf8_lossy(&result).to_string()
+}
+
+#[tauri::command]
+async fn extract_from_test_webview(
+    app: tauri::AppHandle,
+    script: String,
+    state: State<'_, AppState>,
+) -> Result<serde_json::Value, String> {
+    let win = app
+        .get_webview_window("rule-tester-webview")
+        .ok_or_else(|| "Test Webview window is not open. Please click 'Open Webview' or 'Snap Side-by-Side' first.".to_string())?;
+
+    // Wrap script in an async IIFE that encodes the result into window.location.hash
+    let eval_payload = format!(
+        r##"(async function() {{
+            try {{
+                const _eval_fn = async function() {{ {} }};
+                const _res = await _eval_fn();
+                const _cookies = document.cookie || "";
+                const _payload = JSON.stringify({{ success: true, data: _res, cookies: _cookies }});
+                window.location.hash = "#ffm_res=" + encodeURIComponent(_payload);
+            }} catch(err) {{
+                const _err_payload = JSON.stringify({{ success: false, error: err ? err.toString() : "Script execution error" }});
+                window.location.hash = "#ffm_res=" + encodeURIComponent(_err_payload);
+            }}
+        }})()"##,
+        script
+    );
+
+    win.eval(&eval_payload)
+        .map_err(|e| format!("Failed to evaluate extraction script in webview: {}", e))?;
+
+    // Poll briefly for hash to be populated by the evaluated script
+    for _ in 0..25 {
+        tokio::time::sleep(std::time::Duration::from_millis(80)).await;
+        if let Ok(curr_url) = win.url() {
+            if let Some(fragment) = curr_url.fragment() {
+                if fragment.starts_with("ffm_res=") {
+                    let encoded_json = &fragment["ffm_res=".len()..];
+                    let decoded_json = url_decode_simple(encoded_json);
+
+                    // Clean up hash fragment silently
+                    let _ = win.eval("history.replaceState(null, document.title, window.location.pathname + window.location.search);");
+
+                    if let Ok(val) = serde_json::from_str::<serde_json::Value>(&decoded_json) {
+                        // Sync live cookies from webview to scraper
+                        if let Some(cookie_str) = val.get("cookies").and_then(|c| c.as_str()) {
+                            if !cookie_str.is_empty() {
+                                let origin = format!("{}://{}", curr_url.scheme(), curr_url.host_str().unwrap_or_default());
+                                for pair in cookie_str.split(';') {
+                                    let parts: Vec<&str> = pair.trim().splitn(2, '=').collect();
+                                    if parts.len() == 2 {
+                                        state.scraper.http_client.sync_cookie(&origin, parts[0], parts[1]);
+                                    }
+                                }
+                            }
+                        }
+
+                        return Ok(val);
+                    }
+                }
+            }
+        }
+    }
+
+    Err("Timed out waiting for Webview to evaluate extraction script.".to_string())
 }
 
 struct AppState {
@@ -619,6 +704,7 @@ pub fn run() {
             eval_in_test_webview,
             fetch_preview_html,
             snap_test_webview,
+            extract_from_test_webview,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
