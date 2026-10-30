@@ -96,6 +96,19 @@ export interface CustomThemePalette {
   border: string;
 }
 
+export interface NovelUpdateResult {
+  novel_id: string;
+  new_chapters_found: number;
+  total_chapters: number;
+  message: string;
+}
+
+export interface LibraryUpdateSummary {
+  checked_count: number;
+  updated_novels: number;
+  new_chapters_total: number;
+}
+
 declare global {
   interface Window {
     __TAURI_INTERNALS__?: unknown;

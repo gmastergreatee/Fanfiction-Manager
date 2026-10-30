@@ -57,6 +57,17 @@
                 <code class="text-xs text-text-muted font-mono bg-surface-elevated p-2 rounded-lg break-all">
                   {{ rule.url_regex }}
                 </code>
+                <div class="mt-3 pt-2.5 border-t border-border/50 flex items-center justify-between">
+                  <span class="text-[10px] text-text-muted font-mono">v{{ rule.version || 1 }}</span>
+                  <button
+                    @click="store.openRuleInTester(rule)"
+                    class="px-2.5 py-1 rounded-lg bg-accent/15 hover:bg-accent text-accent hover:text-white text-xs font-medium flex items-center gap-1.5 transition-colors shadow-xs"
+                    title="Open this rule in Extraction Rule Tester Workbench"
+                  >
+                    <Play class="w-3 h-3 fill-current" />
+                    <span>Open in Tester</span>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -88,6 +99,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
+import { Play } from 'lucide-vue-next';
 import { useLibraryStore } from './stores/library';
 import TitleBar from './components/TitleBar.vue';
 import Sidebar from './components/Sidebar.vue';

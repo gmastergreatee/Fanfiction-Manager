@@ -170,6 +170,15 @@ impl ScrapingEngine {
                 chapter_links: ".toc_o".into(),
                 chapter_title_subselector: None,
             }
+        } else if rule_name.contains("webnovel") {
+            TocSelectors {
+                title: ".det-info h1, .book-info h1, h1".into(),
+                author: Some(".det-info address a, .author a, .author".into()),
+                cover: Some(".det-info img, .book-img img".into()),
+                summary: Some(".det-tab-pane .det-abt p, .det-abt p, .book-intro".into()),
+                chapter_links: "#contents a, .j_catalog_list a, a.chapter-item, a[href*='/book/'][href*='_']".into(),
+                chapter_title_subselector: None,
+            }
         } else {
             // General / default fallback selectors
             TocSelectors {
@@ -215,6 +224,12 @@ impl ScrapingEngine {
                 title: "#chap_select option:checked, b.head".into(),
                 content: ".storytext".into(),
                 strip_selectors: vec!["script".into(), "style".into()],
+            }
+        } else if rule_name.contains("webnovel") {
+            ChapterSelectors {
+                title: ".cha-tit h1, .chapter-title, h1".into(),
+                content: ".cha-content, .cha-words, .chapter-content".into(),
+                strip_selectors: vec![".cha-ad".into(), ".pirate".into()],
             }
         } else {
             ChapterSelectors {

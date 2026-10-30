@@ -68,6 +68,15 @@
             </button>
 
             <button
+              @click="handleCheckUpdatesForNovel"
+              :disabled="checkingUpdates"
+              :class="['w-full py-2.5 px-4 text-xs flex items-center justify-center gap-2 transition-all', modalSecondaryBtnClass]"
+            >
+              <RefreshCw class="w-4 h-4 text-accent" :class="{ 'animate-spin': checkingUpdates }" />
+              <span>{{ checkingUpdates ? 'Checking for Updates...' : 'Check for Updates' }}</span>
+            </button>
+
+            <button
               @click="handleEnqueueDownload"
               :class="['w-full py-2.5 px-4 text-xs flex items-center justify-center gap-2 transition-all', modalSecondaryBtnClass]"
             >
@@ -82,6 +91,9 @@
               <BookDown class="w-4 h-4 text-emerald-500" />
               <span>{{ epubExporting ? 'Exporting EPUB...' : 'Export as EPUB' }}</span>
             </button>
+            <p v-if="actionMessage" class="text-[10px] text-center font-medium" :class="actionMessageColor">
+              {{ actionMessage }}
+            </p>
             <p v-if="epubMessage" class="text-[10px] text-center text-emerald-500 font-medium">
               {{ epubMessage }}
             </p>
@@ -198,6 +210,7 @@ import {
   X,
   BookOpen,
   Play,
+  RefreshCw,
   DownloadCloud,
   ExternalLink,
   ListFilter,
@@ -223,6 +236,9 @@ const chapterSearch = ref('');
 const epubExporting = ref(false);
 const epubMessage = ref('');
 const coverFailed = ref(false);
+const checkingUpdates = ref(false);
+const actionMessage = ref('');
+const actionMessageColor = ref('text-emerald-500');
 
 const novel = computed(() => store.selectedNovelDetail!);
 
@@ -273,9 +289,43 @@ function openChapter(ch: Chapter) {
   store.openReader(novel.value, ch);
 }
 
+async function handleCheckUpdatesForNovel() {
+  if (!novel.value || checkingUpdates.value) return;
+  checkingUpdates.value = true;
+  actionMessage.value = '';
+  try {
+    const res = await store.checkForUpdates(novel.value.id);
+    if (res.new_chapters_found > 0) {
+      actionMessageColor.value = 'text-emerald-500';
+      actionMessage.value = `Found ${res.new_chapters_found} new chapters! (Total: ${res.total_chapters})`;
+    } else {
+      actionMessageColor.value = 'text-blue-400';
+      actionMessage.value = res.message || 'Already up to date!';
+    }
+  } catch (err: any) {
+    actionMessageColor.value = 'text-rose-400';
+    actionMessage.value = `Update check failed: ${err?.message || 'Error'}`;
+  } finally {
+    checkingUpdates.value = false;
+    setTimeout(() => {
+      actionMessage.value = '';
+    }, 5000);
+  }
+}
+
 function handleEnqueueDownload() {
   if (!novel.value) return;
-  store.enqueueNovel(novel.value, store.currentChaptersList);
+  const count = store.enqueueNovel(novel.value, store.currentChaptersList);
+  if (count > 0) {
+    actionMessageColor.value = 'text-emerald-500';
+    actionMessage.value = `Enqueued ${count} missing chapters to Downloader Queue!`;
+  } else {
+    actionMessageColor.value = 'text-amber-400';
+    actionMessage.value = 'All chapters are already downloaded or queued!';
+  }
+  setTimeout(() => {
+    actionMessage.value = '';
+  }, 4000);
 }
 
 async function handleExportEpub() {

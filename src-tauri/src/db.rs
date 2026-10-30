@@ -329,6 +329,70 @@ impl Database {
         Ok(())
     }
 
+    pub fn insert_chapter_placeholder(
+        &self,
+        novel_id: &str,
+        chapter_index: i64,
+        title: &str,
+        source_url: &str,
+    ) -> Result<()> {
+        let chapter_id = format!("{}_ch_{}", novel_id, chapter_index);
+        self.conn.execute(
+            r#"
+            INSERT INTO chapters (id, novel_id, chapter_index, title, content_html, source_url, word_count, is_downloaded, downloaded_at)
+            VALUES (?1, ?2, ?3, ?4, '', ?5, 0, 0, NULL)
+            ON CONFLICT(novel_id, chapter_index) DO UPDATE SET
+                source_url = CASE WHEN chapters.source_url = '' THEN excluded.source_url ELSE chapters.source_url END
+            "#,
+            rusqlite::params![chapter_id, novel_id, chapter_index, title, source_url],
+        )?;
+        Ok(())
+    }
+
+    pub fn update_novel_total_chapters(&self, novel_id: &str, total_chapters: i64) -> Result<()> {
+        self.conn.execute(
+            r#"
+            UPDATE novels
+            SET total_chapters = MAX(total_chapters, ?1),
+                updated_at = datetime('now')
+            WHERE id = ?2
+            "#,
+            rusqlite::params![total_chapters, novel_id],
+        )?;
+        Ok(())
+    }
+
+    pub fn upsert_rule(&self, rule: &Rule) -> Result<()> {
+        self.conn.execute(
+            r#"
+            INSERT INTO rules (guid, rule_name, url_regex, parser_type, pagetype_code, toc_code, chapter_code, url_blocks, version, updated_at)
+            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, datetime('now'))
+            ON CONFLICT(guid) DO UPDATE SET
+                rule_name = excluded.rule_name,
+                url_regex = excluded.url_regex,
+                parser_type = excluded.parser_type,
+                pagetype_code = excluded.pagetype_code,
+                toc_code = excluded.toc_code,
+                chapter_code = excluded.chapter_code,
+                url_blocks = excluded.url_blocks,
+                version = excluded.version,
+                updated_at = datetime('now')
+            "#,
+            rusqlite::params![
+                rule.guid,
+                rule.rule_name,
+                rule.url_regex,
+                rule.parser_type,
+                rule.pagetype_code,
+                rule.toc_code,
+                rule.chapter_code,
+                rule.url_blocks,
+                rule.version,
+            ],
+        )?;
+        Ok(())
+    }
+
     pub fn get_chapter_content(&self, novel_id: &str, chapter_index: i64) -> Result<Option<Chapter>> {
         let mut stmt = self.conn.prepare(
             "SELECT id, novel_id, chapter_index, title, content_html, source_url, word_count, is_downloaded, downloaded_at

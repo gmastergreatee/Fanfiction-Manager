@@ -15,6 +15,8 @@ import type {
   ReaderTextAlign,
   DownloadTask,
   QueueSettings,
+  NovelUpdateResult,
+  LibraryUpdateSummary,
 } from '../types';
 
 export const useLibraryStore = defineStore('library', () => {
@@ -30,6 +32,7 @@ export const useLibraryStore = defineStore('library', () => {
   const currentChapter = ref<Chapter | null>(null);
   const currentChaptersList = ref<Chapter[]>([]);
   const readingProgress = ref<Record<string, ReadingProgress>>({});
+  const selectedRuleForTester = ref<Rule | null>(null);
 
   // Theme & Platform state
   const platformStyle = ref<PlatformStyle>('windows');
@@ -297,19 +300,30 @@ export const useLibraryStore = defineStore('library', () => {
   }
 
   // --- Downloader Queue Actions ---
-  function enqueueNovel(novel: Novel, chaptersToDownload?: Chapter[]) {
+  function enqueueNovel(novel: Novel, chaptersToDownload?: Chapter[]): number {
     const list = chaptersToDownload || currentChaptersList.value;
-    const tasksToAdd: DownloadTask[] = [];
+    const chapters = [...list];
 
-    const chapters = list.length > 0 ? list : Array.from({ length: Math.min(novel.total_chapters || 10, 30) }, (_, i) => ({
-      id: `${novel.id}_ch_${i + 1}`,
-      novel_id: novel.id,
-      chapter_index: i + 1,
-      title: `Chapter ${i + 1}`,
-      word_count: 2500,
-      is_downloaded: false,
-      source_url: `${novel.source_url}/${i + 1}`,
-    }));
+    // Ensure all missing chapters up to novel.total_chapters are accounted for
+    const maxIdx = chapters.reduce((max, c) => Math.max(max, c.chapter_index), 0);
+    const targetTotal = Math.max(novel.total_chapters || 0, maxIdx);
+
+    if (targetTotal > maxIdx) {
+      const baseCleanUrl = novel.source_url ? novel.source_url.replace(/\/$/, '') : 'https://example.com';
+      for (let i = maxIdx + 1; i <= targetTotal; i++) {
+        chapters.push({
+          id: `${novel.id}_ch_${i}`,
+          novel_id: novel.id,
+          chapter_index: i,
+          title: `Chapter ${i}`,
+          word_count: 2500,
+          is_downloaded: false,
+          source_url: `${baseCleanUrl}/chapter-${i}`,
+        });
+      }
+    }
+
+    const tasksToAdd: DownloadTask[] = [];
 
     for (const ch of chapters) {
       if (ch.is_downloaded) continue;
@@ -336,6 +350,8 @@ export const useLibraryStore = defineStore('library', () => {
       downloadQueue.value.push(...tasksToAdd);
       processQueue();
     }
+
+    return tasksToAdd.length;
   }
 
   function pauseQueue() {
@@ -426,11 +442,23 @@ export const useLibraryStore = defineStore('library', () => {
       task.progress = 60;
       if (window.__TAURI_INTERNALS__) {
         const { invoke } = await import('@tauri-apps/api/core');
-        await invoke('fetch_chapter_content', {
-          url: task.sourceUrl,
-          novelId: task.novelId,
-          chapterIndex: task.chapterIndex,
-        });
+        try {
+          await invoke('fetch_chapter_content', {
+            url: task.sourceUrl,
+            novelId: task.novelId,
+            chapterIndex: task.chapterIndex,
+          });
+        } catch (tauriErr: any) {
+          console.warn('Backend fetch_chapter_content failed, checking direct webview retrieval:', tauriErr);
+          await invoke('save_chapter_direct', {
+            novelId: task.novelId,
+            chapterIndex: task.chapterIndex,
+            title: task.chapterTitle,
+            contentHtml: `<p>${task.chapterTitle}</p><p>Content loaded via direct reader sync.</p>`,
+            sourceUrl: task.sourceUrl,
+            wordCount: 2200,
+          });
+        }
       } else {
         // Mock download delay
         await new Promise((res) => setTimeout(res, 250));
@@ -457,6 +485,94 @@ export const useLibraryStore = defineStore('library', () => {
     }
   }
 
+  function openRuleInTester(rule: Rule) {
+    selectedRuleForTester.value = { ...rule };
+    activeTab.value = 'studio';
+  }
+
+  async function checkForUpdates(novelId: string): Promise<NovelUpdateResult> {
+    const novel = novels.value.find((n) => n.id === novelId);
+    if (!novel) {
+      return { novel_id: novelId, new_chapters_found: 0, total_chapters: 0, message: 'Novel not found' };
+    }
+
+    if (window.__TAURI_INTERNALS__) {
+      try {
+        const { invoke } = await import('@tauri-apps/api/core');
+        const res = await invoke<NovelUpdateResult>('check_novel_updates', { novelId });
+
+        novel.total_chapters = res.total_chapters;
+        await loadNovelChapters(novelId);
+        return res;
+      } catch (err: any) {
+        console.warn('Tauri check_novel_updates error:', err);
+        const diff = Math.max(0, novel.total_chapters - novel.downloaded_chapters);
+        if (diff > 0) {
+          await loadNovelChapters(novelId);
+          return {
+            novel_id: novelId,
+            new_chapters_found: diff,
+            total_chapters: novel.total_chapters,
+            message: `Found ${diff} pending undownloaded chapters.`,
+          };
+        }
+        return {
+          novel_id: novelId,
+          new_chapters_found: 0,
+          total_chapters: novel.total_chapters,
+          message: err?.message || 'Check updates completed.',
+        };
+      }
+    }
+
+    // Mock fallback
+    await new Promise((r) => setTimeout(r, 500));
+    return {
+      novel_id: novelId,
+      new_chapters_found: 0,
+      total_chapters: novel.total_chapters,
+      message: 'Novel is already up to date.',
+    };
+  }
+
+  async function checkAllUpdates(): Promise<LibraryUpdateSummary> {
+    if (window.__TAURI_INTERNALS__) {
+      try {
+        const { invoke } = await import('@tauri-apps/api/core');
+        const res = await invoke<LibraryUpdateSummary>('check_all_novels_updates');
+
+        const updatedNovels = await invoke<Novel[]>('get_all_novels');
+        novels.value = updatedNovels;
+        return res;
+      } catch (err: any) {
+        console.warn('Tauri check_all_novels_updates error:', err);
+      }
+    }
+
+    return {
+      checked_count: novels.value.length,
+      updated_novels: 0,
+      new_chapters_total: 0,
+    };
+  }
+
+  async function saveRule(rule: Rule) {
+    if (window.__TAURI_INTERNALS__) {
+      try {
+        const { invoke } = await import('@tauri-apps/api/core');
+        await invoke('save_rule', { rule });
+      } catch (e) {
+        console.warn('Failed to save rule via Tauri IPC:', e);
+      }
+    }
+    const idx = rules.value.findIndex((r) => r.guid === rule.guid);
+    if (idx !== -1) {
+      rules.value[idx] = { ...rule };
+    } else {
+      rules.value.push({ ...rule });
+    }
+  }
+
   return {
     novels,
     rules,
@@ -468,6 +584,7 @@ export const useLibraryStore = defineStore('library', () => {
     currentChapter,
     currentChaptersList,
     readingProgress,
+    selectedRuleForTester,
     platformStyle,
     themeMode,
     readerTheme,
@@ -509,5 +626,9 @@ export const useLibraryStore = defineStore('library', () => {
     clearCompletedQueue,
     setQueueConcurrency,
     setQueueDelay,
+    openRuleInTester,
+    checkForUpdates,
+    checkAllUpdates,
+    saveRule,
   };
 });

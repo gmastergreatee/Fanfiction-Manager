@@ -18,19 +18,30 @@
       </div>
 
       <!-- Windows Segmented Buttons -->
-      <div class="flex items-center gap-1 bg-[#2b2b2b] p-0.5 rounded-md border border-white/10">
+      <div class="flex items-center gap-2">
+        <div class="flex items-center gap-1 bg-[#2b2b2b] p-0.5 rounded-md border border-white/10">
+          <button
+            v-for="filter in filters"
+            :key="filter.id"
+            @click="store.activeFilter = filter.id"
+            :class="[
+              'px-3 py-1 rounded text-xs font-medium transition-colors font-sans',
+              store.activeFilter === filter.id
+                ? 'bg-accent text-white shadow-xs font-semibold'
+                : 'text-text-muted hover:text-text-primary'
+            ]"
+          >
+            {{ filter.label }}
+          </button>
+        </div>
         <button
-          v-for="filter in filters"
-          :key="filter.id"
-          @click="store.activeFilter = filter.id"
-          :class="[
-            'px-3 py-1 rounded text-xs font-medium transition-colors font-sans',
-            store.activeFilter === filter.id
-              ? 'bg-accent text-white shadow-xs font-semibold'
-              : 'text-text-muted hover:text-text-primary'
-          ]"
+          @click="handleCheckAllUpdates"
+          :disabled="checkingAllUpdates"
+          class="flex items-center gap-1.5 px-3 py-1.5 bg-[#2b2b2b] hover:bg-white/10 border border-white/10 rounded-md text-xs font-medium text-text-primary transition-all disabled:opacity-50"
+          title="Check for novel updates"
         >
-          {{ filter.label }}
+          <RefreshCw class="w-3.5 h-3.5 text-accent" :class="{ 'animate-spin': checkingAllUpdates }" />
+          <span class="hidden sm:inline">{{ checkingAllUpdates ? 'Checking...' : 'Check Updates' }}</span>
         </button>
       </div>
     </header>
@@ -51,19 +62,30 @@
       </div>
 
       <!-- macOS Segmented Control Pill -->
-      <div class="flex items-center gap-1 bg-white/10 p-1 rounded-full border border-white/10 backdrop-blur-md">
+      <div class="flex items-center gap-2">
+        <div class="flex items-center gap-1 bg-white/10 p-1 rounded-full border border-white/10 backdrop-blur-md">
+          <button
+            v-for="filter in filters"
+            :key="filter.id"
+            @click="store.activeFilter = filter.id"
+            :class="[
+              'px-3.5 py-1 rounded-full text-xs transition-all',
+              store.activeFilter === filter.id
+                ? 'bg-gradient-to-r from-[#007aff] to-[#0a84ff] text-white font-medium shadow-sm'
+                : 'text-text-muted hover:text-text-primary'
+            ]"
+          >
+            {{ filter.label }}
+          </button>
+        </div>
         <button
-          v-for="filter in filters"
-          :key="filter.id"
-          @click="store.activeFilter = filter.id"
-          :class="[
-            'px-3.5 py-1 rounded-full text-xs transition-all',
-            store.activeFilter === filter.id
-              ? 'bg-gradient-to-r from-[#007aff] to-[#0a84ff] text-white font-medium shadow-sm'
-              : 'text-text-muted hover:text-text-primary'
-          ]"
+          @click="handleCheckAllUpdates"
+          :disabled="checkingAllUpdates"
+          class="flex items-center gap-1.5 px-3.5 py-1.5 bg-white/10 hover:bg-white/15 border border-white/10 rounded-full text-xs font-medium text-text-primary backdrop-blur-md transition-all disabled:opacity-50"
+          title="Check for novel updates"
         >
-          {{ filter.label }}
+          <RefreshCw class="w-3.5 h-3.5 text-accent" :class="{ 'animate-spin': checkingAllUpdates }" />
+          <span class="hidden sm:inline">{{ checkingAllUpdates ? 'Checking...' : 'Check Updates' }}</span>
         </button>
       </div>
     </header>
@@ -98,6 +120,15 @@
         >
           {{ filter.label }}
         </button>
+        <button
+          @click="handleCheckAllUpdates"
+          :disabled="checkingAllUpdates"
+          class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-medium border border-white/10 bg-[#2b2930] hover:bg-[#383540] text-text-primary transition-all disabled:opacity-50"
+          title="Check for novel updates"
+        >
+          <RefreshCw class="w-3.5 h-3.5 text-accent" :class="{ 'animate-spin': checkingAllUpdates }" />
+          <span class="hidden sm:inline">{{ checkingAllUpdates ? 'Checking...' : 'Check Updates' }}</span>
+        </button>
       </div>
     </header>
 
@@ -116,25 +147,56 @@
         />
       </div>
 
-      <div class="flex items-center gap-1 bg-[#2d2d2d] p-1 rounded-full border border-white/10">
+      <div class="flex items-center gap-2">
+        <div class="flex items-center gap-1 bg-[#2d2d2d] p-1 rounded-full border border-white/10">
+          <button
+            v-for="filter in filters"
+            :key="filter.id"
+            @click="store.activeFilter = filter.id"
+            :class="[
+              'px-3 py-1 rounded-full text-xs font-semibold transition-colors',
+              store.activeFilter === filter.id
+                ? 'bg-accent text-white shadow-xs'
+                : 'text-text-muted hover:text-text-primary'
+            ]"
+          >
+            {{ filter.label }}
+          </button>
+        </div>
         <button
-          v-for="filter in filters"
-          :key="filter.id"
-          @click="store.activeFilter = filter.id"
-          :class="[
-            'px-3 py-1 rounded-full text-xs font-semibold transition-colors',
-            store.activeFilter === filter.id
-              ? 'bg-accent text-white shadow-xs'
-              : 'text-text-muted hover:text-text-primary'
-          ]"
+          @click="handleCheckAllUpdates"
+          :disabled="checkingAllUpdates"
+          class="flex items-center gap-1.5 px-3 py-1 bg-[#2d2d2d] hover:bg-white/10 border border-white/10 rounded-full text-xs font-semibold text-text-primary transition-colors disabled:opacity-50"
+          title="Check for novel updates"
         >
-          {{ filter.label }}
+          <RefreshCw class="w-3.5 h-3.5 text-accent" :class="{ 'animate-spin': checkingAllUpdates }" />
+          <span class="hidden sm:inline">{{ checkingAllUpdates ? 'Checking...' : 'Check Updates' }}</span>
         </button>
       </div>
     </header>
 
     <!-- MAIN NOVEL GRID VIEWPORT -->
     <main class="flex-1 overflow-y-auto p-6 relative">
+      <!-- Update Banner Notification -->
+      <transition
+        enter-active-class="transition duration-200 ease-out"
+        enter-from-class="transform -translate-y-2 opacity-0"
+        enter-to-class="transform translate-y-0 opacity-100"
+        leave-active-class="transition duration-150 ease-in"
+        leave-from-class="transform translate-y-0 opacity-100"
+        leave-to-class="transform -translate-y-2 opacity-0"
+      >
+        <div
+          v-if="updateSummaryMessage"
+          class="sticky top-0 z-30 mb-4 px-4 py-2.5 bg-surface-elevated/95 backdrop-blur-md border border-accent/40 rounded-xl shadow-xl flex items-center justify-between text-xs font-medium text-accent"
+        >
+          <div class="flex items-center gap-2">
+            <RefreshCw class="w-3.5 h-3.5 shrink-0" />
+            <span>{{ updateSummaryMessage }}</span>
+          </div>
+          <button @click="updateSummaryMessage = ''" class="text-text-muted hover:text-text-primary text-sm font-bold ml-2">×</button>
+        </div>
+      </transition>
       <div v-if="store.filteredNovels.length === 0" class="h-full flex flex-col items-center justify-center text-center p-8">
         <BookOpen class="w-12 h-12 text-text-muted mb-3 opacity-40" />
         <h3 class="text-base font-semibold text-text-secondary mb-1">No Novels Found</h3>
@@ -211,11 +273,34 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { useLibraryStore } from '../stores/library';
-import { Search, BookOpen, Plus } from 'lucide-vue-next';
+import { Search, BookOpen, Plus, RefreshCw } from 'lucide-vue-next';
 import type { Novel } from '../types';
 
 const store = useLibraryStore();
 const failedCovers = ref<Record<string, boolean>>({});
+const checkingAllUpdates = ref(false);
+const updateSummaryMessage = ref('');
+
+async function handleCheckAllUpdates() {
+  if (checkingAllUpdates.value) return;
+  checkingAllUpdates.value = true;
+  updateSummaryMessage.value = '';
+  try {
+    const summary = await store.checkAllUpdates();
+    if (summary.new_chapters_total > 0) {
+      updateSummaryMessage.value = `Updated: ${summary.new_chapters_total} new chapters found across ${summary.updated_novels} novels!`;
+    } else {
+      updateSummaryMessage.value = `All ${summary.checked_count} novels are up to date.`;
+    }
+  } catch (err: any) {
+    updateSummaryMessage.value = `Update check failed: ${err?.message || 'Error'}`;
+  } finally {
+    checkingAllUpdates.value = false;
+    setTimeout(() => {
+      updateSummaryMessage.value = '';
+    }, 5000);
+  }
+}
 
 const filters = [
   { id: 'all' as const, label: 'All' },

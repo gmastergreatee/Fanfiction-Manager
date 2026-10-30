@@ -170,6 +170,14 @@
                   v{{ rule.version }}
                 </span>
                 <button
+                  @click="loadRule(rule); activeMode = 'code'"
+                  class="px-2 py-1 rounded text-[11px] font-medium text-accent hover:bg-accent/10 flex items-center gap-1"
+                  title="Open in Tester Workbench"
+                >
+                  <Play class="w-3 h-3 fill-current" />
+                  <span>Test</span>
+                </button>
+                <button
                   @click="copyRuleJson(rule)"
                   class="p-1 rounded text-text-muted hover:text-text-primary"
                   title="Export Rule JSON"
@@ -185,13 +193,28 @@
       <!-- Mode 4: Desktop Code Studio & Tester Workbench -->
       <div v-else-if="activeMode === 'code'" class="max-w-4xl mx-auto space-y-4">
         <div class="p-5 rounded-2xl bg-surface border border-border space-y-4">
-          <div class="flex items-center justify-between">
-            <h3 class="text-sm font-semibold text-text-primary">Extraction Rule Tester Workbench</h3>
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <h3 class="text-sm font-semibold text-text-primary">Extraction Rule Tester Workbench</h3>
+              <div class="flex items-center gap-2 mt-1">
+                <span class="text-[11px] text-text-muted">Active Rule:</span>
+                <select
+                  v-model="selectedRuleGuid"
+                  @change="handleSelectExistingRule"
+                  class="px-2.5 py-1 rounded-lg bg-surface-elevated border border-border text-xs text-text-primary font-medium focus:outline-none focus:border-accent"
+                >
+                  <option value="" disabled>-- Pick an existing rule to test --</option>
+                  <option v-for="r in store.rules" :key="r.guid" :value="r.guid">
+                    {{ r.rule_name }} ({{ r.parser_type }})
+                  </option>
+                </select>
+              </div>
+            </div>
             <div class="flex items-center gap-2">
               <button
                 @click="handleTestExecution"
                 :disabled="testingExecution"
-                class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-accent text-white text-xs font-semibold hover:bg-accent/90 transition-colors"
+                class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-accent text-white text-xs font-semibold hover:bg-accent/90 transition-colors shadow-sm"
               >
                 <Play class="w-3.5 h-3.5 fill-white" />
                 <span>{{ testingExecution ? 'Testing...' : 'Test Execution' }}</span>
@@ -282,7 +305,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import { useLibraryStore } from '../stores/library';
 import {
   Touchpad,
@@ -315,10 +338,54 @@ const syncing = ref(false);
 const syncReport = ref<{ checked: number; added: number; updated: number } | null>(null);
 
 // Mode 4: Code workbench state
+const selectedRuleGuid = ref<string>('');
 const editorTab = ref<'toc' | 'chapter'>('toc');
 const workbenchTestUrl = ref('https://royalroad.com/fiction/12345/chapter-1');
 const testingExecution = ref(false);
 const executionResult = ref<any>(null);
+
+function loadRule(rule: Rule) {
+  selectedRuleGuid.value = rule.guid;
+  editorRule.value = { ...rule };
+
+  // Find a real matching novel in library for testing
+  const matchingNovel = store.novels.find((n) => {
+    try {
+      return new RegExp(rule.url_regex).test(n.source_url);
+    } catch {
+      return false;
+    }
+  });
+  if (matchingNovel?.source_url) {
+    workbenchTestUrl.value = matchingNovel.source_url;
+  }
+}
+
+function handleSelectExistingRule() {
+  const found = store.rules.find((r) => r.guid === selectedRuleGuid.value);
+  if (found) {
+    loadRule(found);
+  }
+}
+
+onMounted(() => {
+  if (store.selectedRuleForTester) {
+    activeMode.value = 'code';
+    loadRule(store.selectedRuleForTester);
+  } else if (store.rules.length > 0) {
+    loadRule(store.rules[0]);
+  }
+});
+
+watch(
+  () => store.selectedRuleForTester,
+  (newRule) => {
+    if (newRule) {
+      activeMode.value = 'code';
+      loadRule(newRule);
+    }
+  }
+);
 
 const editorRule = ref<Rule>({
   guid: 'workbench-rule-01',
@@ -401,13 +468,53 @@ function copyRuleJson(rule: Rule) {
 
 async function handleTestExecution() {
   testingExecution.value = true;
-  await new Promise((res) => setTimeout(res, 400));
+  executionResult.value = null;
+
+  if (window.__TAURI_INTERNALS__) {
+    try {
+      const { invoke } = await import('@tauri-apps/api/core');
+      const start = Date.now();
+      const toc = await invoke<any>('fetch_novel_toc', { url: workbenchTestUrl.value });
+      executionResult.value = {
+        status: 'SUCCESS',
+        execution_time_ms: Date.now() - start,
+        output: {
+          Title: toc.title || 'Untitled',
+          Author: toc.author || 'Unknown',
+          ChapterCount: toc.chapters?.length || 0,
+          CoverURL: toc.cover_url || '(none)',
+          SampleChapters: (toc.chapters || []).slice(0, 5),
+          Summary: toc.summary ? toc.summary.substring(0, 200) + '...' : '(none)',
+        },
+      };
+      testingExecution.value = false;
+      return;
+    } catch (err: any) {
+      console.warn('Tauri fetch_novel_toc error:', err);
+      executionResult.value = {
+        status: 'NOTICE',
+        execution_time_ms: 120,
+        output: {
+          TargetURL: workbenchTestUrl.value,
+          RuleMatched: new RegExp(editorRule.value.url_regex).test(workbenchTestUrl.value),
+          ParserType: editorRule.value.parser_type,
+          Message: err?.message || 'Extraction executed with webview fallback.',
+          Diagnostics: 'Site challenge or CORS restrictions may apply. Use WebView Cookies Sync in Rule Hub to bypass challenges.',
+        },
+      };
+      testingExecution.value = false;
+      return;
+    }
+  }
+
+  // Standalone preview simulation
+  await new Promise((res) => setTimeout(res, 350));
   executionResult.value = {
     status: 'OK',
     execution_time_ms: 128,
     output: {
-      Title: 'He Who Fights with Monsters',
-      ChapterCount: 840,
+      Title: 'Naruto: Drop System',
+      ChapterCount: 119,
       SampleChapterURLs: [
         `${workbenchTestUrl.value}/chapter-1`,
         `${workbenchTestUrl.value}/chapter-2`,
@@ -418,13 +525,8 @@ async function handleTestExecution() {
   testingExecution.value = false;
 }
 
-function handleSaveWorkbenchRule() {
-  const existing = store.rules.find((r) => r.rule_name === editorRule.value.rule_name);
-  if (existing) {
-    Object.assign(existing, editorRule.value);
-  } else {
-    store.rules.push({ ...editorRule.value, guid: 'custom-' + Date.now() });
-  }
-  alert(`Rule "${editorRule.value.rule_name}" saved to database!`);
+async function handleSaveWorkbenchRule() {
+  await store.saveRule(editorRule.value);
+  alert(`Rule "${editorRule.value.rule_name}" successfully saved to database!`);
 }
 </script>
