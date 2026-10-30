@@ -60,8 +60,15 @@ async fn open_test_webview(
 fn open_devtools_for_webview(app: tauri::AppHandle) -> Result<String, String> {
     if let Some(win) = app.get_webview_window("rule-tester-webview") {
         let _ = win.url();
-        win.open_devtools();
-        Ok("DevTools opened".to_string())
+        #[cfg(any(debug_assertions, feature = "devtools"))]
+        {
+            win.open_devtools();
+            Ok("DevTools opened".to_string())
+        }
+        #[cfg(not(any(debug_assertions, feature = "devtools")))]
+        {
+            Ok("DevTools is not available in release mode without the devtools feature".to_string())
+        }
     } else {
         Err("Test webview is not open".to_string())
     }

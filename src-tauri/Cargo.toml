@@ -12,6 +12,10 @@ crate-type = ["rlib"]
 [build-dependencies]
 tauri-build = { version = "2.0", features = [] }
 
+[features]
+default = ["devtools"]
+devtools = ["tauri/devtools"]
+
 [dependencies]
 tauri = { version = "2.0", features = ["protocol-asset", "unstable"] }
 tauri-plugin-shell = "2.0"
