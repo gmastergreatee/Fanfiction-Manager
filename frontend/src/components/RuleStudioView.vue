@@ -46,6 +46,14 @@
               class="flex-1 px-4 py-2 bg-surface-elevated border border-border rounded-xl text-xs text-text-primary placeholder-text-muted focus:outline-none focus:border-accent"
             />
             <button
+              @click="handleOpenPickerWebview"
+              class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold transition-colors flex items-center gap-1.5 shadow-sm"
+              title="Open Webview for testing & visual inspection"
+            >
+              <Globe class="w-3.5 h-3.5" />
+              <span>Open Webview</span>
+            </button>
+            <button
               @click="handleRunPicker"
               class="px-4 py-2 rounded-xl bg-accent text-white text-xs font-semibold hover:bg-accent/90 transition-colors shadow-sm"
             >
@@ -210,7 +218,37 @@
                 </select>
               </div>
             </div>
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-2 flex-wrap">
+              <button
+                @click="handleOpenWebview"
+                :disabled="openingWebview"
+                class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow-sm transition-colors"
+                title="Open native Webview window for testing"
+              >
+                <Globe class="w-3.5 h-3.5" :class="{ 'animate-spin': openingWebview }" />
+                <span>{{ openingWebview ? 'Opening...' : 'Open Webview' }}</span>
+              </button>
+              <button
+                @click="handleOpenDevTools"
+                class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface-elevated hover:bg-white/10 border border-border text-xs font-semibold text-text-primary transition-colors"
+                title="Open Webview DevTools"
+              >
+                <Terminal class="w-3.5 h-3.5 text-accent" />
+                <span>DevTools</span>
+              </button>
+              <button
+                @click="showRendererPane = !showRendererPane"
+                :class="[
+                  'flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-semibold transition-colors',
+                  showRendererPane
+                    ? 'bg-accent/20 border-accent text-accent'
+                    : 'bg-surface-elevated border-border text-text-muted hover:text-text-primary'
+                ]"
+                title="Toggle In-App Webview Renderer"
+              >
+                <Monitor class="w-3.5 h-3.5" />
+                <span>Renderer {{ showRendererPane ? 'On' : 'Off' }}</span>
+              </button>
               <button
                 @click="handleTestExecution"
                 :disabled="testingExecution"
@@ -246,10 +284,20 @@
             </div>
             <div>
               <label class="text-[10px] font-medium text-text-muted mb-1 block">Test Target URL</label>
-              <input
-                v-model="workbenchTestUrl"
-                class="w-full px-3 py-1.5 rounded-lg bg-surface-elevated border border-border text-xs text-text-primary"
-              />
+              <div class="flex gap-1.5">
+                <input
+                  v-model="workbenchTestUrl"
+                  class="flex-1 px-3 py-1.5 rounded-lg bg-surface-elevated border border-border text-xs text-text-primary"
+                />
+                <button
+                  @click="handleOpenWebview"
+                  class="px-2.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium flex items-center gap-1"
+                  title="Launch in Webview"
+                >
+                  <Globe class="w-3.5 h-3.5" />
+                  <span>Go</span>
+                </button>
+              </div>
             </div>
           </div>
 
@@ -290,6 +338,132 @@
             ></textarea>
           </div>
 
+          <!-- In-App Webview Renderer Panel (v3 Classic Renderer Feature) -->
+          <div v-if="showRendererPane" class="rounded-xl bg-surface-elevated border border-border overflow-hidden space-y-0">
+            <!-- Renderer Header -->
+            <div class="px-4 py-2.5 bg-surface border-b border-border flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <Globe class="w-4 h-4 text-accent" />
+                <h4 class="text-xs font-semibold text-text-primary">Live Webview Renderer</h4>
+                <span
+                  class="text-[10px] px-2 py-0.5 rounded-full font-medium"
+                  :class="isWebviewActive ? 'bg-emerald-500/10 text-emerald-500' : 'bg-white/10 text-text-muted'"
+                >
+                  {{ isWebviewActive ? 'Webview Active' : 'Standby' }}
+                </span>
+              </div>
+              <div class="flex items-center gap-2">
+                <button
+                  @click="handleOpenWebview"
+                  class="px-2.5 py-1 rounded bg-blue-600/80 hover:bg-blue-600 text-white text-[11px] font-medium flex items-center gap-1 shadow-xs"
+                  title="Popout into dedicated native Webview Window"
+                >
+                  <ExternalLink class="w-3 h-3" />
+                  <span>Native Window</span>
+                </button>
+                <button
+                  @click="handleOpenDevTools"
+                  class="px-2.5 py-1 rounded bg-surface hover:bg-white/10 border border-border text-text-secondary text-[11px] font-medium flex items-center gap-1"
+                  title="Open Webview DevTools"
+                >
+                  <Terminal class="w-3 h-3 text-accent" />
+                  <span>DevTools</span>
+                </button>
+                <button
+                  @click="showRendererPane = false"
+                  class="p-1 rounded text-text-muted hover:text-text-primary"
+                  title="Hide Renderer"
+                >
+                  <X class="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+
+            <!-- Renderer Address Bar -->
+            <div class="p-3 bg-surface/50 border-b border-border flex items-center gap-2 text-xs">
+              <span class="text-text-muted font-medium shrink-0">URL :</span>
+              <input
+                v-model="rendererUrl"
+                @keyup.enter="handleNavigateRenderer"
+                type="text"
+                placeholder="https://..."
+                class="flex-1 px-3 py-1 bg-surface border border-border rounded-lg text-xs font-mono text-text-primary focus:outline-none focus:border-accent"
+              />
+              <button
+                @click="handleNavigateRenderer"
+                class="px-3 py-1 bg-accent text-white rounded-lg text-xs font-semibold hover:bg-accent/90"
+              >
+                Go
+              </button>
+              <button
+                @click="handleResetRenderer"
+                class="px-3 py-1 bg-surface border border-border text-text-secondary hover:text-text-primary rounded-lg text-xs font-medium"
+              >
+                Reset
+              </button>
+            </div>
+
+            <!-- Renderer Preview Area -->
+            <div class="relative bg-black/40 min-h-[260px] max-h-[420px] flex flex-col items-center justify-center p-3">
+              <iframe
+                v-if="rendererEmbedUrl"
+                :src="rendererEmbedUrl"
+                class="w-full h-[360px] rounded-lg border border-border/50 bg-white"
+                sandbox="allow-same-origin allow-scripts allow-forms allow-popups"
+                @load="handleIframeLoaded"
+                @error="handleIframeError"
+              ></iframe>
+              <div v-else class="text-center p-6 space-y-3">
+                <Globe class="w-10 h-10 text-accent/60 mx-auto" />
+                <p class="text-xs text-text-secondary max-w-md">
+                  Enter a URL above and click <strong>Go</strong> to preview the page, or click <strong>Native Window</strong> to launch the dedicated native Webview window with full unrestricted scripts, cookies, and DevTools.
+                </p>
+                <button
+                  @click="handleOpenWebview"
+                  class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-semibold shadow-md flex items-center gap-2 mx-auto"
+                >
+                  <Globe class="w-4 h-4" />
+                  <span>Launch Native Webview Window</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Renderer Console Bar & Logs -->
+            <div class="border-t border-border bg-surface p-2.5 flex items-center justify-between text-xs">
+              <div class="flex items-center gap-2">
+                <Terminal class="w-3.5 h-3.5 text-accent" />
+                <span class="font-medium text-text-primary">Webview Console</span>
+                <span class="text-[10px] text-text-muted">({{ webConsoleLogs.length }} events)</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <button
+                  @click="webConsoleLogs = []"
+                  class="text-[11px] text-text-muted hover:text-text-primary"
+                >
+                  Clear
+                </button>
+                <button
+                  @click="showWebConsole = !showWebConsole"
+                  class="text-[11px] text-accent font-medium hover:underline"
+                >
+                  {{ showWebConsole ? 'Hide Console' : 'Show Console' }}
+                </button>
+              </div>
+            </div>
+
+            <div v-if="showWebConsole" class="bg-[#121212] p-3 max-h-36 overflow-y-auto font-mono text-[11px] space-y-1 text-text-secondary border-t border-border">
+              <div v-for="(log, idx) in webConsoleLogs" :key="idx" class="flex gap-2">
+                <span class="text-text-muted shrink-0">{{ log.time }}</span>
+                <span :class="log.type === 'error' ? 'text-rose-400' : log.type === 'success' ? 'text-emerald-400' : 'text-text-primary'">
+                  {{ log.msg }}
+                </span>
+              </div>
+              <div v-if="webConsoleLogs.length === 0" class="text-text-muted italic">
+                No logs recorded yet. Test scripts or navigate above to see events.
+              </div>
+            </div>
+          </div>
+
           <!-- Output Inspector -->
           <div v-if="executionResult" class="p-4 rounded-xl bg-surface-elevated border border-border space-y-2">
             <div class="flex items-center justify-between text-xs font-semibold">
@@ -315,6 +489,11 @@ import {
   Wand2,
   RefreshCw,
   Play,
+  Globe,
+  Terminal,
+  ExternalLink,
+  Monitor,
+  X,
 } from 'lucide-vue-next';
 import type { Rule } from '../types';
 
@@ -344,6 +523,86 @@ const workbenchTestUrl = ref('https://royalroad.com/fiction/12345/chapter-1');
 const testingExecution = ref(false);
 const executionResult = ref<any>(null);
 
+// Webview & Renderer Pane State
+const openingWebview = ref(false);
+const showRendererPane = ref(true);
+const rendererUrl = ref('https://royalroad.com/fiction/12345/chapter-1');
+const rendererEmbedUrl = ref('');
+const isWebviewActive = ref(false);
+const showWebConsole = ref(true);
+const webConsoleLogs = ref<{ time: string; msg: string; type: 'info' | 'error' | 'success' }[]>([]);
+
+function addWebLog(msg: string, type: 'info' | 'error' | 'success' = 'info') {
+  const time = new Date().toLocaleTimeString();
+  webConsoleLogs.value.unshift({ time, msg, type });
+  if (webConsoleLogs.value.length > 50) {
+    webConsoleLogs.value.pop();
+  }
+}
+
+async function handleOpenWebview() {
+  const target = (rendererUrl.value || workbenchTestUrl.value || '').trim();
+  if (!target) {
+    alert('Please enter a test URL first.');
+    return;
+  }
+  openingWebview.value = true;
+  addWebLog(`Opening native Webview for: ${target}`, 'info');
+  try {
+    const res = await store.openTestWebview(target, `Fanfiction Manager - Rule Tester (${target})`);
+    isWebviewActive.value = true;
+    addWebLog(`Webview launched: ${res}`, 'success');
+  } catch (err: any) {
+    addWebLog(`Failed to open webview: ${err?.message || err}`, 'error');
+  } finally {
+    openingWebview.value = false;
+  }
+}
+
+async function handleOpenPickerWebview() {
+  if (!targetUrl.value?.trim()) return;
+  addWebLog(`Opening Picker Webview for: ${targetUrl.value}`, 'info');
+  try {
+    await store.openTestWebview(targetUrl.value.trim(), 'Rule Studio - Visual Element Picker');
+  } catch (err: any) {
+    alert(`Failed to open webview: ${err?.message || err}`);
+  }
+}
+
+async function handleOpenDevTools() {
+  addWebLog('Requested DevTools for active webview...', 'info');
+  try {
+    const res = await store.openWebviewDevTools();
+    addWebLog(`DevTools response: ${res}`, 'success');
+  } catch (err: any) {
+    addWebLog(`DevTools notice: ${err?.message || err}`, 'error');
+  }
+}
+
+function handleNavigateRenderer() {
+  if (!rendererUrl.value?.trim()) return;
+  workbenchTestUrl.value = rendererUrl.value.trim();
+  rendererEmbedUrl.value = rendererUrl.value.trim();
+  addWebLog(`Navigating renderer to: ${rendererUrl.value}`, 'info');
+  if (window.__TAURI_INTERNALS__) {
+    store.openTestWebview(rendererUrl.value.trim()).catch(() => {});
+  }
+}
+
+function handleResetRenderer() {
+  rendererUrl.value = workbenchTestUrl.value;
+  rendererEmbedUrl.value = workbenchTestUrl.value;
+  addWebLog(`Reset renderer URL to: ${workbenchTestUrl.value}`, 'info');
+}
+
+function handleIframeLoaded() {
+  addWebLog(`In-app preview loaded for ${rendererEmbedUrl.value}`, 'success');
+}
+
+function handleIframeError() {
+  addWebLog(`In-app preview frame notice: site header X-Frame-Options may block inline iframe. Click 'Native Window' to view in full native Webview.`, 'error');
+}
+
 function loadRule(rule: Rule) {
   selectedRuleGuid.value = rule.guid;
   editorRule.value = { ...rule };
@@ -359,6 +618,9 @@ function loadRule(rule: Rule) {
   if (matchingNovel?.source_url) {
     workbenchTestUrl.value = matchingNovel.source_url;
   }
+  rendererUrl.value = workbenchTestUrl.value;
+  rendererEmbedUrl.value = workbenchTestUrl.value;
+  addWebLog(`Loaded rule: "${rule.rule_name}" (${rule.parser_type}) -> Test URL: ${workbenchTestUrl.value}`);
 }
 
 function handleSelectExistingRule() {
@@ -469,15 +731,17 @@ function copyRuleJson(rule: Rule) {
 async function handleTestExecution() {
   testingExecution.value = true;
   executionResult.value = null;
+  addWebLog(`Starting extraction test on: ${workbenchTestUrl.value}...`, 'info');
 
   if (window.__TAURI_INTERNALS__) {
     try {
       const { invoke } = await import('@tauri-apps/api/core');
       const start = Date.now();
       const toc = await invoke<any>('fetch_novel_toc', { url: workbenchTestUrl.value });
+      const elapsed = Date.now() - start;
       executionResult.value = {
         status: 'SUCCESS',
-        execution_time_ms: Date.now() - start,
+        execution_time_ms: elapsed,
         output: {
           Title: toc.title || 'Untitled',
           Author: toc.author || 'Unknown',
@@ -487,6 +751,7 @@ async function handleTestExecution() {
           Summary: toc.summary ? toc.summary.substring(0, 200) + '...' : '(none)',
         },
       };
+      addWebLog(`Test SUCCESS: Extracted "${toc.title}" (${toc.chapters?.length || 0} chapters) in ${elapsed}ms`, 'success');
       testingExecution.value = false;
       return;
     } catch (err: any) {
@@ -499,9 +764,10 @@ async function handleTestExecution() {
           RuleMatched: new RegExp(editorRule.value.url_regex).test(workbenchTestUrl.value),
           ParserType: editorRule.value.parser_type,
           Message: err?.message || 'Extraction executed with webview fallback.',
-          Diagnostics: 'Site challenge or CORS restrictions may apply. Use WebView Cookies Sync in Rule Hub to bypass challenges.',
+          Diagnostics: 'Site challenge or CORS restrictions may apply. Use Open Webview to solve challenges & sync cookies.',
         },
       };
+      addWebLog(`Test Notice: ${err?.message || 'Headless fetch restricted. Webview fallback available.'}`, 'error');
       testingExecution.value = false;
       return;
     }

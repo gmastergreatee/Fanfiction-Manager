@@ -59,14 +59,24 @@
                 </code>
                 <div class="mt-3 pt-2.5 border-t border-border/50 flex items-center justify-between">
                   <span class="text-[10px] text-text-muted font-mono">v{{ rule.version || 1 }}</span>
-                  <button
-                    @click="store.openRuleInTester(rule)"
-                    class="px-2.5 py-1 rounded-lg bg-accent/15 hover:bg-accent text-accent hover:text-white text-xs font-medium flex items-center gap-1.5 transition-colors shadow-xs"
-                    title="Open this rule in Extraction Rule Tester Workbench"
-                  >
-                    <Play class="w-3 h-3 fill-current" />
-                    <span>Open in Tester</span>
-                  </button>
+                  <div class="flex items-center gap-1.5">
+                    <button
+                      @click="handleOpenRuleInWebview(rule)"
+                      class="px-2.5 py-1 rounded-lg bg-blue-600/15 hover:bg-blue-600 text-blue-400 hover:text-white text-xs font-medium flex items-center gap-1.5 transition-colors shadow-xs"
+                      title="Open Webview for testing this rule"
+                    >
+                      <Globe class="w-3 h-3" />
+                      <span>Webview</span>
+                    </button>
+                    <button
+                      @click="store.openRuleInTester(rule)"
+                      class="px-2.5 py-1 rounded-lg bg-accent/15 hover:bg-accent text-accent hover:text-white text-xs font-medium flex items-center gap-1.5 transition-colors shadow-xs"
+                      title="Open this rule in Extraction Rule Tester Workbench"
+                    >
+                      <Play class="w-3 h-3 fill-current" />
+                      <span>Open in Tester</span>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -99,7 +109,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
-import { Play } from 'lucide-vue-next';
+import { Play, Globe } from 'lucide-vue-next';
 import { useLibraryStore } from './stores/library';
 import TitleBar from './components/TitleBar.vue';
 import Sidebar from './components/Sidebar.vue';
@@ -130,6 +140,19 @@ const appFrameClass = computed(() => {
       return 'border border-white/5';
   }
 });
+
+function handleOpenRuleInWebview(rule: Rule) {
+  store.openRuleInTester(rule);
+  const match = store.novels.find((n) => {
+    try {
+      return new RegExp(rule.url_regex).test(n.source_url);
+    } catch {
+      return false;
+    }
+  });
+  const target = match?.source_url || (rule.url_regex.includes('webnovel') ? 'https://www.webnovel.com' : 'https://www.royalroad.com');
+  store.openTestWebview(target, `Fanfiction Manager - Webview (${rule.rule_name})`);
+}
 
 onMounted(async () => {
   // Check if running in Tauri 2.0 runtime

@@ -573,6 +573,41 @@ export const useLibraryStore = defineStore('library', () => {
     }
   }
 
+  async function openTestWebview(url: string, title?: string): Promise<string> {
+    if (!url || !url.trim()) throw new Error('Empty URL');
+    if (window.__TAURI_INTERNALS__) {
+      const { invoke } = await import('@tauri-apps/api/core');
+      return await invoke<string>('open_test_webview', { url: url.trim(), title });
+    } else {
+      window.open(url.trim(), '_blank');
+      return 'Opened target URL in browser window';
+    }
+  }
+
+  async function openWebviewDevTools(): Promise<string> {
+    if (window.__TAURI_INTERNALS__) {
+      const { invoke } = await import('@tauri-apps/api/core');
+      return await invoke<string>('open_devtools_for_webview');
+    }
+    return 'DevTools available in native mode only';
+  }
+
+  async function closeTestWebview(): Promise<string> {
+    if (window.__TAURI_INTERNALS__) {
+      const { invoke } = await import('@tauri-apps/api/core');
+      return await invoke<string>('close_test_webview');
+    }
+    return 'Closed';
+  }
+
+  async function evalInWebview(script: string): Promise<string> {
+    if (window.__TAURI_INTERNALS__) {
+      const { invoke } = await import('@tauri-apps/api/core');
+      return await invoke<string>('eval_in_test_webview', { script });
+    }
+    return 'Eval available in native mode only';
+  }
+
   return {
     novels,
     rules,
@@ -630,5 +665,9 @@ export const useLibraryStore = defineStore('library', () => {
     checkForUpdates,
     checkAllUpdates,
     saveRule,
+    openTestWebview,
+    openWebviewDevTools,
+    closeTestWebview,
+    evalInWebview,
   };
 });

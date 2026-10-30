@@ -4,7 +4,87 @@ pub mod scraper;
 use db::{Chapter, Database, Novel, ReadingProgress, Rule};
 use scraper::{ChapterContentExtraction, CookieEntry, NovelTocExtraction, ScrapingEngine};
 use std::sync::Mutex;
-use tauri::{Manager, State};
+use tauri::{Manager, State, WebviewWindowBuilder, WebviewUrl};
+
+#[tauri::command]
+async fn open_test_webview(
+    app: tauri::AppHandle,
+    url: String,
+    title: Option<String>,
+) -> Result<String, String> {
+    let mut normalized_url = url.trim().to_string();
+    if !normalized_url.starts_with("http://") && !normalized_url.starts_with("https://") {
+        normalized_url = format!("https://{}", normalized_url);
+    }
+
+    let parsed_url = normalized_url
+        .parse::<tauri::Url>()
+        .map_err(|e| format!("Invalid URL: {}", e))?;
+
+    let window_title = title.unwrap_or_else(|| format!("Rule Tester Webview - {}", normalized_url));
+
+    if let Some(existing) = app.get_webview_window("rule-tester-webview") {
+        let _ = existing.navigate(parsed_url);
+        let _ = existing.set_title(&window_title);
+        let _ = existing.show();
+        let _ = existing.set_focus();
+        return Ok("Navigated existing webview window".to_string());
+    }
+
+    let builder = WebviewWindowBuilder::new(
+        &app,
+        "rule-tester-webview",
+        WebviewUrl::External(parsed_url.clone()),
+    )
+    .title(window_title.clone())
+    .inner_size(1050.0, 750.0)
+    .resizable(true);
+
+    match builder.build() {
+        Ok(_) => Ok("Webview window created successfully".to_string()),
+        Err(e) => {
+            if let Some(existing) = app.get_webview_window("rule-tester-webview") {
+                let _ = existing.navigate(parsed_url);
+                let _ = existing.set_title(&window_title);
+                let _ = existing.show();
+                let _ = existing.set_focus();
+                Ok("Webview window focused and navigated".to_string())
+            } else {
+                Err(format!("Failed to create webview window: {}", e))
+            }
+        }
+    }
+}
+
+#[tauri::command]
+fn open_devtools_for_webview(app: tauri::AppHandle) -> Result<String, String> {
+    if let Some(win) = app.get_webview_window("rule-tester-webview") {
+        win.open_devtools();
+        Ok("DevTools opened".to_string())
+    } else {
+        Err("Test webview is not open".to_string())
+    }
+}
+
+#[tauri::command]
+fn eval_in_test_webview(app: tauri::AppHandle, script: String) -> Result<String, String> {
+    if let Some(win) = app.get_webview_window("rule-tester-webview") {
+        win.eval(&script).map_err(|e| format!("Eval error: {}", e))?;
+        Ok("Script evaluated in webview".to_string())
+    } else {
+        Err("Test webview is not open".to_string())
+    }
+}
+
+#[tauri::command]
+async fn close_test_webview(app: tauri::AppHandle) -> Result<String, String> {
+    if let Some(win) = app.get_webview_window("rule-tester-webview") {
+        win.close().map_err(|e| format!("Failed to close webview: {}", e))?;
+        Ok("Webview closed".to_string())
+    } else {
+        Ok("Webview was not open".to_string())
+    }
+}
 
 struct AppState {
     db: Mutex<Database>,
@@ -451,6 +531,10 @@ pub fn run() {
             check_all_novels_updates,
             save_chapter_direct,
             save_rule,
+            open_test_webview,
+            open_devtools_for_webview,
+            close_test_webview,
+            eval_in_test_webview,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
