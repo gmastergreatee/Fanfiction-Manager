@@ -608,6 +608,27 @@ export const useLibraryStore = defineStore('library', () => {
     return 'Eval available in native mode only';
   }
 
+  async function fetchPreviewHtml(url: string): Promise<{ html: string; url: string; status: number; has_challenge: boolean }> {
+    if (window.__TAURI_INTERNALS__) {
+      const { invoke } = await import('@tauri-apps/api/core');
+      return await invoke('fetch_preview_html', { url });
+    }
+    return {
+      html: `<html><head><base href="${url}"><style>body{font-family:sans-serif;padding:20px;background:#18181b;color:#f4f4f5;}</style></head><body><h3>Preview for: ${url}</h3><p>In browser development mode. In the desktop application, full X-Frame-Options bypass and native Webview are enabled.</p></body></html>`,
+      url,
+      status: 200,
+      has_challenge: false,
+    };
+  }
+
+  async function snapTestWebview(): Promise<string> {
+    if (window.__TAURI_INTERNALS__) {
+      const { invoke } = await import('@tauri-apps/api/core');
+      return await invoke<string>('snap_test_webview');
+    }
+    return 'Snapped';
+  }
+
   return {
     novels,
     rules,
@@ -669,5 +690,7 @@ export const useLibraryStore = defineStore('library', () => {
     openWebviewDevTools,
     closeTestWebview,
     evalInWebview,
+    fetchPreviewHtml,
+    snapTestWebview,
   };
 });

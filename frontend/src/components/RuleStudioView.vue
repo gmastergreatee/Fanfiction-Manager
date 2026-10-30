@@ -341,22 +341,30 @@
           <!-- In-App Webview Renderer Panel (v3 Classic Renderer Feature) -->
           <div v-if="showRendererPane" class="rounded-xl bg-surface-elevated border border-border overflow-hidden space-y-0">
             <!-- Renderer Header -->
-            <div class="px-4 py-2.5 bg-surface border-b border-border flex items-center justify-between">
+            <div class="px-4 py-2.5 bg-surface border-b border-border flex items-center justify-between flex-wrap gap-2">
               <div class="flex items-center gap-2">
                 <Globe class="w-4 h-4 text-accent" />
-                <h4 class="text-xs font-semibold text-text-primary">Live Webview Renderer</h4>
+                <h4 class="text-xs font-semibold text-text-primary">Live Webview & Frame-Bypass Inspector</h4>
                 <span
                   class="text-[10px] px-2 py-0.5 rounded-full font-medium"
                   :class="isWebviewActive ? 'bg-emerald-500/10 text-emerald-500' : 'bg-white/10 text-text-muted'"
                 >
-                  {{ isWebviewActive ? 'Webview Active' : 'Standby' }}
+                  {{ isWebviewActive ? 'Native Window Online' : 'Frame-Bypass Mode' }}
                 </span>
               </div>
               <div class="flex items-center gap-2">
                 <button
+                  @click="handleSnapWebview"
+                  class="px-2.5 py-1 rounded bg-indigo-600/80 hover:bg-indigo-600 text-white text-[11px] font-medium flex items-center gap-1 shadow-xs"
+                  title="Snap Native Webview side-by-side with Fanfiction Manager"
+                >
+                  <Columns class="w-3 h-3" />
+                  <span>Snap Side-by-Side</span>
+                </button>
+                <button
                   @click="handleOpenWebview"
                   class="px-2.5 py-1 rounded bg-blue-600/80 hover:bg-blue-600 text-white text-[11px] font-medium flex items-center gap-1 shadow-xs"
-                  title="Popout into dedicated native Webview Window"
+                  title="Launch Native Webview (bypasses all iframe & CORS restrictions)"
                 >
                   <ExternalLink class="w-3 h-3" />
                   <span>Native Window</span>
@@ -391,9 +399,11 @@
               />
               <button
                 @click="handleNavigateRenderer"
-                class="px-3 py-1 bg-accent text-white rounded-lg text-xs font-semibold hover:bg-accent/90"
+                :disabled="loadingPreview"
+                class="px-3 py-1 bg-accent text-white rounded-lg text-xs font-semibold hover:bg-accent/90 disabled:opacity-50 flex items-center gap-1"
               >
-                Go
+                <RefreshCw v-if="loadingPreview" class="w-3 h-3 animate-spin" />
+                <span>{{ loadingPreview ? 'Loading...' : 'Go' }}</span>
               </button>
               <button
                 @click="handleResetRenderer"
@@ -403,28 +413,71 @@
               </button>
             </div>
 
+            <!-- Frame-Bypass Banner -->
+            <div class="px-4 py-1.5 bg-blue-950/40 border-b border-blue-500/20 flex items-center justify-between text-[11px] text-blue-300">
+              <div class="flex items-center gap-2 truncate">
+                <ShieldCheck class="w-3.5 h-3.5 text-blue-400 shrink-0" />
+                <span>In-app preview uses local DOM proxy with <code>&lt;base&gt;</code> injection to bypass <strong>X-Frame-Options: SAMEORIGIN</strong>.</span>
+              </div>
+              <button
+                @click="handleOpenWebview"
+                class="text-blue-400 hover:text-blue-200 underline shrink-0 font-medium ml-2"
+              >
+                Use Native Webview for interactive SPAs & Cloudflare →
+              </button>
+            </div>
+
+            <!-- Challenge Warning if detected -->
+            <div v-if="previewHasChallenge" class="px-4 py-2 bg-amber-950/50 border-b border-amber-500/30 flex items-center justify-between text-xs text-amber-300">
+              <div class="flex items-center gap-2">
+                <AlertCircle class="w-4 h-4 text-amber-400 shrink-0" />
+                <span>Cloudflare challenge detected on this site. Use the <strong>Native Window</strong> to solve the challenge.</span>
+              </div>
+              <button
+                @click="handleOpenWebview"
+                class="px-2.5 py-1 bg-amber-500 hover:bg-amber-400 text-black font-semibold rounded text-[11px]"
+              >
+                Open Native Webview
+              </button>
+            </div>
+
             <!-- Renderer Preview Area -->
-            <div class="relative bg-black/40 min-h-[260px] max-h-[420px] flex flex-col items-center justify-center p-3">
+            <div class="relative bg-black/40 min-h-[280px] max-h-[460px] flex flex-col items-center justify-center p-3">
+              <!-- Loading spinner -->
+              <div v-if="loadingPreview" class="absolute inset-0 bg-black/60 backdrop-blur-xs flex flex-col items-center justify-center z-10 space-y-2">
+                <RefreshCw class="w-6 h-6 text-accent animate-spin" />
+                <span class="text-xs text-text-muted">Fetching and bypassing X-Frame-Options headers...</span>
+              </div>
+
+              <!-- Sanitized srcdoc preview bypassing X-Frame-Options -->
               <iframe
-                v-if="rendererEmbedUrl"
-                :src="rendererEmbedUrl"
-                class="w-full h-[360px] rounded-lg border border-border/50 bg-white"
+                v-if="previewHtmlDoc"
+                :srcdoc="previewHtmlDoc"
+                class="w-full h-[400px] rounded-lg border border-border/50 bg-white"
                 sandbox="allow-same-origin allow-scripts allow-forms allow-popups"
                 @load="handleIframeLoaded"
-                @error="handleIframeError"
               ></iframe>
+
               <div v-else class="text-center p-6 space-y-3">
                 <Globe class="w-10 h-10 text-accent/60 mx-auto" />
                 <p class="text-xs text-text-secondary max-w-md">
-                  Enter a URL above and click <strong>Go</strong> to preview the page, or click <strong>Native Window</strong> to launch the dedicated native Webview window with full unrestricted scripts, cookies, and DevTools.
+                  Click <strong>Go</strong> to fetch the frame-bypassed preview, or click <strong>Snap Side-by-Side</strong> to tile the native Webview alongside Fanfiction Manager with full DevTools and Cloudflare clearance.
                 </p>
-                <button
-                  @click="handleOpenWebview"
-                  class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-semibold shadow-md flex items-center gap-2 mx-auto"
-                >
-                  <Globe class="w-4 h-4" />
-                  <span>Launch Native Webview Window</span>
-                </button>
+                <div class="flex items-center justify-center gap-2">
+                  <button
+                    @click="handleNavigateRenderer"
+                    class="px-4 py-2 bg-accent text-white rounded-xl text-xs font-semibold shadow-md flex items-center gap-2"
+                  >
+                    <span>Load In-App Preview</span>
+                  </button>
+                  <button
+                    @click="handleSnapWebview"
+                    class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold shadow-md flex items-center gap-2"
+                  >
+                    <Columns class="w-4 h-4" />
+                    <span>Snap Native Webview</span>
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -494,6 +547,9 @@ import {
   ExternalLink,
   Monitor,
   X,
+  Columns,
+  ShieldCheck,
+  AlertCircle,
 } from 'lucide-vue-next';
 import type { Rule } from '../types';
 
@@ -527,7 +583,9 @@ const executionResult = ref<any>(null);
 const openingWebview = ref(false);
 const showRendererPane = ref(true);
 const rendererUrl = ref('https://royalroad.com/fiction/12345/chapter-1');
-const rendererEmbedUrl = ref('');
+const previewHtmlDoc = ref('');
+const loadingPreview = ref(false);
+const previewHasChallenge = ref(false);
 const isWebviewActive = ref(false);
 const showWebConsole = ref(true);
 const webConsoleLogs = ref<{ time: string; msg: string; type: 'info' | 'error' | 'success' }[]>([]);
@@ -559,6 +617,20 @@ async function handleOpenWebview() {
   }
 }
 
+async function handleSnapWebview() {
+  const target = (rendererUrl.value || workbenchTestUrl.value || '').trim();
+  if (!target) return;
+  addWebLog(`Snapping native Webview side-by-side for ${target}...`, 'info');
+  try {
+    await store.openTestWebview(target, `Fanfiction Manager - Rule Tester (${target})`);
+    isWebviewActive.value = true;
+    const res = await store.snapTestWebview();
+    addWebLog(`Snap side-by-side: ${res}`, 'success');
+  } catch (err: any) {
+    addWebLog(`Snap notice: ${err?.message || err}`, 'error');
+  }
+}
+
 async function handleOpenPickerWebview() {
   if (!targetUrl.value?.trim()) return;
   addWebLog(`Opening Picker Webview for: ${targetUrl.value}`, 'info');
@@ -579,28 +651,44 @@ async function handleOpenDevTools() {
   }
 }
 
+async function fetchBypassPreview(url: string) {
+  if (!url || !url.trim()) return;
+  loadingPreview.value = true;
+  previewHasChallenge.value = false;
+  addWebLog(`Fetching X-Frame-Options bypass preview for ${url}...`, 'info');
+  try {
+    const res = await store.fetchPreviewHtml(url.trim());
+    previewHtmlDoc.value = res.html;
+    previewHasChallenge.value = res.has_challenge;
+    if (res.has_challenge) {
+      addWebLog(`Site Challenge (Cloudflare/403) detected on ${url}. Please use Native Webview to solve.`, 'error');
+    } else {
+      addWebLog(`Bypass preview rendered cleanly (${res.html.length} bytes, HTTP ${res.status})`, 'success');
+    }
+  } catch (err: any) {
+    addWebLog(`Preview fetch notice: ${err?.message || err}. Use Native Webview directly.`, 'error');
+  } finally {
+    loadingPreview.value = false;
+  }
+}
+
 function handleNavigateRenderer() {
   if (!rendererUrl.value?.trim()) return;
   workbenchTestUrl.value = rendererUrl.value.trim();
-  rendererEmbedUrl.value = rendererUrl.value.trim();
-  addWebLog(`Navigating renderer to: ${rendererUrl.value}`, 'info');
-  if (window.__TAURI_INTERNALS__) {
+  fetchBypassPreview(rendererUrl.value.trim());
+  if (isWebviewActive.value && window.__TAURI_INTERNALS__) {
     store.openTestWebview(rendererUrl.value.trim()).catch(() => {});
   }
 }
 
 function handleResetRenderer() {
   rendererUrl.value = workbenchTestUrl.value;
-  rendererEmbedUrl.value = workbenchTestUrl.value;
+  fetchBypassPreview(workbenchTestUrl.value);
   addWebLog(`Reset renderer URL to: ${workbenchTestUrl.value}`, 'info');
 }
 
 function handleIframeLoaded() {
-  addWebLog(`In-app preview loaded for ${rendererEmbedUrl.value}`, 'success');
-}
-
-function handleIframeError() {
-  addWebLog(`In-app preview frame notice: site header X-Frame-Options may block inline iframe. Click 'Native Window' to view in full native Webview.`, 'error');
+  addWebLog(`In-app frame-bypass preview rendered successfully`, 'success');
 }
 
 function loadRule(rule: Rule) {
@@ -619,8 +707,8 @@ function loadRule(rule: Rule) {
     workbenchTestUrl.value = matchingNovel.source_url;
   }
   rendererUrl.value = workbenchTestUrl.value;
-  rendererEmbedUrl.value = workbenchTestUrl.value;
   addWebLog(`Loaded rule: "${rule.rule_name}" (${rule.parser_type}) -> Test URL: ${workbenchTestUrl.value}`);
+  fetchBypassPreview(workbenchTestUrl.value);
 }
 
 function handleSelectExistingRule() {

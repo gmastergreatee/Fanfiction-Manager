@@ -2,9 +2,9 @@ pub mod db;
 pub mod scraper;
 
 use db::{Chapter, Database, Novel, ReadingProgress, Rule};
-use scraper::{ChapterContentExtraction, CookieEntry, NovelTocExtraction, ScrapingEngine};
+use scraper::{ChallengeType, ChapterContentExtraction, CookieEntry, NovelTocExtraction, ScrapingEngine};
 use std::sync::Mutex;
-use tauri::{Manager, State, WebviewWindowBuilder, WebviewUrl};
+use tauri::{Manager, State, WebviewWindowBuilder, WebviewUrl, Position, Size};
 
 #[tauri::command]
 async fn open_test_webview(
@@ -84,6 +84,88 @@ async fn close_test_webview(app: tauri::AppHandle) -> Result<String, String> {
     } else {
         Ok("Webview was not open".to_string())
     }
+}
+
+#[derive(serde::Serialize)]
+pub struct PreviewHtmlResult {
+    pub html: String,
+    pub url: String,
+    pub status: u16,
+    pub has_challenge: bool,
+}
+
+#[tauri::command]
+async fn fetch_preview_html(
+    url: String,
+    state: State<'_, AppState>,
+) -> Result<PreviewHtmlResult, String> {
+    let mut normalized_url = url.trim().to_string();
+    if !normalized_url.starts_with("http://") && !normalized_url.starts_with("https://") {
+        normalized_url = format!("https://{}", normalized_url);
+    }
+
+    let resp = state
+        .scraper
+        .http_client
+        .fetch(&normalized_url)
+        .await
+        .map_err(|e| format!("Network request failed: {}", e))?;
+
+    let raw_html = resp.body;
+    let base_tag = format!(r#"<base href="{}">"#, normalized_url);
+
+    // Inject <base href="..."> into <head> so relative assets load cleanly without origin errors
+    let mut modified = if let Some(idx) = raw_html.find("<head>") {
+        let (before, after) = raw_html.split_at(idx + 6);
+        format!("{}{}{}", before, base_tag, after)
+    } else if let Some(idx) = raw_html.find("<HEAD>") {
+        let (before, after) = raw_html.split_at(idx + 6);
+        format!("{}{}{}", before, base_tag, after)
+    } else {
+        format!("{}\n{}", base_tag, raw_html)
+    };
+
+    // Strip frame-blocking meta tags
+    if let Ok(re) = regex::Regex::new(r#"(?i)<meta[^>]+http-equiv=["']?(content-security-policy|x-frame-options)["']?[^>]*>"#) {
+        modified = re.replace_all(&modified, "").to_string();
+    }
+
+    let has_challenge = resp.challenge != ChallengeType::None;
+
+    Ok(PreviewHtmlResult {
+        html: modified,
+        url: normalized_url,
+        status: resp.status,
+        has_challenge,
+    })
+}
+
+#[tauri::command]
+async fn snap_test_webview(app: tauri::AppHandle) -> Result<String, String> {
+    if let (Some(main_win), Some(test_win)) = (
+        app.get_webview_window("main"),
+        app.get_webview_window("rule-tester-webview"),
+    ) {
+        if let (Ok(main_pos), Ok(main_size)) = (main_win.outer_position(), main_win.outer_size()) {
+            let target_x = main_pos.x + main_size.width as i32 + 10;
+            let target_y = main_pos.y;
+            let target_w = (main_size.width as f64 * 0.85).max(700.0) as u32;
+            let target_h = main_size.height;
+
+            let _ = test_win.set_position(Position::Physical(tauri::PhysicalPosition {
+                x: target_x,
+                y: target_y,
+            }));
+            let _ = test_win.set_size(Size::Physical(tauri::PhysicalSize {
+                width: target_w,
+                height: target_h,
+            }));
+            let _ = test_win.show();
+            let _ = test_win.set_focus();
+            return Ok("Snapped test webview side-by-side with main window".to_string());
+        }
+    }
+    Err("Could not find both main window and test webview window".to_string())
 }
 
 struct AppState {
@@ -535,6 +617,8 @@ pub fn run() {
             open_devtools_for_webview,
             close_test_webview,
             eval_in_test_webview,
+            fetch_preview_html,
+            snap_test_webview,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
