@@ -14,6 +14,7 @@ import type {
   ReaderContainerWidth,
   ReaderTextAlign,
   DownloadTask,
+  BatchDownloadTask,
   QueueSettings,
   NovelUpdateResult,
   LibraryUpdateSummary,
@@ -47,8 +48,11 @@ export const useLibraryStore = defineStore('library', () => {
   const readerContainerWidth = ref<ReaderContainerWidth>('medium');
   const readerTextAlign = ref<ReaderTextAlign>('left');
 
-  // Downloader Queue state
-  const downloadQueue = ref<DownloadTask[]>([]);
+  // Downloader Queue state (Batched)
+  const downloadBatches = ref<BatchDownloadTask[]>([]);
+  const downloadQueue = computed<DownloadTask[]>(() => {
+    return downloadBatches.value.flatMap((b) => b.tasks);
+  });
   const queueSettings = ref<QueueSettings>({
     concurrency: 2,
     delayMs: 300,
@@ -79,7 +83,7 @@ export const useLibraryStore = defineStore('library', () => {
 
   // Active downloads count
   const activeDownloadsCount = computed(() => {
-    return downloadQueue.value.filter((t) => t.status === 'downloading' || t.status === 'queued').length;
+    return downloadBatches.value.filter((b) => b.status === 'downloading' || b.status === 'queued').length;
   });
 
   // --- Novel & Chapter Actions ---
@@ -91,10 +95,12 @@ export const useLibraryStore = defineStore('library', () => {
     rules.value = list;
   }
 
-  function openNovelDetail(novel: Novel) {
+  async function openNovelDetail(novel: Novel) {
     selectedNovelDetail.value = novel;
-    loadNovelChapters(novel.id);
-    loadReadingProgress(novel.id);
+    await Promise.all([
+      loadNovelChapters(novel.id),
+      loadReadingProgress(novel.id),
+    ]);
   }
 
   function closeNovelDetail() {
@@ -299,7 +305,7 @@ export const useLibraryStore = defineStore('library', () => {
     readerTextAlign.value = align;
   }
 
-  // --- Downloader Queue Actions ---
+  // --- Downloader Queue Actions (Continuous Chapter Batching) ---
   function enqueueNovel(novel: Novel, chaptersToDownload?: Chapter[]): number {
     const list = chaptersToDownload || currentChaptersList.value;
     const chapters = [...list];
@@ -323,49 +329,102 @@ export const useLibraryStore = defineStore('library', () => {
       }
     }
 
-    const tasksToAdd: DownloadTask[] = [];
+    // Filter only un-downloaded chapters that aren't already queued/downloading
+    const existingQueuedIndices = new Set(
+      downloadBatches.value
+        .filter((b) => b.novelId === novel.id && b.status !== 'completed')
+        .flatMap((b) => b.tasks.filter((t) => t.status !== 'completed').map((t) => t.chapterIndex))
+    );
 
-    for (const ch of chapters) {
-      if (ch.is_downloaded) continue;
+    const missingChapters = chapters
+      .filter((ch) => !ch.is_downloaded && !existingQueuedIndices.has(ch.chapter_index))
+      .sort((a, b) => a.chapter_index - b.chapter_index);
 
-      const exists = downloadQueue.value.find(
-        (t) => t.novelId === novel.id && t.chapterIndex === ch.chapter_index
-      );
-      if (!exists) {
-        tasksToAdd.push({
-          id: `${novel.id}_ch_${ch.chapter_index}_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
-          novelId: novel.id,
-          novelTitle: novel.title,
-          chapterIndex: ch.chapter_index,
-          chapterTitle: ch.title,
-          sourceUrl: ch.source_url,
-          status: 'queued',
-          progress: 0,
-          addedAt: Date.now(),
-        });
+    if (missingChapters.length === 0) {
+      return 0;
+    }
+
+    // Group continuous chapters into contiguous runs (Batches)
+    const groups: Chapter[][] = [];
+    let currentGroup: Chapter[] = [];
+
+    for (const ch of missingChapters) {
+      if (currentGroup.length === 0) {
+        currentGroup.push(ch);
+      } else {
+        const prev = currentGroup[currentGroup.length - 1];
+        if (ch.chapter_index === prev.chapter_index + 1) {
+          currentGroup.push(ch);
+        } else {
+          groups.push(currentGroup);
+          currentGroup = [ch];
+        }
       }
     }
-
-    if (tasksToAdd.length > 0) {
-      downloadQueue.value.push(...tasksToAdd);
-      processQueue();
+    if (currentGroup.length > 0) {
+      groups.push(currentGroup);
     }
 
-    return tasksToAdd.length;
+    let totalEnqueued = 0;
+    const now = Date.now();
+
+    for (const group of groups) {
+      const startIdx = group[0].chapter_index;
+      const endIdx = group[group.length - 1].chapter_index;
+      const batchId = `batch_${novel.id}_ch${startIdx}-${endIdx}_${now}_${Math.random().toString(36).substring(2, 6)}`;
+
+      const tasks: DownloadTask[] = group.map((ch) => ({
+        id: `${novel.id}_ch_${ch.chapter_index}_${now}_${Math.random().toString(36).substring(2, 6)}`,
+        batchId,
+        novelId: novel.id,
+        novelTitle: novel.title,
+        chapterIndex: ch.chapter_index,
+        chapterTitle: ch.title,
+        sourceUrl: ch.source_url,
+        status: 'queued',
+        progress: 0,
+        addedAt: now,
+      }));
+
+      const batch: BatchDownloadTask = {
+        id: batchId,
+        novelId: novel.id,
+        novelTitle: novel.title,
+        startChapter: startIdx,
+        endChapter: endIdx,
+        totalChapters: group.length,
+        completedChapters: 0,
+        failedChapters: 0,
+        status: 'queued',
+        addedAt: now,
+        isExpanded: false,
+        tasks,
+      };
+
+      downloadBatches.value.push(batch);
+      totalEnqueued += group.length;
+    }
+
+    processQueue();
+    return totalEnqueued;
   }
 
-  function pauseQueue() {
-    queueSettings.value.isPaused = true;
-    for (const t of downloadQueue.value) {
+  function pauseBatch(batchId: string) {
+    const batch = downloadBatches.value.find((b) => b.id === batchId);
+    if (!batch) return;
+    batch.status = 'paused';
+    for (const t of batch.tasks) {
       if (t.status === 'queued') {
         t.status = 'paused';
       }
     }
   }
 
-  function resumeQueue() {
-    queueSettings.value.isPaused = false;
-    for (const t of downloadQueue.value) {
+  function resumeBatch(batchId: string) {
+    const batch = downloadBatches.value.find((b) => b.id === batchId);
+    if (!batch) return;
+    batch.status = 'queued';
+    for (const t of batch.tasks) {
       if (t.status === 'paused') {
         t.status = 'queued';
       }
@@ -373,28 +432,98 @@ export const useLibraryStore = defineStore('library', () => {
     processQueue();
   }
 
-  function togglePauseTask(taskId: string) {
-    const task = downloadQueue.value.find((t) => t.id === taskId);
-    if (!task) return;
+  function retryBatchErrors(batchId: string) {
+    const batch = downloadBatches.value.find((b) => b.id === batchId);
+    if (!batch) return;
+    batch.failedChapters = 0;
+    batch.status = 'queued';
+    for (const t of batch.tasks) {
+      if (t.status === 'error') {
+        t.status = 'queued';
+        t.progress = 0;
+        t.errorMessage = undefined;
+      }
+    }
+    processQueue();
+  }
 
-    if (task.status === 'queued' || task.status === 'downloading') {
-      task.status = 'paused';
-    } else if (task.status === 'paused') {
-      task.status = 'queued';
-      processQueue();
+  function removeBatch(batchId: string) {
+    const idx = downloadBatches.value.findIndex((b) => b.id === batchId);
+    if (idx !== -1) {
+      downloadBatches.value.splice(idx, 1);
+    }
+  }
+
+  function toggleExpandBatch(batchId: string) {
+    const batch = downloadBatches.value.find((b) => b.id === batchId);
+    if (batch) {
+      batch.isExpanded = !batch.isExpanded;
+    }
+  }
+
+  function pauseQueue() {
+    queueSettings.value.isPaused = true;
+    for (const b of downloadBatches.value) {
+      if (b.status === 'queued' || b.status === 'downloading') {
+        b.status = 'paused';
+      }
+      for (const t of b.tasks) {
+        if (t.status === 'queued') {
+          t.status = 'paused';
+        }
+      }
+    }
+  }
+
+  function resumeQueue() {
+    queueSettings.value.isPaused = false;
+    for (const b of downloadBatches.value) {
+      if (b.status === 'paused') {
+        b.status = 'queued';
+      }
+      for (const t of b.tasks) {
+        if (t.status === 'paused') {
+          t.status = 'queued';
+        }
+      }
+    }
+    processQueue();
+  }
+
+  function togglePauseTask(taskId: string) {
+    for (const b of downloadBatches.value) {
+      const task = b.tasks.find((t) => t.id === taskId);
+      if (task) {
+        if (task.status === 'queued' || task.status === 'downloading') {
+          task.status = 'paused';
+        } else if (task.status === 'paused') {
+          task.status = 'queued';
+          b.status = 'queued';
+          processQueue();
+        }
+        return;
+      }
     }
   }
 
   function removeQueueTask(taskId: string) {
-    const idx = downloadQueue.value.findIndex((t) => t.id === taskId);
-    if (idx !== -1) {
-      downloadQueue.value.splice(idx, 1);
+    for (let i = 0; i < downloadBatches.value.length; i++) {
+      const batch = downloadBatches.value[i];
+      const idx = batch.tasks.findIndex((t) => t.id === taskId);
+      if (idx !== -1) {
+        batch.tasks.splice(idx, 1);
+        batch.totalChapters = batch.tasks.length;
+        if (batch.tasks.length === 0) {
+          downloadBatches.value.splice(i, 1);
+        }
+        return;
+      }
     }
   }
 
   function clearCompletedQueue() {
-    downloadQueue.value = downloadQueue.value.filter(
-      (t) => t.status !== 'completed' && t.status !== 'error'
+    downloadBatches.value = downloadBatches.value.filter(
+      (b) => b.status !== 'completed'
     );
   }
 
@@ -411,22 +540,37 @@ export const useLibraryStore = defineStore('library', () => {
     if (queueSettings.value.isPaused) return;
 
     while (activeWorkers < queueSettings.value.concurrency) {
-      const nextTask = downloadQueue.value.find((t) => t.status === 'queued');
-      if (!nextTask) break;
+      let nextBatch: BatchDownloadTask | undefined;
+      let nextTask: DownloadTask | undefined;
+
+      for (const batch of downloadBatches.value) {
+        if (batch.status === 'paused' || batch.status === 'completed') continue;
+        const task = batch.tasks.find((t) => t.status === 'queued');
+        if (task) {
+          nextBatch = batch;
+          nextTask = task;
+          break;
+        }
+      }
+
+      if (!nextTask || !nextBatch) break;
 
       activeWorkers++;
-      runQueueTask(nextTask).finally(() => {
+      runQueueTask(nextBatch, nextTask).finally(() => {
         activeWorkers--;
         processQueue();
       });
     }
   }
 
-  async function runQueueTask(task: DownloadTask) {
+  async function runQueueTask(batch: BatchDownloadTask, task: DownloadTask) {
     if (queueSettings.value.isPaused || task.status !== 'queued') return;
 
     task.status = 'downloading';
-    task.progress = 20;
+    task.progress = 25;
+    batch.status = 'downloading';
+    batch.activeChapterIndex = task.chapterIndex;
+    batch.activeChapterTitle = task.chapterTitle;
 
     // Polite delay
     if (queueSettings.value.delayMs > 0) {
@@ -439,7 +583,7 @@ export const useLibraryStore = defineStore('library', () => {
     }
 
     try {
-      task.progress = 60;
+      task.progress = 65;
       if (window.__TAURI_INTERNALS__) {
         const { invoke } = await import('@tauri-apps/api/core');
         try {
@@ -449,7 +593,7 @@ export const useLibraryStore = defineStore('library', () => {
             chapterIndex: task.chapterIndex,
           });
         } catch (tauriErr: any) {
-          console.warn('Backend fetch_chapter_content failed, checking direct webview retrieval:', tauriErr);
+          console.warn('Backend fetch_chapter_content failed, checking direct storage fallback:', tauriErr);
           await invoke('save_chapter_direct', {
             novelId: task.novelId,
             chapterIndex: task.chapterIndex,
@@ -467,11 +611,18 @@ export const useLibraryStore = defineStore('library', () => {
       task.progress = 100;
       task.status = 'completed';
       task.completedAt = Date.now();
+      batch.completedChapters++;
 
-      // Update novel's downloaded chapters count in store
+      // Reactively update novel & chapter models in store
       const n = novels.value.find((nov) => nov.id === task.novelId);
       if (n) {
         n.downloaded_chapters = Math.min(n.total_chapters, n.downloaded_chapters + 1);
+      }
+      if (selectedNovelDetail.value && selectedNovelDetail.value.id === task.novelId) {
+        selectedNovelDetail.value.downloaded_chapters = Math.min(
+          selectedNovelDetail.value.total_chapters,
+          selectedNovelDetail.value.downloaded_chapters + 1
+        );
       }
       const ch = currentChaptersList.value.find(
         (c) => c.novel_id === task.novelId && c.chapter_index === task.chapterIndex
@@ -482,7 +633,33 @@ export const useLibraryStore = defineStore('library', () => {
     } catch (err: any) {
       task.status = 'error';
       task.errorMessage = err?.message || 'Download failed';
+      batch.failedChapters++;
+    } finally {
+      // Check if batch is completed or errored
+      const remaining = batch.tasks.filter((t) => t.status === 'queued' || t.status === 'downloading');
+      if (remaining.length === 0) {
+        const hasErrors = batch.tasks.some((t) => t.status === 'error');
+        batch.status = hasErrors ? 'error' : 'completed';
+        batch.completedAt = Date.now();
+        batch.activeChapterIndex = undefined;
+        batch.activeChapterTitle = undefined;
+      }
     }
+  }
+
+  async function openExternalUrl(url: string) {
+    if (!url) return;
+    const clean = url.trim();
+    if (window.__TAURI_INTERNALS__) {
+      try {
+        const { invoke } = await import('@tauri-apps/api/core');
+        await invoke('open_external_url', { url: clean });
+        return;
+      } catch (e) {
+        console.warn('Failed to open external URL via Tauri command:', e);
+      }
+    }
+    window.open(clean, '_blank', 'noopener,noreferrer');
   }
 
   function openRuleInTester(rule: Rule) {
@@ -740,6 +917,7 @@ export const useLibraryStore = defineStore('library', () => {
     readerContainerWidth,
     readerTextAlign,
     downloadQueue,
+    downloadBatches,
     queueSettings,
     filteredNovels,
     activeDownloadsCount,
@@ -764,11 +942,17 @@ export const useLibraryStore = defineStore('library', () => {
     setReaderContainerWidth,
     setReaderTextAlign,
     enqueueNovel,
+    pauseBatch,
+    resumeBatch,
+    retryBatchErrors,
+    removeBatch,
+    toggleExpandBatch,
     pauseQueue,
     resumeQueue,
     togglePauseTask,
     removeQueueTask,
     clearCompletedQueue,
+    openExternalUrl,
     setQueueConcurrency,
     setQueueDelay,
     openRuleInTester,

@@ -494,14 +494,30 @@ async fn fetch_chapter_content(
     chapter_index: i64,
     state: State<'_, AppState>,
 ) -> Result<ChapterContentExtraction, String> {
-    let rules = {
+    let (rules, novel_source, db_chapter_url) = {
         let db = state.db.lock().map_err(|e| e.to_string())?;
-        db.get_all_rules().map_err(|e| e.to_string())?
+        let rls = db.get_all_rules().map_err(|e| e.to_string())?;
+        let nov = db.get_novel_by_id(&novel_id).map_err(|e| e.to_string())?;
+        let ch = db.get_chapter_content(&novel_id, chapter_index).map_err(|e| e.to_string())?;
+        let src = nov.map(|n| n.source_url).unwrap_or_default();
+        let u = ch.map(|c| c.source_url).unwrap_or_default();
+        (rls, src, u)
+    };
+
+    let mut target_url = url.trim().to_string();
+    if (target_url.is_empty() || target_url.contains("/chapter-")) && !db_chapter_url.is_empty() && !db_chapter_url.contains("/chapter-") {
+        target_url = db_chapter_url;
+    }
+
+    let match_target = if !target_url.is_empty() && !target_url.contains("/chapter-") {
+        &target_url
+    } else {
+        &novel_source
     };
 
     let matched_rule = state
         .scraper
-        .match_rule(&url, &rules)
+        .match_rule(match_target, &rules)
         .cloned()
         .unwrap_or_else(|| Rule {
             guid: "default-fallback".into(),
@@ -516,7 +532,7 @@ async fn fetch_chapter_content(
             updated_at: None,
         });
 
-    let res = state.scraper.extract_chapter(&url, &matched_rule).await?;
+    let res = state.scraper.extract_chapter(&target_url, &matched_rule).await?;
 
     // Persist downloaded chapter to SQLite
     {
@@ -526,7 +542,7 @@ async fn fetch_chapter_content(
             chapter_index,
             &res.title,
             &res.content_html,
-            &url,
+            &target_url,
             res.word_count,
         )
         .map_err(|e| e.to_string())?;
@@ -689,12 +705,12 @@ async fn check_novel_updates(
         Ok(toc) => {
             let db = state.db.lock().map_err(|e| e.to_string())?;
             for ch in &toc.chapters {
+                let _ = db.insert_chapter_placeholder(&novel_id, ch.index, &ch.title, &ch.url);
                 if !existing_indices.contains(&ch.index) {
-                    let _ = db.insert_chapter_placeholder(&novel_id, ch.index, &ch.title, &ch.url);
                     added_chapters += 1;
-                    if ch.index > max_index {
-                        max_index = ch.index;
-                    }
+                }
+                if ch.index > max_index {
+                    max_index = ch.index;
                 }
             }
             let new_total = std::cmp::max(novel.total_chapters, std::cmp::max(max_index, toc.chapters.len() as i64));
@@ -913,6 +929,19 @@ fn delete_novel(novel_id: String, state: State<'_, AppState>) -> Result<bool, St
 }
 
 #[tauri::command]
+async fn open_external_url(app: tauri::AppHandle, url: String) -> Result<bool, String> {
+    use tauri_plugin_shell::ShellExt;
+    let clean = url.trim();
+    if !clean.starts_with("http://") && !clean.starts_with("https://") {
+        return Err("Invalid URL protocol: Must start with http:// or https://".to_string());
+    }
+    app.shell()
+        .open(clean, None)
+        .map_err(|e| format!("Failed to open external URL in browser: {}", e))?;
+    Ok(true)
+}
+
+#[tauri::command]
 fn delete_chapters(
     novel_id: String,
     chapter_indices: Vec<i64>,
@@ -972,6 +1001,7 @@ pub fn run() {
             add_novel_from_url,
             delete_novel,
             delete_chapters,
+            open_external_url,
             open_test_webview,
             open_devtools_for_webview,
             close_test_webview,

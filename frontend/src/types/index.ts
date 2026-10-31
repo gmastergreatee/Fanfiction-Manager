@@ -68,6 +68,7 @@ export interface ReaderSettings {
 
 export interface DownloadTask {
   id: string;
+  batchId?: string;
   novelId: string;
   novelTitle: string;
   chapterIndex: number;
@@ -78,6 +79,25 @@ export interface DownloadTask {
   errorMessage?: string;
   addedAt: number;
   completedAt?: number;
+}
+
+export interface BatchDownloadTask {
+  id: string;
+  novelId: string;
+  novelTitle: string;
+  startChapter: number;
+  endChapter: number;
+  totalChapters: number;
+  completedChapters: number;
+  failedChapters: number;
+  activeChapterIndex?: number;
+  activeChapterTitle?: string;
+  status: 'queued' | 'downloading' | 'paused' | 'completed' | 'error';
+  errorMessage?: string;
+  addedAt: number;
+  completedAt?: number;
+  isExpanded?: boolean;
+  tasks: DownloadTask[];
 }
 
 export interface QueueSettings {

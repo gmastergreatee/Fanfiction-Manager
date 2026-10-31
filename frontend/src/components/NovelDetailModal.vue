@@ -84,6 +84,42 @@
               <span>Download Missing Chapters</span>
             </button>
 
+            <!-- Live Batch Download Card if active for this novel -->
+            <div v-if="novelBatch" class="p-3 rounded-xl bg-accent/10 border border-accent/25 space-y-2 text-left animate-in fade-in duration-150">
+              <div class="flex items-center justify-between text-xs">
+                <div class="flex items-center gap-1.5 font-semibold text-accent truncate">
+                  <Loader2 v-if="novelBatch.status === 'downloading'" class="w-3.5 h-3.5 animate-spin shrink-0" />
+                  <DownloadCloud v-else class="w-3.5 h-3.5 shrink-0" />
+                  <span class="truncate">Batch: Ch. {{ novelBatch.startChapter }} - {{ novelBatch.endChapter }}</span>
+                </div>
+                <span class="text-[11px] font-bold text-text-primary ml-1 shrink-0">
+                  {{ novelBatch.completedChapters }} / {{ novelBatch.totalChapters }} ({{ Math.round((novelBatch.completedChapters / (novelBatch.totalChapters || 1)) * 100) }}%)
+                </span>
+              </div>
+
+              <!-- Progress bar -->
+              <div class="w-full bg-surface-elevated h-1.5 rounded-full overflow-hidden border border-border/30">
+                <div
+                  class="bg-accent h-full transition-all duration-300"
+                  :style="{ width: `${Math.round((novelBatch.completedChapters / (novelBatch.totalChapters || 1)) * 100)}%` }"
+                ></div>
+              </div>
+
+              <div class="flex items-center justify-between text-[10px] text-text-muted">
+                <span class="truncate max-w-[190px]">
+                  {{ novelBatch.activeChapterTitle ? `Active: ${novelBatch.activeChapterTitle}` : novelBatch.status }}
+                </span>
+                <button
+                  type="button"
+                  @click="goToQueue"
+                  class="text-accent hover:underline flex items-center gap-0.5 font-medium shrink-0 cursor-pointer"
+                >
+                  <span>View in Queue</span>
+                  <ExternalLink class="w-2.5 h-2.5" />
+                </button>
+              </div>
+            </div>
+
             <button
               @click="handleExportEpub"
               :class="['w-full py-2.5 px-4 text-xs flex items-center justify-center gap-2 transition-all', modalSecondaryBtnClass]"
@@ -162,15 +198,16 @@
             <p class="text-xs text-text-muted flex items-center gap-2">
               <span>Author: <strong class="text-text-secondary">{{ novel.author || 'Unknown' }}</strong></span>
               <span>•</span>
-              <a
+              <button
                 v-if="novel.source_url"
-                :href="novel.source_url"
-                target="_blank"
-                class="text-accent hover:underline flex items-center gap-1"
+                type="button"
+                @click="store.openExternalUrl(novel.source_url)"
+                class="text-accent hover:underline flex items-center gap-1 cursor-pointer font-medium hover:text-accent/80 transition-colors"
+                title="Open novel source website in default browser"
               >
-                <span>Source</span>
+                <span>Go to source</span>
                 <ExternalLink class="w-3 h-3" />
-              </a>
+              </button>
             </p>
           </div>
 
@@ -321,6 +358,7 @@ import {
   BookDown,
   Trash2,
   Eraser,
+  Loader2,
 } from 'lucide-vue-next';
 import { usePlatformModal } from '../composables/usePlatformModal';
 import type { Chapter } from '../types';
@@ -350,6 +388,20 @@ const actionMessage = ref('');
 const actionMessageColor = ref('text-emerald-500');
 
 const novel = computed(() => store.selectedNovelDetail!);
+
+const novelBatch = computed(() => {
+  if (!novel.value) return null;
+  return (
+    store.downloadBatches.find(
+      (b) => b.novelId === novel.value.id && (b.status === 'downloading' || b.status === 'queued')
+    ) || null
+  );
+});
+
+function goToQueue() {
+  store.activeTab = 'queue';
+  store.closeNovelDetail();
+}
 
 function getCoverUrl(): string {
   if (!novel.value) return '';
@@ -531,12 +583,15 @@ async function handleCheckUpdatesForNovel() {
   }
 }
 
-function handleEnqueueDownload() {
+async function handleEnqueueDownload() {
   if (!novel.value) return;
+  if (store.currentChaptersList.length === 0) {
+    await store.loadNovelChapters(novel.value.id);
+  }
   const count = store.enqueueNovel(novel.value, store.currentChaptersList);
   if (count > 0) {
     actionMessageColor.value = 'text-emerald-500';
-    actionMessage.value = `Enqueued ${count} missing chapters to Downloader Queue!`;
+    actionMessage.value = `Enqueued batch of ${count} missing chapters to Downloader Queue!`;
   } else {
     actionMessageColor.value = 'text-amber-400';
     actionMessage.value = 'All chapters are already downloaded or queued!';
