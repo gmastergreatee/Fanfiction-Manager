@@ -282,6 +282,73 @@ impl Database {
         Ok(())
     }
 
+    pub fn delete_novel(&self, novel_id: &str) -> Result<()> {
+        self.conn.execute("DELETE FROM reading_progress WHERE novel_id = ?1", rusqlite::params![novel_id])?;
+        self.conn.execute("DELETE FROM chapters WHERE novel_id = ?1", rusqlite::params![novel_id])?;
+        self.conn.execute("DELETE FROM novels WHERE id = ?1", rusqlite::params![novel_id])?;
+        Ok(())
+    }
+
+    pub fn delete_chapters(
+        &self,
+        novel_id: &str,
+        chapter_indices: &[i64],
+        delete_records: bool,
+    ) -> Result<()> {
+        if chapter_indices.is_empty() {
+            return Ok(());
+        }
+
+        let placeholders: Vec<String> = (0..chapter_indices.len()).map(|i| format!("?{}", i + 2)).collect();
+        let in_clause = placeholders.join(",");
+
+        let mut params: Vec<Box<dyn rusqlite::ToSql>> = Vec::new();
+        params.push(Box::new(novel_id.to_string()));
+        for idx in chapter_indices {
+            params.push(Box::new(*idx));
+        }
+        let param_refs: Vec<&dyn rusqlite::ToSql> = params.iter().map(|b| b.as_ref()).collect();
+
+        if delete_records {
+            let sql = format!(
+                "DELETE FROM chapters WHERE novel_id = ?1 AND chapter_index IN ({})",
+                in_clause
+            );
+            self.conn.execute(&sql, rusqlite::params_from_iter(param_refs))?;
+
+            // Update novel total_chapters and downloaded_chapters
+            self.conn.execute(
+                r#"
+                UPDATE novels
+                SET total_chapters = (SELECT COUNT(*) FROM chapters WHERE novel_id = ?1),
+                    downloaded_chapters = (SELECT COUNT(*) FROM chapters WHERE novel_id = ?1 AND is_downloaded = 1),
+                    updated_at = datetime('now')
+                WHERE id = ?1
+                "#,
+                rusqlite::params![novel_id],
+            )?;
+        } else {
+            let sql = format!(
+                "UPDATE chapters SET is_downloaded = 0, content_html = '', word_count = 0, downloaded_at = NULL WHERE novel_id = ?1 AND chapter_index IN ({})",
+                in_clause
+            );
+            self.conn.execute(&sql, rusqlite::params_from_iter(param_refs))?;
+
+            // Update novel downloaded_chapters count
+            self.conn.execute(
+                r#"
+                UPDATE novels
+                SET downloaded_chapters = (SELECT COUNT(*) FROM chapters WHERE novel_id = ?1 AND is_downloaded = 1),
+                    updated_at = datetime('now')
+                WHERE id = ?1
+                "#,
+                rusqlite::params![novel_id],
+            )?;
+        }
+
+        Ok(())
+    }
+
     pub fn save_chapter_content(
         &self,
         novel_id: &str,

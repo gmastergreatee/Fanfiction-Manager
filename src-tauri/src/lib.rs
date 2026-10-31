@@ -796,6 +796,134 @@ fn save_rule(rule: Rule, state: State<'_, AppState>) -> Result<bool, String> {
     Ok(true)
 }
 
+#[tauri::command]
+async fn add_novel_from_url(
+    url: String,
+    title_override: Option<String>,
+    author_override: Option<String>,
+    state: State<'_, AppState>,
+) -> Result<Novel, String> {
+    let normalized_url = url.trim().to_string();
+    if normalized_url.is_empty() {
+        return Err("URL cannot be empty".to_string());
+    }
+
+    // Check if novel with this URL already exists
+    let (existing, rules) = {
+        let db = state.db.lock().map_err(|e| e.to_string())?;
+        let all = db.get_all_novels().map_err(|e| e.to_string())?;
+        let rls = db.get_all_rules().map_err(|e| e.to_string())?;
+        (all, rls)
+    };
+
+    if let Some(found) = existing.into_iter().find(|n| n.source_url.trim().eq_ignore_ascii_case(&normalized_url)) {
+        return Err(format!("Novel '{}' is already in your library.", found.title));
+    }
+
+    let matched_rule = state
+        .scraper
+        .match_rule(&normalized_url, &rules)
+        .cloned();
+
+    let rule_for_extraction = matched_rule.clone().unwrap_or_else(|| Rule {
+        guid: "default-fallback".into(),
+        rule_name: "Default Fast-Path".into(),
+        url_regex: ".*".into(),
+        parser_type: "headless".into(),
+        pagetype_code: None,
+        toc_code: None,
+        chapter_code: None,
+        url_blocks: None,
+        version: 1,
+        updated_at: None,
+    });
+
+    let novel_id = uuid::Uuid::new_v4().to_string();
+
+    // Try live TOC extraction
+    let (title, author, cover_url, summary, chapters) = match state.scraper.extract_toc(&normalized_url, &rule_for_extraction).await {
+        Ok(toc) => {
+            let t = title_override.filter(|s| !s.trim().is_empty()).unwrap_or_else(|| {
+                if !toc.title.trim().is_empty() { toc.title.trim().to_string() } else { "Untitled Web Novel".to_string() }
+            });
+            let a = author_override.filter(|s| !s.trim().is_empty()).unwrap_or_else(|| {
+                if !toc.author.trim().is_empty() { toc.author.trim().to_string() } else { "Unknown Author".to_string() }
+            });
+            let c = toc.cover_url;
+            let s = toc.summary;
+            (t, a, c, s, toc.chapters)
+        }
+        Err(_err) => {
+            // Fallback: create novel entry with basic metadata so user can still add it and test/update
+            let fallback_title = title_override.filter(|s| !s.trim().is_empty()).unwrap_or_else(|| {
+                let trimmed = normalized_url.trim_end_matches('/');
+                if let Some(slug) = trimmed.split('/').last() {
+                    let clean = slug.replace('-', " ").replace('_', " ");
+                    let title_cased = clean.split_whitespace().map(|word| {
+                        let mut chars = word.chars();
+                        match chars.next() {
+                            None => String::new(),
+                            Some(f) => f.to_uppercase().collect::<String>() + chars.as_str(),
+                        }
+                    }).collect::<Vec<_>>().join(" ");
+                    if !title_cased.is_empty() {
+                        return title_cased;
+                    }
+                }
+                "New Web Novel".to_string()
+            });
+            let fallback_author = author_override.filter(|s| !s.trim().is_empty()).unwrap_or_else(|| "Unknown Author".to_string());
+            (fallback_title, fallback_author, "".to_string(), "".to_string(), vec![])
+        }
+    };
+
+    let total = chapters.len() as i64;
+    let novel = Novel {
+        id: novel_id.clone(),
+        title,
+        author,
+        cover_url,
+        cover_local_path: "".to_string(),
+        summary,
+        source_url: normalized_url,
+        rule_guid: matched_rule.map(|r| r.guid),
+        total_chapters: total,
+        downloaded_chapters: 0,
+        check_updates: true,
+        created_at: None,
+        updated_at: None,
+    };
+
+    {
+        let db = state.db.lock().map_err(|e| e.to_string())?;
+        db.upsert_novel(&novel).map_err(|e| e.to_string())?;
+        for ch in chapters {
+            let _ = db.insert_chapter_placeholder(&novel_id, ch.index, &ch.title, &ch.url);
+        }
+    }
+
+    Ok(novel)
+}
+
+#[tauri::command]
+fn delete_novel(novel_id: String, state: State<'_, AppState>) -> Result<bool, String> {
+    let db = state.db.lock().map_err(|e| e.to_string())?;
+    db.delete_novel(&novel_id).map_err(|e| e.to_string())?;
+    Ok(true)
+}
+
+#[tauri::command]
+fn delete_chapters(
+    novel_id: String,
+    chapter_indices: Vec<i64>,
+    delete_records: bool,
+    state: State<'_, AppState>,
+) -> Result<bool, String> {
+    let db = state.db.lock().map_err(|e| e.to_string())?;
+    db.delete_chapters(&novel_id, &chapter_indices, delete_records).map_err(|e| e.to_string())?;
+    Ok(true)
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -841,6 +969,9 @@ pub fn run() {
             check_all_novels_updates,
             save_chapter_direct,
             save_rule,
+            add_novel_from_url,
+            delete_novel,
+            delete_chapters,
             open_test_webview,
             open_devtools_for_webview,
             close_test_webview,

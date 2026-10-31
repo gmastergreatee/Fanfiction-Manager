@@ -43,6 +43,14 @@
           <RefreshCw class="w-3.5 h-3.5 text-accent" :class="{ 'animate-spin': checkingAllUpdates }" />
           <span class="hidden sm:inline">{{ checkingAllUpdates ? 'Checking...' : 'Check Updates' }}</span>
         </button>
+        <button
+          @click="isAddModalOpen = true"
+          class="flex items-center gap-1.5 px-3 py-1.5 bg-accent hover:bg-accent-hover text-white rounded-md text-xs font-semibold shadow-sm transition-all"
+          title="Add new novel"
+        >
+          <Plus class="w-3.5 h-3.5" />
+          <span class="hidden sm:inline">Add Novel</span>
+        </button>
       </div>
     </header>
 
@@ -87,6 +95,14 @@
           <RefreshCw class="w-3.5 h-3.5 text-accent" :class="{ 'animate-spin': checkingAllUpdates }" />
           <span class="hidden sm:inline">{{ checkingAllUpdates ? 'Checking...' : 'Check Updates' }}</span>
         </button>
+        <button
+          @click="isAddModalOpen = true"
+          class="flex items-center gap-1.5 px-3.5 py-1.5 bg-[#007aff] hover:bg-[#0071e3] text-white rounded-full text-xs font-medium shadow-sm transition-all"
+          title="Add new novel"
+        >
+          <Plus class="w-3.5 h-3.5" />
+          <span class="hidden sm:inline">Add Novel</span>
+        </button>
       </div>
     </header>
 
@@ -128,6 +144,14 @@
         >
           <RefreshCw class="w-3.5 h-3.5 text-accent" :class="{ 'animate-spin': checkingAllUpdates }" />
           <span class="hidden sm:inline">{{ checkingAllUpdates ? 'Checking...' : 'Check Updates' }}</span>
+        </button>
+        <button
+          @click="isAddModalOpen = true"
+          class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-accent hover:opacity-90 text-white shadow-sm transition-all"
+          title="Add new novel"
+        >
+          <Plus class="w-3.5 h-3.5" />
+          <span class="hidden sm:inline">Add Novel</span>
         </button>
       </div>
     </header>
@@ -172,6 +196,14 @@
           <RefreshCw class="w-3.5 h-3.5 text-accent" :class="{ 'animate-spin': checkingAllUpdates }" />
           <span class="hidden sm:inline">{{ checkingAllUpdates ? 'Checking...' : 'Check Updates' }}</span>
         </button>
+        <button
+          @click="isAddModalOpen = true"
+          class="flex items-center gap-1.5 px-3 py-1 bg-[#3584e4] hover:bg-[#1c71d8] text-white rounded-full text-xs font-semibold shadow-sm transition-colors"
+          title="Add new novel"
+        >
+          <Plus class="w-3.5 h-3.5" />
+          <span class="hidden sm:inline">Add Novel</span>
+        </button>
       </div>
     </header>
 
@@ -203,6 +235,13 @@
         <p class="text-xs text-text-muted max-w-sm">
           {{ store.searchQuery ? 'Try adjusting your search query.' : 'Add your first novel via URL or site rules.' }}
         </p>
+        <button
+          @click="isAddModalOpen = true"
+          class="mt-4 px-4 py-2 rounded-xl bg-accent text-white text-xs font-semibold hover:bg-accent/90 transition-colors shadow-sm flex items-center gap-2"
+        >
+          <Plus class="w-4 h-4" />
+          <span>Add Novel to Library</span>
+        </button>
       </div>
 
       <div v-else class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-5">
@@ -260,13 +299,16 @@
       <!-- Android Floating Action Button (FAB) -->
       <button
         v-if="store.platformStyle === 'android'"
-        @click="store.activeTab = 'rules'"
-        class="fixed bottom-8 right-8 w-14 h-14 rounded-2xl bg-accent text-[#381e72] shadow-2xl flex items-center justify-center hover:scale-105 active:scale-95 transition-all z-30"
-        title="Add Novel via Site Rules"
+        @click="isAddModalOpen = true"
+        class="fixed bottom-8 right-8 w-14 h-14 rounded-2xl bg-accent text-white shadow-2xl flex items-center justify-center hover:scale-105 active:scale-95 transition-all z-30"
+        title="Add Novel"
       >
         <Plus class="w-7 h-7 stroke-[2.5]" />
       </button>
     </main>
+
+    <!-- Add Novel Modal Dialog -->
+    <AddNovelModal :is-open="isAddModalOpen" @close="isAddModalOpen = false" />
   </div>
 </template>
 
@@ -274,9 +316,11 @@
 import { ref, computed } from 'vue';
 import { useLibraryStore } from '../stores/library';
 import { Search, BookOpen, Plus, RefreshCw } from 'lucide-vue-next';
+import AddNovelModal from './AddNovelModal.vue';
 import type { Novel } from '../types';
 
 const store = useLibraryStore();
+const isAddModalOpen = ref(false);
 const failedCovers = ref<Record<string, boolean>>({});
 const checkingAllUpdates = ref(false);
 const updateSummaryMessage = ref('');

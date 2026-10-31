@@ -91,6 +91,37 @@
               <BookDown class="w-4 h-4 text-emerald-500" />
               <span>{{ epubExporting ? 'Exporting EPUB...' : 'Export as EPUB' }}</span>
             </button>
+
+            <!-- Delete Novel Confirmation & Trigger -->
+            <div v-if="confirmDeleteNovel" class="p-3 rounded-xl bg-rose-500/15 border border-rose-500/40 space-y-2 text-center animate-in fade-in duration-150">
+              <p class="text-[11px] text-rose-300 font-semibold leading-tight">Permanently delete this novel and all downloaded chapters?</p>
+              <div class="flex items-center justify-center gap-2 pt-1">
+                <button
+                  @click="handleDeleteNovel"
+                  :disabled="isDeletingNovel"
+                  class="px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold transition-all shadow-sm flex items-center gap-1.5"
+                >
+                  <Trash2 class="w-3.5 h-3.5" />
+                  <span>{{ isDeletingNovel ? 'Deleting...' : 'Yes, Delete' }}</span>
+                </button>
+                <button
+                  @click="confirmDeleteNovel = false"
+                  class="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-text-secondary text-xs font-medium transition-all"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+            <button
+              v-else
+              @click="confirmDeleteNovel = true"
+              class="w-full py-2.5 px-4 text-xs flex items-center justify-center gap-2 transition-all rounded-md border border-rose-500/30 bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 hover:text-rose-300 hover:border-rose-500/50"
+              title="Permanently remove novel from library"
+            >
+              <Trash2 class="w-4 h-4" />
+              <span>Delete Novel</span>
+            </button>
+
             <p v-if="actionMessage" class="text-[10px] text-center font-medium" :class="actionMessageColor">
               {{ actionMessage }}
             </p>
@@ -151,13 +182,13 @@
 
           <!-- Chapter List Section -->
           <div class="flex-1 flex flex-col min-h-0">
-            <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center justify-between mb-2 flex-wrap gap-2">
               <div class="flex items-center gap-2">
                 <ListFilter class="w-4 h-4 text-accent" />
                 <h3 class="text-xs font-semibold text-text-primary">Chapter Index</h3>
-                <span class="text-[11px] text-text-muted">({{ store.currentChaptersList.length }} loaded)</span>
+                <span class="text-[11px] text-text-muted">({{ store.currentChaptersList.length }} total, {{ downloadedCount }} ready)</span>
               </div>
-              <div class="relative w-48">
+              <div class="relative w-44 sm:w-48">
                 <Search class="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-text-muted" />
                 <input
                   v-model="chapterSearch"
@@ -168,28 +199,100 @@
               </div>
             </div>
 
+            <!-- Chapter Batch Action Toolbar -->
+            <div class="mb-2 px-3 py-1.5 rounded-lg bg-surface-elevated/80 border border-white/5 flex items-center justify-between text-xs flex-wrap gap-2">
+              <div class="flex items-center gap-2.5">
+                <label class="flex items-center gap-1.5 cursor-pointer text-text-secondary hover:text-text-primary select-none">
+                  <input
+                    type="checkbox"
+                    :checked="isAllSelected"
+                    @change="toggleSelectAll"
+                    class="rounded border-white/20 text-accent focus:ring-0 w-3.5 h-3.5"
+                  />
+                  <span class="text-[11px] font-medium">Select All</span>
+                </label>
+                <button
+                  type="button"
+                  @click="selectOnlyDownloaded"
+                  class="px-2 py-0.5 rounded bg-white/5 hover:bg-white/10 text-text-muted hover:text-text-primary text-[10px] font-medium transition-colors"
+                >
+                  Select Downloaded ({{ downloadedCount }})
+                </button>
+                <button
+                  v-if="selectedChapterIndices.length > 0"
+                  type="button"
+                  @click="selectedChapterIndices = []"
+                  class="text-[10px] text-text-muted hover:text-text-primary underline ml-1"
+                >
+                  Clear Selection
+                </button>
+              </div>
+
+              <!-- Batch Action Buttons when chapters are selected -->
+              <div v-if="selectedChapterIndices.length > 0" class="flex items-center gap-1.5 animate-in fade-in duration-150">
+                <span class="text-[10px] font-semibold text-accent px-1.5 py-0.5 bg-accent/15 rounded">
+                  {{ selectedChapterIndices.length }} selected
+                </span>
+                <button
+                  type="button"
+                  @click="handleClearDownloadedBatch"
+                  :disabled="isDeletingChapters"
+                  class="px-2 py-1 rounded bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-400 text-[10px] font-semibold flex items-center gap-1 transition-all"
+                  title="Delete offline saved text while keeping chapters in index"
+                >
+                  <Eraser class="w-3 h-3" />
+                  <span>Clear Content</span>
+                </button>
+                <button
+                  type="button"
+                  @click="handleDeleteRecordsBatch"
+                  :disabled="isDeletingChapters"
+                  class="px-2 py-1 rounded bg-rose-600/20 hover:bg-rose-600/30 border border-rose-500/40 text-rose-400 text-[10px] font-semibold flex items-center gap-1 transition-all"
+                  title="Permanently remove selected chapters from novel"
+                >
+                  <Trash2 class="w-3 h-3" />
+                  <span>Delete Chapters</span>
+                </button>
+              </div>
+            </div>
+
             <!-- Chapters Scroll Area -->
             <div :class="['flex-1 overflow-y-auto divide-y divide-white/5 max-h-64', modalCardClass]">
               <div
                 v-for="ch in filteredChapters"
                 :key="ch.id"
+                class="px-3 py-2 flex items-center justify-between hover:bg-white/5 cursor-pointer transition-colors group"
                 @click="openChapter(ch)"
-                class="px-4 py-2.5 flex items-center justify-between hover:bg-white/5 cursor-pointer transition-colors group"
               >
-                <div class="flex items-center gap-3 truncate">
-                  <span class="text-xs font-mono text-text-muted w-8">#{{ ch.chapter_index }}</span>
+                <div class="flex items-center gap-2.5 truncate">
+                  <input
+                    type="checkbox"
+                    :checked="selectedChapterIndices.includes(ch.chapter_index)"
+                    @click.stop="toggleSelectChapter(ch.chapter_index)"
+                    class="rounded border-white/20 text-accent focus:ring-0 w-3.5 h-3.5 shrink-0 cursor-pointer"
+                  />
+                  <span class="text-xs font-mono text-text-muted w-7 shrink-0">#{{ ch.chapter_index }}</span>
                   <span class="text-xs text-text-secondary group-hover:text-text-primary truncate">
                     {{ ch.title }}
                   </span>
                 </div>
                 <div class="flex items-center gap-2 shrink-0">
-                  <span class="text-[10px] text-text-muted">{{ ch.word_count }} words</span>
+                  <span class="text-[10px] text-text-muted hidden sm:inline">{{ ch.word_count }} words</span>
                   <span
                     class="text-[10px] px-2 py-0.5 rounded-full font-medium"
                     :class="ch.is_downloaded ? 'bg-emerald-500/10 text-emerald-500' : 'bg-amber-500/10 text-amber-500'"
                   >
                     {{ ch.is_downloaded ? 'Ready' : 'Online' }}
                   </span>
+                  <!-- Single Chapter Quick Delete Action -->
+                  <button
+                    type="button"
+                    @click.stop="handleDeleteSingleChapter(ch)"
+                    class="p-1 rounded opacity-0 group-hover:opacity-100 hover:bg-rose-500/20 text-text-muted hover:text-rose-400 transition-all"
+                    :title="ch.is_downloaded ? 'Delete downloaded content (Ch. ' + ch.chapter_index + ')' : 'Delete chapter from list (Ch. ' + ch.chapter_index + ')'"
+                  >
+                    <Trash2 class="w-3.5 h-3.5" />
+                  </button>
                 </div>
               </div>
 
@@ -216,6 +319,8 @@ import {
   ListFilter,
   Search,
   BookDown,
+  Trash2,
+  Eraser,
 } from 'lucide-vue-next';
 import { usePlatformModal } from '../composables/usePlatformModal';
 import type { Chapter } from '../types';
@@ -237,6 +342,10 @@ const epubExporting = ref(false);
 const epubMessage = ref('');
 const coverFailed = ref(false);
 const checkingUpdates = ref(false);
+const confirmDeleteNovel = ref(false);
+const isDeletingNovel = ref(false);
+const selectedChapterIndices = ref<number[]>([]);
+const isDeletingChapters = ref(false);
 const actionMessage = ref('');
 const actionMessageColor = ref('text-emerald-500');
 
@@ -276,6 +385,115 @@ const filteredChapters = computed(() => {
     (c) => c.title.toLowerCase().includes(q) || c.chapter_index.toString().includes(q)
   );
 });
+
+const downloadedCount = computed(() => {
+  return store.currentChaptersList.filter((c) => c.is_downloaded).length;
+});
+
+const isAllSelected = computed(() => {
+  if (filteredChapters.value.length === 0) return false;
+  return filteredChapters.value.every((c) => selectedChapterIndices.value.includes(c.chapter_index));
+});
+
+function toggleSelectAll() {
+  if (isAllSelected.value) {
+    selectedChapterIndices.value = [];
+  } else {
+    selectedChapterIndices.value = filteredChapters.value.map((c) => c.chapter_index);
+  }
+}
+
+function selectOnlyDownloaded() {
+  selectedChapterIndices.value = store.currentChaptersList
+    .filter((c) => c.is_downloaded)
+    .map((c) => c.chapter_index);
+}
+
+function toggleSelectChapter(index: number) {
+  const pos = selectedChapterIndices.value.indexOf(index);
+  if (pos >= 0) {
+    selectedChapterIndices.value.splice(pos, 1);
+  } else {
+    selectedChapterIndices.value.push(index);
+  }
+}
+
+async function handleDeleteNovel() {
+  if (!novel.value || isDeletingNovel.value) return;
+  isDeletingNovel.value = true;
+  try {
+    const novelTitle = novel.value.title;
+    await store.deleteNovel(novel.value.id);
+    actionMessageColor.value = 'text-emerald-500';
+    actionMessage.value = `Deleted "${novelTitle}" from library.`;
+  } catch (err: any) {
+    console.error('Failed to delete novel:', err);
+    actionMessageColor.value = 'text-rose-400';
+    actionMessage.value = `Delete failed: ${err?.message || err}`;
+  } finally {
+    isDeletingNovel.value = false;
+    confirmDeleteNovel.value = false;
+  }
+}
+
+async function handleClearDownloadedBatch() {
+  if (!novel.value || !selectedChapterIndices.value.length || isDeletingChapters.value) return;
+  const count = selectedChapterIndices.value.length;
+  isDeletingChapters.value = true;
+  try {
+    await store.deleteChapters(novel.value.id, selectedChapterIndices.value, false);
+    actionMessageColor.value = 'text-emerald-500';
+    actionMessage.value = `Cleared downloaded content for ${count} chapters.`;
+    selectedChapterIndices.value = [];
+  } catch (err: any) {
+    actionMessageColor.value = 'text-rose-400';
+    actionMessage.value = `Failed to clear chapters: ${err?.message || err}`;
+  } finally {
+    isDeletingChapters.value = false;
+    setTimeout(() => { actionMessage.value = ''; }, 4000);
+  }
+}
+
+async function handleDeleteRecordsBatch() {
+  if (!novel.value || !selectedChapterIndices.value.length || isDeletingChapters.value) return;
+  const count = selectedChapterIndices.value.length;
+  if (!confirm(`Are you sure you want to remove ${count} chapter(s) from the index?`)) return;
+  isDeletingChapters.value = true;
+  try {
+    await store.deleteChapters(novel.value.id, selectedChapterIndices.value, true);
+    actionMessageColor.value = 'text-emerald-500';
+    actionMessage.value = `Removed ${count} chapter(s) from chapter index.`;
+    selectedChapterIndices.value = [];
+  } catch (err: any) {
+    actionMessageColor.value = 'text-rose-400';
+    actionMessage.value = `Failed to delete chapters: ${err?.message || err}`;
+  } finally {
+    isDeletingChapters.value = false;
+    setTimeout(() => { actionMessage.value = ''; }, 4000);
+  }
+}
+
+async function handleDeleteSingleChapter(ch: Chapter) {
+  if (!novel.value || isDeletingChapters.value) return;
+  isDeletingChapters.value = true;
+  try {
+    // If downloaded, clear its content; if not downloaded, remove record
+    const deleteRecord = !ch.is_downloaded;
+    await store.deleteChapters(novel.value.id, [ch.chapter_index], deleteRecord);
+    actionMessageColor.value = 'text-emerald-500';
+    actionMessage.value = deleteRecord
+      ? `Removed Chapter ${ch.chapter_index} from index.`
+      : `Cleared downloaded content for Chapter ${ch.chapter_index}.`;
+    const idx = selectedChapterIndices.value.indexOf(ch.chapter_index);
+    if (idx >= 0) selectedChapterIndices.value.splice(idx, 1);
+  } catch (err: any) {
+    actionMessageColor.value = 'text-rose-400';
+    actionMessage.value = `Error: ${err?.message || err}`;
+  } finally {
+    isDeletingChapters.value = false;
+    setTimeout(() => { actionMessage.value = ''; }, 4000);
+  }
+}
 
 function handleStartReading() {
   if (!novel.value) return;

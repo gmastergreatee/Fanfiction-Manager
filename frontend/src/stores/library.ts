@@ -556,6 +556,87 @@ export const useLibraryStore = defineStore('library', () => {
     };
   }
 
+  async function addNovel(url: string, title?: string, author?: string): Promise<Novel> {
+    if (!url || !url.trim()) throw new Error('Novel URL cannot be empty');
+    if (window.__TAURI_INTERNALS__) {
+      const { invoke } = await import('@tauri-apps/api/core');
+      const created = await invoke<Novel>('add_novel_from_url', {
+        url: url.trim(),
+        titleOverride: title?.trim() || null,
+        authorOverride: author?.trim() || null,
+      });
+      const existingIdx = novels.value.findIndex(n => n.id === created.id);
+      if (existingIdx !== -1) {
+        novels.value[existingIdx] = created;
+      } else {
+        novels.value.unshift(created);
+      }
+      return created;
+    } else {
+      const mock: Novel = {
+        id: 'mock_' + Date.now(),
+        title: title || 'Newly Added Novel',
+        author: author || 'Web Novel Author',
+        cover_url: '',
+        cover_local_path: '',
+        summary: 'Added via web URL',
+        source_url: url.trim(),
+        total_chapters: 25,
+        downloaded_chapters: 0,
+        check_updates: true,
+      };
+      novels.value.unshift(mock);
+      return mock;
+    }
+  }
+
+  async function deleteNovel(novelId: string): Promise<boolean> {
+    if (window.__TAURI_INTERNALS__) {
+      const { invoke } = await import('@tauri-apps/api/core');
+      await invoke('delete_novel', { novelId });
+    }
+    novels.value = novels.value.filter(n => n.id !== novelId);
+    if (selectedNovelDetail.value?.id === novelId) {
+      selectedNovelDetail.value = null;
+    }
+    if (activeNovel.value?.id === novelId) {
+      activeNovel.value = null;
+      if (activeTab.value === 'reader') {
+        activeTab.value = 'library';
+      }
+    }
+    return true;
+  }
+
+  async function deleteChapters(novelId: string, chapterIndices: number[], deleteRecords: boolean = false): Promise<boolean> {
+    if (!chapterIndices.length) return true;
+    if (window.__TAURI_INTERNALS__) {
+      const { invoke } = await import('@tauri-apps/api/core');
+      await invoke('delete_chapters', { novelId, chapterIndices, deleteRecords });
+    }
+
+    const novel = novels.value.find(n => n.id === novelId);
+    if (deleteRecords) {
+      currentChaptersList.value = currentChaptersList.value.filter(c => !chapterIndices.includes(c.chapter_index));
+      if (novel) {
+        novel.total_chapters = currentChaptersList.value.length;
+        novel.downloaded_chapters = currentChaptersList.value.filter(c => c.is_downloaded).length;
+      }
+    } else {
+      currentChaptersList.value.forEach(c => {
+        if (chapterIndices.includes(c.chapter_index)) {
+          c.is_downloaded = false;
+          c.content_html = '';
+          c.word_count = 0;
+        }
+      });
+      if (novel) {
+        novel.downloaded_chapters = currentChaptersList.value.filter(c => c.is_downloaded).length;
+      }
+    }
+    return true;
+  }
+
   async function saveRule(rule: Rule) {
     if (window.__TAURI_INTERNALS__) {
       try {
@@ -693,6 +774,9 @@ export const useLibraryStore = defineStore('library', () => {
     openRuleInTester,
     checkForUpdates,
     checkAllUpdates,
+    addNovel,
+    deleteNovel,
+    deleteChapters,
     saveRule,
     openTestWebview,
     openWebviewDevTools,
